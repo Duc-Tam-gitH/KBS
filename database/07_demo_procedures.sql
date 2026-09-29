@@ -1,5 +1,3 @@
-\set ON_ERROR_STOP on
-
 -- The demo deliberately rolls back so it does not alter seed data.
 BEGIN;
 

@@ -1,5 +1,3 @@
-\set ON_ERROR_STOP on
-
 CREATE OR REPLACE FUNCTION "fn_products_auto_inventory"()
 RETURNS trigger
 LANGUAGE plpgsql AS $$

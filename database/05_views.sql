@@ -1,5 +1,3 @@
-\set ON_ERROR_STOP on
-
 CREATE OR REPLACE VIEW "vw_ProductFull" AS
 SELECT p."Id" AS "ProductId", p."Name" AS "ProductName", p."Price", p."OriginalPrice",
        p."Description", c."Name" AS "CategoryName", b."Name" AS "BrandName",

@@ -1,5 +1,3 @@
-\set ON_ERROR_STOP on
-
 -- Password hashes are placeholders only. The application layer performs real bcrypt hashing.
 INSERT INTO "Categories" ("Name", "Description") VALUES
     ('Văn phòng', 'Bàn phím cho công việc hằng ngày'),

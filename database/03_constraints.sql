@@ -1,5 +1,3 @@
-\set ON_ERROR_STOP on
-
 -- Constraints are added conditionally so the script is safe to re-run.
 DO $$
 DECLARE

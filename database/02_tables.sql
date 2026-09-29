@@ -1,5 +1,3 @@
-\set ON_ERROR_STOP on
-
 -- Raw SQL owns the KBS88 application schema. Mixed-case identifiers are quoted
 -- so the names remain compatible with EF Core scaffolding.
 CREATE TABLE IF NOT EXISTS "Categories" (
