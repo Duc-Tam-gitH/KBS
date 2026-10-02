@@ -1,10 +1,9 @@
+\set ON_ERROR_STOP on
+
 -- Run this script while connected to the maintenance database (usually postgres).
--- It uses only PostgreSQL server SQL and is safe in pgAdmin, DBeaver, and VS Code.
--- PostgreSQL does not support CREATE DATABASE IF NOT EXISTS, and CREATE DATABASE
--- cannot run inside a DO block or transaction. If this query reports missing,
--- execute the documented CREATE DATABASE command separately as an administrator.
-SELECT CASE
-    WHEN EXISTS (SELECT 1 FROM pg_database WHERE datname = 'KBS88')
-        THEN 'KBS88 already exists.'
-    ELSE 'KBS88 is missing. Run: CREATE DATABASE "KBS88" WITH ENCODING ''UTF8'' TEMPLATE template0 LC_COLLATE ''en_US.UTF-8'' LC_CTYPE ''en_US.UTF-8'';'
-END AS "DatabaseStatus";
+-- PostgreSQL cannot parameterize CREATE DATABASE, so psql executes the statement
+-- only when KBS88 is absent. The requested locale must exist on the host.
+-- FIX: Dùng collation C để tránh phụ thuộc locale của hệ điều hành.
+SELECT 'CREATE DATABASE "KBS88" WITH ENCODING ''UTF8'' TEMPLATE template0 LC_COLLATE ''C'' LC_CTYPE ''C'''
+WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'KBS88')
+\gexec

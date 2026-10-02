@@ -1,4 +1,7 @@
--- Password hashes are placeholders only. The application layer performs real bcrypt hashing.
+-- FIX: Bảo đảm các chuỗi tiếng Việt được đọc theo UTF-8.
+SET client_encoding = 'UTF8';
+
+-- Các mã băm mật khẩu chỉ là giá trị thay thế; tầng ứng dụng thực hiện bcrypt thực tế.
 INSERT INTO "Categories" ("Name", "Description") VALUES
     ('Văn phòng', 'Bàn phím cho công việc hằng ngày'),
     ('Gaming', 'Bàn phím tối ưu cho chơi game'),
@@ -81,7 +84,8 @@ FROM product_seed s
 JOIN "Categories" c ON c."Name" = s."CategoryName"
 JOIN "Brands" b ON b."Name" = s."BrandName"
 WHERE NOT EXISTS (SELECT 1 FROM "Products" p WHERE p."Name" = s."Name")
-ON CONFLICT DO NOTHING;
+-- FIX: Xác định xung đột theo tên sản phẩm duy nhất.
+ON CONFLICT ("Name") DO NOTHING;
 
 INSERT INTO "Inventories" ("ProductId", "StockQuantity")
 SELECT p."Id",
@@ -121,7 +125,11 @@ WITH order_seed("Username", "CustomerName", "PhoneNumber", "ShippingAddress", "P
 INSERT INTO "Orders" ("UserId", "CustomerName", "PhoneNumber", "ShippingAddress", "TotalPrice", "PaymentMethod", "PaymentStatus", "OrderStatus", "CreatedAt")
 SELECT u."Id", s."CustomerName", s."PhoneNumber", s."ShippingAddress", 0, s."PaymentMethod", s."PaymentStatus", s."OrderStatus", s."CreatedAt"
 FROM order_seed s JOIN "Users" u ON u."Username" = s."Username"
-WHERE NOT EXISTS (SELECT 1 FROM "Orders" o WHERE o."ShippingAddress" = s."ShippingAddress")
+-- FIX: Chống trùng dữ liệu mẫu theo cả người dùng và địa chỉ giao hàng.
+WHERE NOT EXISTS (
+    SELECT 1 FROM "Orders" o
+    WHERE o."UserId" = u."Id" AND o."ShippingAddress" = s."ShippingAddress"
+)
 ON CONFLICT DO NOTHING;
 
 WITH detail_seed("ShippingAddress", "ProductName", "Quantity") AS (

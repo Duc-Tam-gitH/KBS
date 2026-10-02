@@ -1,56 +1,87 @@
-# KBS PostgreSQL Database
+# Cơ sở dữ liệu PostgreSQL KBS88
 
-Raw SQL is the source of truth for the KBS88 application schema. The existing
-EF Core migration history table is retained, but EF Core should scaffold from
-this database rather than create a competing schema.
+SQL thuần trong thư mục này là nguồn chuẩn cho schema của KBS88. EF Core chỉ
+nên scaffold từ database đã tạo, không tạo một schema song song bằng migration.
 
-## Execution order
+## Yêu cầu
 
-Run the scripts from this directory:
+- PostgreSQL 14 trở lên và lệnh `psql`.
+- Tài khoản PostgreSQL có quyền tạo database và đối tượng trong KBS88.
+- Không đưa mật khẩu, file `.env` hoặc connection string có `Password=...` vào Git.
+
+## Thứ tự thực thi
+
+Mở terminal tích hợp của VS Code hoặc PowerShell tại thư mục `database`. Dùng
+`-v ON_ERROR_STOP=1` để `psql` dừng ngay khi có lỗi.
 
 ```powershell
-psql -h localhost -U postgres -d postgres -f 01_create_database.sql
-psql -h localhost -U postgres -d KBS88 -f 02_tables.sql
-psql -h localhost -U postgres -d KBS88 -f 03_constraints.sql
-psql -h localhost -U postgres -d KBS88 -f 04_seed_data.sql
-psql -h localhost -U postgres -d KBS88 -f 05_views.sql
-psql -h localhost -U postgres -d KBS88 -f 06_procedures.sql
-psql -h localhost -U postgres -d KBS88 -f 07_demo_procedures.sql
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f .\01_create_database.sql
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d KBS88 -f .\02_tables.sql
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d KBS88 -f .\03_constraints.sql
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d KBS88 -f .\04_seed_data.sql
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d KBS88 -f .\05_views.sql
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d KBS88 -f .\06_procedures.sql
 ```
 
-All scripts are designed to be re-run. The demo script always rolls back.
+`01_create_database.sql` có lệnh dành riêng cho `psql`; hãy chạy file này bằng
+`psql`, không dùng trình chạy SQL chung. Script tạo KBS88 khi chưa tồn tại với
+UTF-8 và locale `C`, phù hợp giữa các hệ điều hành.
 
-## Script contents
+`07_demo_procedures.sql` là tùy chọn và chỉ dùng để kiểm thử:
 
-- `01_create_database.sql`: conditionally creates KBS88 with UTF-8 and the requested locale.
-- `02_tables.sql`: creates Categories, Brands, Products, Inventories, Roles, Users, Orders, and OrderDetails.
-- `03_constraints.sql`: adds keys, foreign keys, checks, and lookup indexes.
-- `04_seed_data.sql`: adds realistic Vietnamese keyboard-market seed data.
-- `05_views.sql`: creates product, order, revenue, stock, and brand reports.
-- `06_procedures.sql`: creates procedures, reporting functions, and triggers.
-- `07_demo_procedures.sql`: demonstrates the database API without persisting changes.
+```powershell
+psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d KBS88 -f .\07_demo_procedures.sql
+```
 
-## Database objects
+Mọi script có thể chạy lặp lại. Demo luôn kết thúc bằng `ROLLBACK`, nên không
+lưu đơn hàng thử nghiệm.
+
+## Kiểm tra sau khi chạy
+
+```powershell
+psql -h localhost -U postgres -d KBS88
+```
+
+Trong phiên `psql`, chạy:
+    
+```sql
+SELECT COUNT(*) AS "Total",
+       COUNT(DISTINCT "Name") AS "DistinctNames"
+FROM "Products";
+
+SELECT * FROM "vw_LowStockProducts";
+SELECT * FROM "fn_GetTopSellingProducts"(5, current_date - 180, current_date);
+```
+
+Sau dữ liệu mẫu chuẩn, hai cột đếm sản phẩm đều phải là `40`.
+
+## Nội dung script
+
+- `01_create_database.sql`: tạo KBS88 có điều kiện.
+- `02_tables.sql`: tạo các bảng Categories, Brands, Products, Inventories, Roles, Users, Orders và OrderDetails.
+- `03_constraints.sql`: tạo ràng buộc, khóa ngoại, kiểm tra dữ liệu và index.
+- `04_seed_data.sql`: thêm dữ liệu mẫu bàn phím bằng UTF-8.
+- `05_views.sql`: tạo view báo cáo sản phẩm, đơn hàng, doanh thu, tồn kho và thương hiệu.
+- `06_procedures.sql`: tạo procedure, function báo cáo và trigger.
+- `07_demo_procedures.sql`: kiểm thử API database mà không lưu thay đổi.
+
+## Đối tượng database
 
 Views: `vw_ProductFull`, `vw_OrderSummary`, `vw_RevenueByDay`,
 `vw_RevenueByMonth`, `vw_TopSellingProducts`, `vw_LowStockProducts`,
-and `vw_ProductByBrand`.
+và `vw_ProductByBrand`.
 
-Procedures: `sp_CreateOrder` creates and prices an order while decrementing
-stock; `sp_UpdateOrderStatus` enforces valid lifecycle transitions;
-`sp_UpdateStock` prevents negative stock; `sp_RegisterUser` validates
-roles and duplicate accounts; `sp_CancelOrder` cancels with a notice log.
+Procedures: `sp_CreateOrder`, `sp_UpdateOrderStatus`, `sp_UpdateStock`,
+`sp_RegisterUser` và `sp_CancelOrder`.
 
 Functions: `fn_GetRevenueByDay`, `fn_GetTopSellingProducts`,
-`fn_GetLowStockProducts`, `fn_GetMonthlyRevenue`, and
+`fn_GetLowStockProducts`, `fn_GetMonthlyRevenue` và
 `fn_GetCustomerOrderHistory`.
 
-Triggers: `trg_products_auto_inventory` creates stock rows,
-`trg_inventories_updated_at` stamps inventory updates,
-`trg_orders_validate_status` protects lifecycle transitions, and
-`trg_orderdetails_stock_check` rejects overselling.
+Triggers: `trg_products_auto_inventory`, `trg_inventories_updated_at`,
+`trg_orders_validate_status` và `trg_orderdetails_stock_check`.
 
-## Example calls
+## Lệnh ví dụ
 
 ```sql
 CALL "sp_UpdateStock"(1, 5);
@@ -59,8 +90,18 @@ SELECT * FROM "fn_GetRevenueByDay"(current_date - 30, current_date);
 SELECT * FROM "fn_GetLowStockProducts"(10);
 ```
 
+## Kết nối backend
+
+Chỉ dùng connection string qua biến môi trường hoặc User Secrets. Ví dụ tạm
+thời cho một phiên PowerShell:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Host=localhost;Port=5432;Database=KBS88;Username=postgres;Password=MAT_KHAU_CUA_BAN"
+dotnet run --project ..\backend\KBS.API
+```
+
 ## EF Core scaffolding
 
 ```powershell
-dotnet ef dbcontext scaffold "Host=localhost;Database=KBS88;Username=postgres;Password=***" Npgsql.EntityFrameworkCore.PostgreSQL --output-dir Models --context-dir Data --context KbsDbContext --project KBS.DAL --startup-project KBS.API --force
+dotnet ef dbcontext scaffold "Host=localhost;Database=KBS88;Username=postgres;Password=MAT_KHAU_CUA_BAN" Npgsql.EntityFrameworkCore.PostgreSQL --output-dir Models --context-dir Data --context KbsDbContext --project ..\backend\KBS.DAL --startup-project ..\backend\KBS.API --force
 ```

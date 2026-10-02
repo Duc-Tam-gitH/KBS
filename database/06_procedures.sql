@@ -79,18 +79,21 @@ CREATE TRIGGER "trg_orderdetails_stock_check"
 BEFORE INSERT ON "OrderDetails"
 FOR EACH ROW EXECUTE FUNCTION "fn_orderdetails_stock_check"();
 
+-- FIX: Xóa chữ ký cũ để thay đổi kiểu khóa không tạo procedure overload.
+DROP PROCEDURE IF EXISTS "sp_CreateOrder"(integer, varchar, varchar, text, varchar, jsonb);
+
 CREATE OR REPLACE PROCEDURE "sp_CreateOrder"(
-    IN p_user_id integer,
+    IN p_user_id bigint,
     IN p_customer_name varchar,
     IN p_phone varchar,
     IN p_address text,
     IN p_payment_method varchar,
     IN p_items jsonb,
-    OUT p_order_id integer)
+    OUT p_order_id bigint)
 LANGUAGE plpgsql AS $$
 DECLARE
     v_item jsonb;
-    v_product_id integer;
+    v_product_id bigint;
     v_quantity integer;
     v_price numeric(12,2);
     v_stock integer;
@@ -113,7 +116,7 @@ BEGIN
 
     FOR v_item IN SELECT value FROM jsonb_array_elements(p_items)
     LOOP
-        v_product_id := (v_item ->> 'productId')::integer;
+        v_product_id := (v_item ->> 'productId')::bigint;
         v_quantity := (v_item ->> 'quantity')::integer;
         IF v_quantity IS NULL OR v_quantity <= 0 THEN
             RAISE EXCEPTION 'Quantity for product % must be positive.', v_product_id;
@@ -144,15 +147,15 @@ BEGIN
     END LOOP;
 
     UPDATE "Orders" SET "TotalPrice" = v_total WHERE "Id" = v_order_id;
-    p_order_id := v_order_id::integer;
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE EXCEPTION 'Create order failed: %', SQLERRM;
+    p_order_id := v_order_id;
 END;
 $$;
 
+-- FIX: Xóa chữ ký cũ để đồng bộ định danh đơn hàng với bigserial.
+DROP PROCEDURE IF EXISTS "sp_UpdateOrderStatus"(integer, varchar);
+
 CREATE OR REPLACE PROCEDURE "sp_UpdateOrderStatus"(
-    IN p_order_id integer,
+    IN p_order_id bigint,
     IN p_new_status varchar)
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -160,6 +163,11 @@ DECLARE
     v_detail record;
     v_status varchar(20) := upper(p_new_status);
 BEGIN
+    -- FIX: Không cho phép trạng thái mới là NULL.
+    IF p_new_status IS NULL THEN
+        RAISE EXCEPTION 'New order status must not be NULL.';
+    END IF;
+
     SELECT "OrderStatus" INTO v_current_status
     FROM "Orders" WHERE "Id" = p_order_id FOR UPDATE;
 
@@ -189,8 +197,11 @@ BEGIN
 END;
 $$;
 
+-- FIX: Xóa chữ ký cũ để thay đổi kiểu khóa không tạo procedure overload.
+DROP PROCEDURE IF EXISTS "sp_UpdateStock"(integer, integer);
+
 CREATE OR REPLACE PROCEDURE "sp_UpdateStock"(
-    IN p_product_id integer,
+    IN p_product_id bigint,
     IN p_delta integer)
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -261,10 +272,13 @@ LANGUAGE sql STABLE AS $$
     ORDER BY o."CreatedAt"::date;
 $$;
 
+-- FIX: Xóa hàm cũ trước khi đổi kiểu cột trả về từ integer sang bigint.
+DROP FUNCTION IF EXISTS "fn_GetTopSellingProducts"(integer, date, date);
+
 CREATE OR REPLACE FUNCTION "fn_GetTopSellingProducts"(p_limit integer, p_from date, p_to date)
-RETURNS TABLE(product_id integer, product_name varchar, total_quantity bigint, total_revenue numeric)
+RETURNS TABLE(product_id bigint, product_name varchar, total_quantity bigint, total_revenue numeric)
 LANGUAGE sql STABLE AS $$
-    SELECT p."Id"::integer, p."Name", SUM(d."Quantity")::bigint,
+    SELECT p."Id", p."Name", SUM(d."Quantity")::bigint,
            COALESCE(SUM(d."Quantity" * d."UnitPrice"), 0)
     FROM "OrderDetails" d
     JOIN "Orders" o ON o."Id" = d."OrderId"
@@ -276,10 +290,13 @@ LANGUAGE sql STABLE AS $$
     LIMIT GREATEST(p_limit, 0);
 $$;
 
+-- FIX: Xóa hàm cũ trước khi đổi kiểu cột trả về từ integer sang bigint.
+DROP FUNCTION IF EXISTS "fn_GetLowStockProducts"(integer);
+
 CREATE OR REPLACE FUNCTION "fn_GetLowStockProducts"(p_threshold integer)
-RETURNS TABLE(product_id integer, product_name varchar, brand_name varchar, stock_quantity integer)
+RETURNS TABLE(product_id bigint, product_name varchar, brand_name varchar, stock_quantity integer)
 LANGUAGE sql STABLE AS $$
-    SELECT p."Id"::integer, p."Name", b."Name", i."StockQuantity"
+    SELECT p."Id", p."Name", b."Name", i."StockQuantity"
     FROM "Inventories" i
     JOIN "Products" p ON p."Id" = i."ProductId"
     JOIN "Brands" b ON b."Id" = p."BrandId"
@@ -300,10 +317,13 @@ LANGUAGE sql STABLE AS $$
     ORDER BY EXTRACT(MONTH FROM o."CreatedAt");
 $$;
 
-CREATE OR REPLACE FUNCTION "fn_GetCustomerOrderHistory"(p_user_id integer)
-RETURNS TABLE(order_id integer, order_date timestamptz, total_price numeric, order_status varchar)
+-- FIX: Xóa chữ ký cũ để đồng bộ khóa người dùng và đơn hàng với bigserial.
+DROP FUNCTION IF EXISTS "fn_GetCustomerOrderHistory"(integer);
+
+CREATE OR REPLACE FUNCTION "fn_GetCustomerOrderHistory"(p_user_id bigint)
+RETURNS TABLE(order_id bigint, order_date timestamptz, total_price numeric, order_status varchar)
 LANGUAGE sql STABLE AS $$
-    SELECT o."Id"::integer, o."CreatedAt", o."TotalPrice", o."OrderStatus"
+    SELECT o."Id", o."CreatedAt", o."TotalPrice", o."OrderStatus"
     FROM "Orders" o
     WHERE o."UserId" = p_user_id
     ORDER BY o."CreatedAt" DESC;

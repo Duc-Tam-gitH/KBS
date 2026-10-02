@@ -17,7 +17,10 @@ SELECT o."Id" AS "OrderId", o."CreatedAt", u."Username", o."CustomerName",
 FROM "Orders" o
 JOIN "Users" u ON u."Id" = o."UserId"
 LEFT JOIN "OrderDetails" d ON d."OrderId" = o."Id"
-GROUP BY o."Id", u."Username";
+-- FIX: Liệt kê đầy đủ các cột không tổng hợp để không phụ thuộc hàm ý khóa của PostgreSQL.
+GROUP BY o."Id", o."CreatedAt", u."Username", o."CustomerName", o."PhoneNumber",
+         o."ShippingAddress", o."PaymentMethod", o."PaymentStatus", o."OrderStatus",
+         o."TotalPrice";
 
 CREATE OR REPLACE VIEW "vw_RevenueByDay" AS
 SELECT o."CreatedAt"::date AS "OrderDate", COUNT(*) AS "OrderCount",
@@ -33,6 +36,7 @@ FROM "Orders" o
 WHERE o."PaymentStatus" = 'PAID' AND o."OrderStatus" <> 'CANCELLED'
 GROUP BY date_trunc('month', o."CreatedAt")::date;
 
+-- FIX: Người dùng phải áp dụng ORDER BY khi truy vấn view để bảo đảm thứ tự kết quả.
 CREATE OR REPLACE VIEW "vw_TopSellingProducts" AS
 SELECT p."Id" AS "ProductId", p."Name" AS "ProductName", b."Name" AS "BrandName",
        SUM(d."Quantity") AS "TotalQuantity", SUM(d."Quantity" * d."UnitPrice") AS "TotalRevenue"
@@ -41,17 +45,16 @@ JOIN "Orders" o ON o."Id" = d."OrderId"
 JOIN "Products" p ON p."Id" = d."ProductId"
 JOIN "Brands" b ON b."Id" = p."BrandId"
 WHERE o."OrderStatus" <> 'CANCELLED'
-GROUP BY p."Id", p."Name", b."Name"
-ORDER BY "TotalQuantity" DESC, "TotalRevenue" DESC;
+GROUP BY p."Id", p."Name", b."Name";
 
+-- FIX: Người dùng phải áp dụng ORDER BY khi truy vấn view để bảo đảm thứ tự kết quả.
 CREATE OR REPLACE VIEW "vw_LowStockProducts" AS
 SELECT p."Id" AS "ProductId", p."Name" AS "ProductName", b."Name" AS "BrandName",
        i."StockQuantity", p."Price"
 FROM "Inventories" i
 JOIN "Products" p ON p."Id" = i."ProductId"
 JOIN "Brands" b ON b."Id" = p."BrandId"
-WHERE i."StockQuantity" < 10
-ORDER BY i."StockQuantity", p."Name";
+WHERE i."StockQuantity" < 10;
 
 CREATE OR REPLACE VIEW "vw_ProductByBrand" AS
 SELECT b."Id" AS "BrandId", b."Name" AS "BrandName", COUNT(p."Id") AS "ProductCount",

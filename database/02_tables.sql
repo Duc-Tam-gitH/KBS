@@ -1,14 +1,16 @@
--- Raw SQL owns the KBS88 application schema. Mixed-case identifiers are quoted
--- so the names remain compatible with EF Core scaffolding.
+-- Schema ứng dụng KBS88 được quản lý bằng SQL thuần. Các định danh chữ hoa/thường
+-- được đặt trong dấu nháy để vẫn tương thích với EF Core scaffolding.
 CREATE TABLE IF NOT EXISTS "Categories" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "Name" varchar(100) NOT NULL,
     "Description" text,
     "CreatedAt" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS "Brands" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "Name" varchar(100) NOT NULL,
     "Country" varchar(50),
     "Description" text,
@@ -16,8 +18,10 @@ CREATE TABLE IF NOT EXISTS "Brands" (
 );
 
 CREATE TABLE IF NOT EXISTS "Products" (
-    "Id" bigserial,
-    "Name" varchar(255) NOT NULL,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
+    -- FIX: Tên sản phẩm là duy nhất để hỗ trợ ON CONFLICT ("Name").
+    "Name" varchar(255) NOT NULL UNIQUE,
     "Price" numeric(12,2) NOT NULL,
     "OriginalPrice" numeric(12,2),
     "Description" text,
@@ -35,20 +39,23 @@ CREATE TABLE IF NOT EXISTS "Products" (
 );
 
 CREATE TABLE IF NOT EXISTS "Inventories" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "ProductId" bigint NOT NULL,
     "StockQuantity" integer NOT NULL DEFAULT 0,
     "UpdatedAt" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS "Roles" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "Name" varchar(50) NOT NULL,
     "Description" text
 );
 
 CREATE TABLE IF NOT EXISTS "Users" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "Username" varchar(50) NOT NULL,
     "Email" varchar(255) NOT NULL,
     "PasswordHash" varchar(255) NOT NULL,
@@ -60,7 +67,8 @@ CREATE TABLE IF NOT EXISTS "Users" (
 );
 
 CREATE TABLE IF NOT EXISTS "Orders" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "UserId" bigint NOT NULL,
     "CustomerName" varchar(100) NOT NULL,
     "PhoneNumber" varchar(20) NOT NULL,
@@ -73,7 +81,8 @@ CREATE TABLE IF NOT EXISTS "Orders" (
 );
 
 CREATE TABLE IF NOT EXISTS "OrderDetails" (
-    "Id" bigserial,
+    -- FIX: Khóa chính được khai báo cùng cột định danh.
+    "Id" bigserial PRIMARY KEY,
     "OrderId" bigint NOT NULL,
     "ProductId" bigint NOT NULL,
     "UnitPrice" numeric(12,2) NOT NULL,
