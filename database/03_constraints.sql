@@ -1,7 +1,4 @@
--- FIX: Bảo đảm psql trên Windows đọc các chú thích tiếng Việt theo UTF-8.
-SET client_encoding = 'UTF8';
-
--- Các ràng buộc được thêm có điều kiện để script có thể chạy lặp lại.
+q-- Các ràng buộc được thêm có điều kiện để script có thể chạy lặp lại.
 DO $$
 DECLARE
     r record;
@@ -34,25 +31,6 @@ BEGIN
                 'public', r.table_name, r.constraint_name, r.definition);
         END IF;
     END LOOP;
-END $$;
-
--- FIX: Bổ sung ràng buộc tên sản phẩm cho database đã được tạo từ phiên bản cũ.
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint c
-        JOIN pg_attribute a
-          ON a.attrelid = c.conrelid
-         AND a.attnum = c.conkey[1]
-        WHERE c.conrelid = to_regclass('public."Products"')
-          AND c.contype = 'u'
-          AND array_length(c.conkey, 1) = 1
-          AND a.attname = 'Name'
-    ) THEN
-        ALTER TABLE "Products"
-        ADD CONSTRAINT "UQ_Products_Name" UNIQUE ("Name");
-    END IF;
 END $$;
 
 DO $$
