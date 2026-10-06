@@ -17,22 +17,22 @@ INSERT INTO "Categories" ("Name", "Description") VALUES
     ('Layout đặc biệt', 'Alice, split và layout độc đáo')
 ON CONFLICT ("Name") DO NOTHING;
 
-INSERT INTO "Brands" ("Name", "Country", "Description") VALUES
-    ('Keychron', 'Hong Kong', 'Keyboard productivity and custom brand'),
-    ('Akko', 'China', 'Mechanical keyboard and keycap brand'),
-    ('Leopold', 'Korea', 'Premium Korean keyboard manufacturer'),
-    ('Ducky', 'Taiwan', 'Taiwanese gaming keyboard brand'),
-    ('Varmilo', 'China', 'Premium themed keyboard manufacturer'),
-    ('NuPhy', 'United States', 'Low-profile wireless keyboard brand'),
-    ('FL-Esports', 'China', 'Custom-oriented keyboard brand'),
-    ('Razer', 'Singapore', 'Gaming peripheral manufacturer'),
-    ('Logitech', 'Switzerland', 'Consumer electronics manufacturer'),
-    ('Corsair', 'United States', 'Gaming hardware manufacturer'),
-    ('HyperX', 'United States', 'Gaming accessory brand'),
-    ('Royal Kludge', 'China', 'Affordable wireless keyboard brand'),
-    ('Xiaomi', 'China', 'Consumer electronics manufacturer'),
-    ('Monsgeek', 'China', 'Aluminium custom keyboard brand'),
-    ('Epomaker', 'China', 'Keyboard and switch brand')
+INSERT INTO "Brands" ("Name", "Description") VALUES
+    ('Keychron', 'Keyboard productivity and custom brand'),
+    ('Akko', 'Mechanical keyboard and keycap brand'),
+    ('Leopold', 'Premium Korean keyboard manufacturer'),
+    ('Ducky', 'Taiwanese gaming keyboard brand'),
+    ('Varmilo', 'Premium themed keyboard manufacturer'),
+    ('NuPhy', 'Low-profile wireless keyboard brand'),
+    ('FL-Esports', 'Custom-oriented keyboard brand'),
+    ('Razer', 'Gaming peripheral manufacturer'),
+    ('Logitech', 'Consumer electronics manufacturer'),
+    ('Corsair', 'Gaming hardware manufacturer'),
+    ('HyperX', 'Gaming accessory brand'),
+    ('Royal Kludge', 'Affordable wireless keyboard brand'),
+    ('Xiaomi', 'Consumer electronics manufacturer'),
+    ('Monsgeek', 'Aluminium custom keyboard brand'),
+    ('Epomaker', 'Keyboard and switch brand')
 ON CONFLICT ("Name") DO NOTHING;
 
 WITH product_seed("Name", "Price", "OriginalPrice", "Description", "CategoryName", "BrandName", "SwitchType", "Layout", "ConnectionType", "Keycap", "Color", "IsHotSwap", "IsRGB") AS (
