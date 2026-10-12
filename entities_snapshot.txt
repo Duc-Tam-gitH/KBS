@@ -1,0 +1,191 @@
+﻿
+========== Brand.cs ==========
+namespace KBS.Models.Entities;
+
+public class Brand
+{
+    public long Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public ICollection<Product> Products { get; set; } = new List<Product>();
+}
+
+========== Category.cs ==========
+namespace KBS.Models.Entities;
+
+public class Category
+{
+    public long Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public ICollection<Product> Products { get; set; } = new List<Product>();
+}
+
+========== Inventory.cs ==========
+namespace KBS.Models.Entities;
+
+public class Inventory
+{
+    public long Id { get; set; }
+
+    public long ProductId { get; set; }
+
+    public int StockQuantity { get; set; }
+
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public Product? Product { get; set; }
+}
+
+========== Order.cs ==========
+namespace KBS.Models.Entities;
+
+public class Order
+{
+    public long Id { get; set; }
+
+    public long UserId { get; set; }
+
+    public string CustomerName { get; set; } = string.Empty;
+
+    public string PhoneNumber { get; set; } = string.Empty;
+
+    public string ShippingAddress { get; set; } = string.Empty;
+
+    public decimal TotalPrice { get; set; }
+
+    public string PaymentMethod { get; set; } = string.Empty;
+
+    // Tráº¡ng thÃ¡i thanh toÃ¡n: PENDING (chá» xá»­ lÃ½), PAID (Ä‘Ã£ thanh toÃ¡n), CANCELLED (Ä‘Ã£ há»§y)
+    public string PaymentStatus { get; set; } = "PENDING";
+
+    public string OrderStatus { get; set; } = "PENDING";
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public User? User { get; set; }
+
+    public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+}
+
+========== OrderDetail.cs ==========
+namespace KBS.Models.Entities;
+
+public class OrderDetail
+{
+    public long Id { get; set; }
+
+    public long OrderId { get; set; }
+
+    public long ProductId { get; set; }
+
+    public decimal UnitPrice { get; set; }
+
+    public int Quantity { get; set; }
+
+    public Order? Order { get; set; }
+
+    public Product? Product { get; set; }
+}
+
+========== Product.cs ==========
+namespace KBS.Models.Entities;
+
+public class Product
+{
+    public long Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public decimal Price { get; set; }
+
+    public decimal? OriginalPrice { get; set; }
+
+    public string? Description { get; set; }
+
+    public long CategoryId { get; set; }
+
+    public long BrandId { get; set; }
+
+    public string? SwitchType { get; set; }
+
+    public string? Layout { get; set; }
+
+    public string? ConnectionType { get; set; }
+
+    public string? Keycap { get; set; }
+
+    public string? Color { get; set; }
+
+    public bool IsHotSwap { get; set; }
+
+    public bool IsRGB { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public Category? Category { get; set; }
+
+    public Brand? Brand { get; set; }
+
+    public Inventory? Inventory { get; set; }
+
+    public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+}
+
+========== Role.cs ==========
+namespace KBS.Models.Entities;
+
+public class Role
+{
+    public long Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    public ICollection<User> Users { get; set; } = new List<User>();
+}
+
+========== User.cs ==========
+namespace KBS.Models.Entities;
+
+public class User
+{
+    public long Id { get; set; }
+
+    public string Username { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public string PasswordHash { get; set; } = string.Empty;
+
+    public string? FullName { get; set; }
+
+    public string? PhoneNumber { get; set; }
+
+    public long RoleId { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public Role? Role { get; set; }
+
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+}

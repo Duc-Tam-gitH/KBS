@@ -1,19 +1,24 @@
+
 using KBS.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Đăng ký các dịch vụ cho ứng dụng.
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+// Đăng ký kết nối PostgreSQL và DbContext.
+var connectionString = builder.Configuration.GetConnectionString("KBSConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "Chưa cấu hình ConnectionStrings:KBSConnection trong User Secrets.");
+}
 
 builder.Services.AddDbContext<KbsDbContext>(options =>
     options.UseNpgsql(connectionString));
-
-builder.Services.AddControllers();
-// Cấu hình OpenAPI cho môi trường phát triển.
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -24,19 +29,21 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
-// Tự động tạo database và áp dụng migration khi API khởi động
-using (var scope = app.Services.CreateScope())
+app.MapGet("/health/database", async (KbsDbContext db) =>
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
+    var canConnect = await db.Database.CanConnectAsync();
 
-    // Migrate() sẽ tạo database nếu chưa tồn tại,
-    // và áp dụng tất cả migration đang chờ
-    dbContext.Database.Migrate();
-}
+    return canConnect
+        ? Results.Ok(new
+        {
+            status = "connected",
+            database = "KBS_DB"
+        })
+        : Results.Problem(
+            "Không thể kết nối PostgreSQL. Hãy kiểm tra User Secrets và PostgreSQL.");
+});
 
 app.Run();

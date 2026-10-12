@@ -1,24 +1,15 @@
+
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\KBS.Models\KBS.Models.csproj" />
   </ItemGroup>
 
-  <!--
-    SQL nguồn cho migration: dữ liệu mẫu, view và procedure/function/trigger.
-    Các tệp này nằm trong thư mục database ở gốc kho mã và được nhúng vào
-    KBS.DAL để migration đọc lại khi chạy.
-  -->
   <ItemGroup>
-    <EmbeddedResource Include="..\..\database\seed_data.sql" Link="Sql\seed_data.sql" LogicalName="KBS.DAL.Sql.seed_data.sql" />
-    <EmbeddedResource Include="..\..\database\views.sql" Link="Sql\views.sql" LogicalName="KBS.DAL.Sql.views.sql" />
-    <EmbeddedResource Include="..\..\database\procedures.sql" Link="Sql\procedures.sql" LogicalName="KBS.DAL.Sql.procedures.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
