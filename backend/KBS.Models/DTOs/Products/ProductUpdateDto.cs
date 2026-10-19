@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 namespace KBS.Models.DTOs.Products;
 
 public class ProductUpdateDto
 {
+    [Required(ErrorMessage = "Tên sản phẩm là bắt buộc.")]
+    [StringLength(200, MinimumLength = 2, ErrorMessage = "Tên sản phẩm dài từ 2 đến 200 ký tự.")]
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public decimal? OriginalPrice { get; set; }
@@ -16,4 +19,6 @@ public class ProductUpdateDto
     public bool IsHotSwap { get; set; }
     public bool IsRGB { get; set; }
     public bool IsActive { get; set; }
+    [MaxLength(10, ErrorMessage = "Tối đa 10 ảnh cho một sản phẩm.")]
+    public List<ProductImageDto> Images { get; set; } = new();
 }

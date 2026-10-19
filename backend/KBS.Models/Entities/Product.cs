@@ -40,5 +40,7 @@ public class Product
 
     public Inventory? Inventory { get; set; }
 
+    public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+
     public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 }

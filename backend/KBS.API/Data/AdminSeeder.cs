@@ -52,6 +52,14 @@ public static class AdminSeeder
                 "Thiếu cấu hình AdminBootstrap:Username, Email hoặc Password.");
         }
 
+        if (password.Length < 8 || !password.Any(char.IsLetter) || !password.Any(char.IsDigit))
+        {
+            throw new InvalidOperationException("Mật khẩu AdminBootstrap phải có ít nhất 8 ký tự, gồm chữ và số.");
+        }
+
+        username = username.Trim();
+        email = email.Trim().ToLowerInvariant();
+
         // Tránh xung đột với tài khoản đã tồn tại.
         var accountExists = await dbContext.Users.AnyAsync(user =>
             user.Username == username || user.Email == email);

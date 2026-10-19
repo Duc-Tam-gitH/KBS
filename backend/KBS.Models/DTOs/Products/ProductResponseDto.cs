@@ -7,7 +7,9 @@ public class ProductResponseDto
     public decimal? OriginalPrice { get; set; }
     public string? Description { get; set; }
     public long CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
     public long BrandId { get; set; }
+    public string BrandName { get; set; } = string.Empty;
     public string? SwitchType { get; set; }
     public string? Layout { get; set; }
     public string? ConnectionType { get; set; }
@@ -17,4 +19,5 @@ public class ProductResponseDto
     public bool IsRGB { get; set; }
     public bool IsActive { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public List<ProductImageDto> Images { get; set; } = new();
 }

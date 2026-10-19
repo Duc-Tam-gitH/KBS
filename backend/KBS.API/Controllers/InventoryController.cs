@@ -1,0 +1,3 @@
+using KBS.BLL.Interfaces; using KBS.Models.DTOs.Inventory; using Microsoft.AspNetCore.Authorization; using Microsoft.AspNetCore.Mvc;
+namespace KBS.API.Controllers;
+[ApiController][Route("api/inventory")][Authorize(Roles="Admin")] public class InventoryController(IInventoryService service):ControllerBase { [HttpGet("product/{productId:long}")] public async Task<ActionResult<InventoryResponseDto>> Get(long productId,CancellationToken ct){var x=await service.GetByProductIdAsync(productId,ct);return x is null?NotFound():Ok(x);}[HttpPut("product/{productId:long}")] public async Task<ActionResult<InventoryResponseDto>> Update(long productId,UpdateInventoryDto dto,CancellationToken ct){var x=await service.UpdateAsync(productId,dto,ct);return x is null?NotFound():Ok(x);} }

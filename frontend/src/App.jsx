@@ -1,122 +1,36 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { api } from './services/api'
+import { useAuth } from './auth/AuthContext'
+
+const demoProducts = [
+  { id: 1, name: 'Keychron K8 Pro', brand: 'Keychron', category: 'Cơ học', price: 2490000, oldPrice: 2790000, layout: 'TKL 87 phím', connection: 'Ba chế độ', switch: 'Gateron Brown', color: 'charcoal', badge: 'Bán chạy' },
+  { id: 2, name: 'Akko 5075B Plus', brand: 'Akko', category: 'Cơ học', price: 1890000, layout: '75%', connection: 'Ba chế độ', switch: 'Akko Cream Yellow', color: 'cream', badge: 'Mới về' },
+  { id: 3, name: 'Wooting 80HE', brand: 'Wooting', category: 'Hall Effect', price: 5490000, layout: '80%', connection: 'Có dây', switch: 'Lekker L60', color: 'dark', badge: 'Đặt trước' },
+  { id: 4, name: 'Nuphy Air75 V2', brand: 'NuPhy', category: 'Low-profile', price: 2990000, oldPrice: 3190000, layout: '75%', connection: 'Ba chế độ', switch: 'Aloe', color: 'stone', badge: 'Ưu đãi' },
+  { id: 5, name: 'MonsGeek M1W V3', brand: 'MonsGeek', category: 'Cơ học', price: 2690000, layout: '75%', connection: 'Ba chế độ', switch: 'Akko Cream Black', color: 'silver' },
+  { id: 6, name: 'SteelSeries Apex Pro TKL', brand: 'SteelSeries', category: 'Hall Effect', price: 4290000, layout: 'TKL 87 phím', connection: 'Có dây', switch: 'OmniPoint 3.0', color: 'black' },
+  { id: 7, name: 'Keychron Q1 Max', brand: 'Keychron', category: 'Cơ học', price: 4690000, layout: '75%', connection: 'Ba chế độ', switch: 'Gateron Jupiter', color: 'navy' },
+  { id: 8, name: 'Logitech G715', brand: 'Logitech', category: 'Cơ học', price: 3490000, layout: 'TKL 87 phím', connection: 'Không dây', switch: 'GX Brown', color: 'white' },
+]
+const categories = ['Tất cả', 'Cơ học', 'Hall Effect', 'Low-profile']
+const money = (amount) => new Intl.NumberFormat('vi-VN').format(amount) + '₫'
+function KeyboardVisual({ tone }) { return <div className={`keyboard keyboard--${tone}`} aria-hidden="true"><div className="keyboard__keys">{Array.from({ length: 25 }, (_, i) => <i key={i} />)}</div></div> }
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  const [catalogProducts, setCatalogProducts] = useState(demoProducts); const [isLoading, setIsLoading] = useState(true); const [loadError, setLoadError] = useState(''); const [search, setSearch] = useState(''); const [category, setCategory] = useState('Tất cả'); const [connection, setConnection] = useState('Tất cả'); const [maxPrice, setMaxPrice] = useState(6000000); const [sort, setSort] = useState('featured'); const [cartCount, setCartCount] = useState(0)
+  const { user, isAdmin, logout } = useAuth()
+  const loadProducts = () => { setIsLoading(true); setLoadError(''); api.products({ page: 1, pageSize: 100 }).then((response) => { setCatalogProducts((response.items || []).map((p) => ({ ...p, oldPrice: p.originalPrice, brand: p.brandName || 'KBS', category: p.categoryName || 'Sản phẩm', layout: p.layout || 'Tiêu chuẩn', connection: p.connectionType || 'Có dây', switch: p.switchType || '', color: 'charcoal' }))) }).catch(() => setLoadError('Không thể tải sản phẩm. Kiểm tra API và thử lại.')).finally(() => setIsLoading(false)) }
+  useEffect(() => { loadProducts() }, [])
+  const filteredProducts = useMemo(() => { const query = search.trim().toLowerCase(); const items = catalogProducts.filter((p) => (!query || `${p.name} ${p.brand} ${p.switch}`.toLowerCase().includes(query)) && (category === 'Tất cả' || p.category === category) && (connection === 'Tất cả' || p.connection === connection) && p.price <= maxPrice); return [...items].sort((a, b) => sort === 'low' ? a.price - b.price : sort === 'high' ? b.price - a.price : a.id - b.id) }, [catalogProducts, search, category, connection, maxPrice, sort])
+  const resetFilters = () => { setSearch(''); setCategory('Tất cả'); setConnection('Tất cả'); setMaxPrice(6000000); setSort('featured') }
+  return <main>
+    <header className="site-header"><a className="brand" href="#top" aria-label="KBS trang chủ"><span>K</span>KBS</a><nav aria-label="Điều hướng chính"><a className="active" href="#san-pham">Sản phẩm</a><a href="#uu-dai">Ưu đãi</a><a href="#thuong-hieu">Thương hiệu</a>{isAdmin && <a href="#admin">Quản trị</a>}</nav><div className="header-actions">{user ? <button className="icon-button" onClick={logout} title="Đăng xuất" aria-label="Đăng xuất">♙</button> : <button className="icon-button" aria-label="Đăng nhập">♙</button>}<button className="cart-button" aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}>Giỏ hàng <b>{cartCount}</b></button></div></header>
+    <section className="hero" id="top"><div className="hero__content"><p className="eyebrow">BỘ SƯU TẬP 2026</p><h1>Gõ đúng <em>chất</em> của bạn.</h1><p className="hero__copy">Khám phá bàn phím được tuyển chọn cho công việc, sáng tạo và những trận game không khoan nhượng.</p><a className="primary-button" href="#san-pham">Khám phá ngay <span>→</span></a></div><div className="hero__art"><KeyboardVisual tone="hero" /><span className="hero__note">Thiết kế. Cảm nhận.<br />Khác biệt.</span></div></section>
+    <section className="benefits" aria-label="Cam kết dịch vụ"><div><b>01</b><span><strong>Hàng chính hãng</strong>Cam kết 100% sản phẩm chuẩn</span></div><div><b>02</b><span><strong>Giao nhanh toàn quốc</strong>Miễn phí cho đơn từ 1.000.000₫</span></div><div><b>03</b><span><strong>Tư vấn tận tâm</strong>Đội ngũ am hiểu bàn phím</span></div></section>
+    <section className="catalog" id="san-pham"><div className="catalog__heading"><div><p className="eyebrow">KHÁM PHÁ SẢN PHẨM</p><h2>Bàn phím dành cho bạn</h2></div><p>{filteredProducts.length} sản phẩm phù hợp</p></div><div className="search-row"><label className="search-box"><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm tên bàn phím, thương hiệu..." /></label><select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sắp xếp sản phẩm"><option value="featured">Sắp xếp: Nổi bật</option><option value="low">Giá: Thấp đến cao</option><option value="high">Giá: Cao đến thấp</option></select></div>
+      <div className="catalog__body"><aside className="filters"><div className="filter-title"><h3>Bộ lọc</h3><button onClick={resetFilters}>Xóa tất cả</button></div><div className="filter-group"><p>Danh mục</p>{categories.map((item) => <label key={item}><input type="radio" name="category" checked={category === item} onChange={() => setCategory(item)} />{item}</label>)}</div><div className="filter-group"><p>Mức giá <strong>đến {money(maxPrice)}</strong></p><input className="range" type="range" min="1000000" max="6000000" step="250000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} /><div className="range-labels"><span>1 triệu</span><span>6 triệu+</span></div></div><div className="filter-group"><p>Kết nối</p>{['Tất cả', 'Ba chế độ', 'Không dây', 'Có dây'].map((item) => <label key={item}><input type="radio" name="connection" checked={connection === item} onChange={() => setConnection(item)} />{item}</label>)}</div></aside><div className="products" aria-busy={isLoading}>{isLoading ? Array.from({ length: 6 }, (_, i) => <div className="product-skeleton" key={i} />) : filteredProducts.map((p) => <article className="product-card" key={p.id}><div className="product-card__image">{p.badge && <span className="badge">{p.badge}</span>}<button className="wish" aria-label={`Yêu thích ${p.name}`}>♡</button>{p.images?.[0]?.imageUrl ? <img src={p.images[0].imageUrl} alt={p.images[0].altText || p.name} /> : <KeyboardVisual tone={p.color} />}</div><div className="product-card__content"><p className="product-brand">{p.brand}</p><h3>{p.name}</h3><p className="product-meta">{p.layout} · {p.connection}</p><div className="price-row"><strong>{money(p.price)}</strong>{p.oldPrice && <del>{money(p.oldPrice)}</del>}<button onClick={() => setCartCount((count) => count + 1)} aria-label={`Thêm ${p.name} vào giỏ hàng`}>+</button></div></div></article>)}</div></div>
+      {loadError && <div className="empty-state error-state"><p>{loadError}</p><button onClick={loadProducts}>Thử lại</button></div>}{!isLoading && !loadError && filteredProducts.length === 0 && <div className="empty-state"><p>Không tìm thấy sản phẩm phù hợp.</p><button onClick={resetFilters}>Đặt lại bộ lọc</button></div>}</section><footer>© 2026 KBS — Keyboard Beyond Standard</footer>
+  </main>
 }
-
 export default App

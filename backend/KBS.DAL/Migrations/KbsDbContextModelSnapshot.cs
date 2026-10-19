@@ -293,6 +293,19 @@ namespace KBS.DAL.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("KBS.Models.Entities.ProductImage", b =>
+                {
+                    b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("bigint");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<string>("AltText").HasColumnType("text");
+                    b.Property<string>("ImageUrl").IsRequired().HasColumnType("text");
+                    b.Property<long>("ProductId").HasColumnType("bigint");
+                    b.Property<int>("SortOrder").HasColumnType("integer");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductId", "SortOrder");
+                    b.ToTable("ProductImages");
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.Role", b =>
                 {
                     b.Property<long>("Id")
@@ -328,6 +341,16 @@ namespace KBS.DAL.Migrations
                             Description = "Khách hàng",
                             Name = "Customer"
                         });
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.ProductImage", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.User", b =>
@@ -369,6 +392,10 @@ namespace KBS.DAL.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique()
+                        .HasFilter("\"PhoneNumber\" IS NOT NULL");
 
                     b.HasIndex("RoleId");
 
@@ -467,6 +494,8 @@ namespace KBS.DAL.Migrations
             modelBuilder.Entity("KBS.Models.Entities.Product", b =>
                 {
                     b.Navigation("Inventory");
+
+                    b.Navigation("Images");
 
                     b.Navigation("OrderDetails");
                 });

@@ -11,6 +11,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<Inventory> Inventories => Set<Inventory>();
+    public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Order> Orders => Set<Order>();
@@ -27,6 +28,16 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .HasForeignKey(p => p.CategoryId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ProductImage>()
+            .HasOne(i => i.Product)
+            .WithMany(p => p.Images)
+            .HasForeignKey(i => i.ProductId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProductImage>()
+            .HasIndex(i => new { i.ProductId, i.SortOrder });
 
         // Brand 1 - N Product
         modelBuilder.Entity<Product>()
@@ -84,6 +95,11 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.PhoneNumber)
+            .IsUnique()
+            .HasFilter("\"PhoneNumber\" IS NOT NULL");
 
         modelBuilder.Entity<Role>()
             .HasIndex(r => r.Name)

@@ -12,6 +12,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\KBS.BLL\KBS.BLL.csproj" />
     <ProjectReference Include="..\KBS.API\KBS.API.csproj" />
+    <ProjectReference Include="..\KBS.DAL\KBS.DAL.csproj" />
   </ItemGroup>
 
 </Project>

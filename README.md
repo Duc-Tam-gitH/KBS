@@ -1,73 +1,60 @@
-## Database Setup
+# KBS — Keyboard Beyond Standard
 
-### Technology
-- PostgreSQL 16
-- Entity Framework Core 9
-- Npgsql.EntityFrameworkCore.PostgreSQL 9.0.4
-- Code-First Migrations
+Ứng dụng thương mại điện tử bàn phím dùng React/Vite, ASP.NET Core 9, EF Core 9 và PostgreSQL 16.
 
-### Database Configuration
+## Chạy từ đầu
 
-The project uses PostgreSQL as its database and Entity Framework Core migrations to manage the database schema.
-
-Configure the connection string using .NET User Secrets in the API project. Do not commit database credentials to source control.
+Cần .NET SDK 9, Node.js 20+, PostgreSQL 16 và `psql`.
 
 ```powershell
+createdb -U postgres KBS_DB
 dotnet user-secrets set "ConnectionStrings:KBSConnection" "Host=localhost;Port=5432;Database=KBS_DB;Username=postgres;Password=YOUR_PASSWORD" --project .\backend\KBS.API
-```
-
-Replace `YOUR_PASSWORD` with your local PostgreSQL password.
-
-### Apply Database Migrations
-
-Run the following command from the repository root:
-
-```powershell
 dotnet ef database update --project .\backend\KBS.DAL --startup-project .\backend\KBS.API
+psql -U postgres -d KBS_DB -f .\database\seed_demo.sql
+psql -U postgres -d KBS_DB -f .\database\reporting.sql
+dotnet run --project .\backend\KBS.API --launch-profile https
+
+# terminal khác
+Copy-Item .\frontend\.env.example .\frontend\.env.local
+npm install --prefix .\frontend
+npm run dev --prefix .\frontend
 ```
 
-To create a new migration after changing the entity models or database configuration:
+Frontend: `http://localhost:5173`. OpenAPI: `https://localhost:7013/openapi/v1.json` (môi trường Development); import URL này vào Postman/Insomnia để thử endpoint.
+
+## Tài khoản demo
+
+| Vai trò | Tài khoản | Mật khẩu |
+|---|---|---|
+| Admin | `admin` | `Admin@123` |
+| Customer | `minh.demo`, `lan.demo` | `Demo@123` |
+
+Đổi AdminBootstrap/JWT bằng User Secrets hoặc biến môi trường trước khi deploy; tài khoản demo chỉ dùng local.
+
+## API chính
+
+| Endpoint | Quyền |
+|---|---|
+| `POST /api/auth/register`, `POST /api/auth/login` | Public |
+| `GET /api/products`, `GET /api/products/{id}` | Public |
+| `POST/PUT /api/products` | Admin |
+| `POST /api/orders`, `GET /api/orders/mine` | Đăng nhập |
+| `GET /api/orders`, `PUT /api/orders/{id}/status` | Admin |
+| `GET /api/admin/dashboard` | Admin |
+
+Login trả access token; gửi `Authorization: Bearer <token>`. Ảnh nằm trong mảng `images: [{ imageUrl, altText, sortOrder }]` của request tạo/sửa product. Trạng thái đơn hợp lệ: `PENDING → CONFIRMED → SHIPPING → COMPLETED`, hoặc hủy ở `PENDING`/`CONFIRMED`; hủy đơn hoàn tồn kho.
+
+## Kiểm tra và kịch bản demo
 
 ```powershell
-dotnet ef migrations add MigrationName --project .\backend\KBS.DAL --startup-project .\backend\KBS.API --output-dir Migrations
+dotnet test .\backend\KBS.Tests
+npm run build --prefix .\frontend
 ```
 
-Replace `MigrationName` with a descriptive migration name.
+1. Mở frontend ở desktop/mobile: tìm kiếm, lọc, loading, empty/error state.
+2. Đăng nhập Customer trên OpenAPI, tạo đơn một sản phẩm; xác nhận `totalPrice` do server tính.
+3. Tạo quantity lớn hơn tồn kho và xác nhận `409 Conflict`, tồn kho không đổi.
+4. Với token Customer gọi dashboard để nhận `403`; token Admin có thể xem dashboard và chuyển trạng thái đơn.
+5. Chạy `SELECT * FROM vw_daily_revenue;` và `SELECT * FROM vw_low_inventory;` để demo báo cáo.
 
-### Current Database Schema
-
-The initial schema includes the following entities:
-
-- Products
-- Categories
-- Brands
-- Inventories
-- Roles
-- Users
-- Orders
-- OrderDetails
-
-EF Core also maintains the `__EFMigrationsHistory` table to track applied migrations.
-
-### Seed Data
-
-The `SeedRolesAndCategories` migration inserts the following default data:
-
-**Roles**
-- Admin
-- Customer
-
-**Categories**
-- Membrane
-- Mechanical
-- Optical
-- Hall Effect
-- TMR
-- Low-profile
-s
-### Current Migrations
-
-- `InitialCreate` — creates the initial database schema and relationships.
-- `SeedRolesAndCategories` — inserts the default roles and product categories.
-
-For a new development environment, configure the connection string and apply the migrations. Existing databases should be updated through migrations rather than recreated manually.
+Xem [tài liệu Quản trị dữ liệu](database/README.md) để có ERD, 3NF, dữ liệu mẫu, backup/restore và quyền DB.
