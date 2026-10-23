@@ -1,0 +1,124 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { createElement } from 'react'
+import { renderToString } from 'react-dom/server'
+import { createServer } from 'vite'
+
+const root = fileURLToPath(new URL('../', import.meta.url))
+const server = await createServer({ root, server: { middlewareMode: true }, appType: 'custom' })
+try {
+  const { default: App } = await server.ssrLoadModule('/src/App.tsx')
+  const html = renderToString(createElement(App))
+  assert.match(html, /Feel Every/)
+  assert.match(html, /Keystroke/)
+  assert.match(html, /KBS/)
+  assert.match(html, /aria-pressed="true"/)
+  assert.doesNotMatch(html, /TCKR|bg-cream|text-ink|bg-white/)
+  const { Catalog, Detail, Checkout, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
+  const { default: Login } = await server.ssrLoadModule('/src/pages/auth/Login.jsx')
+  const { default: Register } = await server.ssrLoadModule('/src/pages/auth/Register.jsx')
+  const { default: Cart } = await server.ssrLoadModule('/src/pages/customer/Cart.jsx')
+  const { default: Navigation } = await server.ssrLoadModule('/src/components/Navbar.tsx')
+  const product = { id: 7, name: 'KBS Test', brand: 'KBS', price: 1200000, category: 'Keyboard' }
+  const noop = () => {}
+  const catalogProps = { products: [product], query: 'kbs', onQuery: noop, onRetry: noop,
+    onSelect: noop, onAdd: noop, busy: false, loading: false, error: '' }
+  const catalog = renderToString(createElement(Catalog, catalogProps))
+  assert.match(catalog, /KBS Test/)
+  assert.match(catalog, /1.200.000₫/)
+  assert.doesNotMatch(renderToString(createElement(Catalog, { ...catalogProps, query: 'missing' })), /KBS Test/)
+  assert.match(renderToString(createElement(Detail, { product, onBack: noop, onAdd: noop, busy: true })), /disabled=""/)
+  assert.match(renderToString(createElement(Login, { onLogin: noop, onNavigate: noop })), /name="password"/)
+  assert.match(renderToString(createElement(Register, { onRegister: noop, onNavigate: noop })), /confirmPassword/)
+  const cart = [{ ...product, quantity: 2 }]
+  assert.match(renderToString(createElement(Cart, { cart, busy: false, onUpdate: noop,
+    onRemove: noop, onCheckout: noop, onNavigate: noop })), /2.400.000₫/)
+  assert.match(renderToString(createElement(Checkout, { cart, onPlaced: noop, onDone: noop })), /name="address"/)
+  assert.match(renderToString(createElement(Checkout, { cart: [], onPlaced: noop, onDone: noop })), /Không có sản phẩm/)
+  assert.match(renderToString(createElement(Orders)), /Đang tải đơn hàng/)
+  assert.match(renderToString(createElement(Admin)), /Đang tổng hợp/)
+  const navProps = { route: 'shop', onNavigate: noop, onSearch: noop, cartCount: 2,
+    user: { username: 'test' }, role: 'customer', onLogout: noop }
+  const customerNav = renderToString(createElement(Navigation, navProps))
+  assert.match(customerNav, /Giỏ hàng: 2 sản phẩm/)
+  assert.doesNotMatch(customerNav, /Quản trị/)
+  assert.match(renderToString(createElement(Navigation, { ...navProps, role: 'admin' })), /Quản trị/)
+  const { api, authStore } = await server.ssrLoadModule('/src/services/api.js')
+  authStore.setSession({ accessToken: 'test', user: { username: 'admin', roleName: 'Admin' } })
+  assert.match(renderToString(createElement(App)), /Quản trị/)
+  authStore.clear()
+  assert.doesNotMatch(renderToString(createElement(App)), /Quản trị/)
+  const originalFetch = globalThis.fetch
+  const requests = []
+  try {
+    globalThis.fetch = async (url, options) => {
+      requests.push({ url: String(url), ...options })
+      if (String(url).endsWith('/api/auth/login')) {
+        return Response.json({ accessToken: 'customer-token', user: { username: 'test', roleName: 'Customer' } })
+      }
+      if (options.method === 'DELETE') return new Response(null, { status: 204 })
+      return Response.json({ items: [] })
+    }
+    await api.products({ page: 1, pageSize: 100 })
+    assert.equal(requests.at(-1).headers.get('Authorization'), null)
+    await api.register({ username: 'test', email: 'test@example.com', password: 'Example123' })
+    assert.equal(requests.at(-1).method, 'POST')
+    await api.login({ loginIdentifier: 'test', password: 'Example123' })
+    assert.equal(authStore.user.username, 'test')
+    await api.addCartItem(7, 2)
+    assert.equal(requests.at(-1).headers.get('Authorization'), 'Bearer customer-token')
+    assert.equal(requests.at(-1).method, 'POST')
+    assert.deepEqual(JSON.parse(requests.at(-1).body), { productId: 7, quantity: 2 })
+    await api.updateCartItem(7, 3)
+    assert.equal(requests.at(-1).method, 'PUT')
+    assert.deepEqual(JSON.parse(requests.at(-1).body), { quantity: 3 })
+    await api.removeCartItem(7)
+    assert.equal(requests.at(-1).method, 'DELETE')
+    const order = { customerName: 'Test', phoneNumber: '0901000001', shippingAddress: 'Test address',
+      paymentMethod: 'COD', orderItems: [{ productId: 7, quantity: 2 }] }
+    await api.createOrder(order)
+    assert.ok(requests.at(-1).url.endsWith('/api/orders'))
+    assert.deepEqual(JSON.parse(requests.at(-1).body), order)
+    let notifications = 0
+    const unsubscribe = authStore.subscribe(() => notifications++)
+    globalThis.fetch = async () => Response.json({ message: 'Expired' }, { status: 401 })
+    await assert.rejects(api.cart(), /Expired/)
+    assert.equal(authStore.user, null)
+    assert.equal(notifications, 1)
+    unsubscribe()
+    // Phản hồi đến muộn từ phiên cũ không được đăng xuất phiên đăng nhập mới.
+    authStore.setSession({ accessToken: 'old-token', user: { username: 'old' } })
+    let resolveOld
+    globalThis.fetch = () => new Promise(resolve => { resolveOld = resolve })
+    const oldRequest = api.cart()
+    authStore.setSession({ accessToken: 'new-token', user: { username: 'new' } })
+    resolveOld(Response.json({ message: 'Old session' }, { status: 401 }))
+    await assert.rejects(oldRequest, /Old session/)
+    assert.equal(authStore.user.username, 'new')
+  } finally {
+    globalThis.fetch = originalFetch
+    authStore.clear()
+  }
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
+  const palette = ['#050512', '#121226', '#2D2E54', '#FF2A6D', '#05D9E8', '#8A9BB3', '#E0F2FE']
+  assert.deepEqual([...css.matchAll(/#[0-9a-f]{6}/gi)].map(m => m[0].toUpperCase()), palette)
+  const luminance = hex => {
+    const rgb = hex.slice(1).match(/../g).map(x => parseInt(x, 16) / 255)
+      .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
+  }
+  // Tech White (#E0F2FE) on dark backgrounds (#050512, #121226, #2D2E54)
+  for (const background of palette.slice(0, 3)) {
+    assert.ok((luminance('#E0F2FE') + 0.05) / (luminance(background) + 0.05) >= 4.5)
+  }
+  // Steel Gray (#8A9BB3) on Void Black and Cyber Metal
+  for (const background of palette.slice(0, 2)) {
+    assert.ok((luminance('#8A9BB3') + 0.05) / (luminance(background) + 0.05) >= 4.5)
+  }
+  // Void Black (#050512) on neon buttons (#FF2A6D, #05D9E8)
+  for (const neon of ['#FF2A6D', '#05D9E8']) {
+    assert.ok((luminance(neon) + 0.05) / (luminance('#050512') + 0.05) >= 4.5)
+  }
+  console.log('PASS: Landing, auth, catalog, cart, checkout, orders and admin render; role navigation and palette checks pass.')
+} finally { await server.close() }

@@ -8,7 +8,7 @@ Cần .NET SDK 9, Node.js 20+, PostgreSQL 16 và `psql`.
 
 ```powershell
 createdb -U postgres KBS_DB
-dotnet user-secrets set "ConnectionStrings:KBSConnection" "Host=localhost;Port=5432;Database=KBS_DB;Username=postgres;Password=YOUR_PASSWORD" --project .\backend\KBS.API
+dotnet user-secrets set "ConnectionStrings:KBSConnection" "Host=localhost;Port=5432;Database=KBS_DB;Username=postgres;Password=10052005" --project .\backend\KBS.API
 dotnet ef database update --project .\backend\KBS.DAL --startup-project .\backend\KBS.API
 psql -U postgres -d KBS_DB -f .\database\seed_demo.sql
 psql -U postgres -d KBS_DB -f .\database\reporting.sql

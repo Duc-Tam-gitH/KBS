@@ -16,12 +16,29 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     public DbSet<User> Users => Set<User>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
+    public DbSet<LikelistItem> Likelist => Set<LikelistItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Category 1 - N Product
+        modelBuilder.Entity<LikelistItem>().ToTable("Likelist");
+        modelBuilder.Entity<LikelistItem>()
+            .HasIndex(x => new { x.UserId, x.ProductId })
+            .IsUnique();
+        modelBuilder.Entity<LikelistItem>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<LikelistItem>()
+            .HasOne(x => x.Product)
+            .WithMany()
+            .HasForeignKey(x => x.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Một danh mục có nhiều sản phẩm
         modelBuilder.Entity<Product>()
             .HasOne(p => p.Category)
             .WithMany(c => c.Products)
@@ -39,7 +56,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
         modelBuilder.Entity<ProductImage>()
             .HasIndex(i => new { i.ProductId, i.SortOrder });
 
-        // Brand 1 - N Product
+        // Một thương hiệu có nhiều sản phẩm
         modelBuilder.Entity<Product>()
             .HasOne(p => p.Brand)
             .WithMany(b => b.Products)
@@ -47,7 +64,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Product 1 - 1 Inventory
+        // Mỗi sản phẩm có một bản ghi tồn kho
         modelBuilder.Entity<Product>()
             .HasOne(p => p.Inventory)
             .WithOne(i => i.Product)
@@ -55,7 +72,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Role 1 - N User
+        // Một vai trò có nhiều người dùng
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
             .WithMany(r => r.Users)
@@ -63,7 +80,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // User 1 - N Order
+        // Một người dùng có nhiều đơn hàng
         modelBuilder.Entity<Order>()
             .HasOne(o => o.User)
             .WithMany(u => u.Orders)
@@ -71,7 +88,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Order 1 - N OrderDetail
+        // Một đơn hàng có nhiều chi tiết đơn hàng
         modelBuilder.Entity<OrderDetail>()
             .HasOne(od => od.Order)
             .WithMany(o => o.OrderDetails)
@@ -79,7 +96,21 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Product 1 - N OrderDetail
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.User)
+            .WithMany(u => u.CartItems)
+            .HasForeignKey(ci => ci.UserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Product)
+            .WithMany(p => p.CartItems)
+            .HasForeignKey(ci => ci.ProductId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Một sản phẩm có thể nằm trong nhiều chi tiết đơn hàng
         modelBuilder.Entity<OrderDetail>()
             .HasOne(od => od.Product)
             .WithMany(p => p.OrderDetails)
@@ -87,7 +118,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Unique constraints
+        // Các ràng buộc duy nhất
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
@@ -105,7 +136,11 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .HasIndex(r => r.Name)
             .IsUnique();
 
-        // Decimal precision for money
+        modelBuilder.Entity<CartItem>()
+            .HasIndex(ci => new { ci.UserId, ci.ProductId })
+            .IsUnique();
+
+        // Độ chính xác số thập phân cho giá trị tiền
         modelBuilder.Entity<Product>()
             .Property(p => p.Price)
             .HasPrecision(18, 2);
@@ -122,9 +157,9 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
             .Property(od => od.UnitPrice)
             .HasPrecision(18, 2);
 
-        // Inventory.ProductId is unique due to the 1-1 relationship.
+        // Inventory.ProductId là duy nhất do quan hệ một-một.
 
-        // Seed Roles
+        // Khởi tạo dữ liệu vai trò
         modelBuilder.Entity<Role>().HasData(
         new Role
         {
@@ -140,7 +175,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
         }
 );
 
-        // Seed Categories
+        // Khởi tạo dữ liệu danh mục
         modelBuilder.Entity<Category>().HasData(
             new Category
             {

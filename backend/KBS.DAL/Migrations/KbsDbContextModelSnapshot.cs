@@ -48,6 +48,36 @@ namespace KBS.DAL.Migrations
                     b.ToTable("Brands");
                 });
 
+            modelBuilder.Entity("KBS.Models.Entities.CartItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId", "ProductId")
+                        .IsUnique();
+
+                    b.ToTable("CartItems");
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.Category", b =>
                 {
                     b.Property<long>("Id")
@@ -147,6 +177,33 @@ namespace KBS.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("Inventories");
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.LikelistItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId", "ProductId")
+                        .IsUnique();
+
+                    b.ToTable("Likelist", (string)null);
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.Order", b =>
@@ -295,14 +352,29 @@ namespace KBS.DAL.Migrations
 
             modelBuilder.Entity("KBS.Models.Entities.ProductImage", b =>
                 {
-                    b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("bigint");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-                    b.Property<string>("AltText").HasColumnType("text");
-                    b.Property<string>("ImageUrl").IsRequired().HasColumnType("text");
-                    b.Property<long>("ProductId").HasColumnType("bigint");
-                    b.Property<int>("SortOrder").HasColumnType("integer");
+
+                    b.Property<string>("AltText")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
                     b.HasIndex("ProductId", "SortOrder");
+
                     b.ToTable("ProductImages");
                 });
 
@@ -341,16 +413,6 @@ namespace KBS.DAL.Migrations
                             Description = "Khách hàng",
                             Name = "Customer"
                         });
-                });
-
-            modelBuilder.Entity("KBS.Models.Entities.ProductImage", b =>
-                {
-                    b.HasOne("KBS.Models.Entities.Product", "Product")
-                        .WithMany("Images")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.User", b =>
@@ -405,6 +467,25 @@ namespace KBS.DAL.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("KBS.Models.Entities.CartItem", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.Product", "Product")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KBS.Models.Entities.User", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.Inventory", b =>
                 {
                     b.HasOne("KBS.Models.Entities.Product", "Product")
@@ -414,6 +495,25 @@ namespace KBS.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.LikelistItem", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KBS.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.Order", b =>
@@ -465,6 +565,17 @@ namespace KBS.DAL.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("KBS.Models.Entities.ProductImage", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.User", b =>
                 {
                     b.HasOne("KBS.Models.Entities.Role", "Role")
@@ -493,9 +604,11 @@ namespace KBS.DAL.Migrations
 
             modelBuilder.Entity("KBS.Models.Entities.Product", b =>
                 {
-                    b.Navigation("Inventory");
+                    b.Navigation("CartItems");
 
                     b.Navigation("Images");
+
+                    b.Navigation("Inventory");
 
                     b.Navigation("OrderDetails");
                 });
@@ -507,6 +620,8 @@ namespace KBS.DAL.Migrations
 
             modelBuilder.Entity("KBS.Models.Entities.User", b =>
                 {
+                    b.Navigation("CartItems");
+
                     b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618

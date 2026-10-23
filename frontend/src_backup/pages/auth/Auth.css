@@ -1,0 +1,204 @@
+/* src/pages/auth/Auth.css */
+.auth-container {
+  /* Project palette */
+  background-color: var(--color-bg-dark);
+  min-height: calc(100vh - 72px);
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--color-text-light);
+  padding: 40px 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px 36px;
+  border-radius: 20px;
+  background: var(--color-bg-dark);
+  border: 1px solid var(--color-surface);
+  /* Neumorphic Extrude (Bóng nổi lên) */
+  box-shadow: 12px 12px 24px var(--color-bg-deep),
+              -12px -12px 24px var(--color-surface);
+  box-sizing: border-box;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  /* Project palette */
+  color: var(--color-accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.auth-subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-accent);
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 15px 18px;
+  border: none;
+  outline: none;
+  border-radius: 12px;
+  background: var(--color-bg-dark);
+  color: var(--color-accent);
+  font-size: 15px;
+  /* Neumorphic Inset (Bóng chìm xuống) */
+  box-shadow: inset 6px 6px 12px var(--color-bg-deep),
+              inset -6px -6px 12px var(--color-surface);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.auth-input::placeholder {
+  color: var(--color-accent);
+}
+
+.auth-input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  /* Tăng độ sâu khi focus */
+  box-shadow: inset 8px 8px 16px var(--color-bg-deep),
+              inset -8px -8px 16px var(--color-surface);
+}
+
+/* Keep browser autofill within the project palette. */
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-accent) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-bg-dark) inset,
+    inset 6px 6px 12px var(--color-bg-deep),
+    inset -6px -6px 12px var(--color-surface) !important;
+  box-shadow: 0 0 0 1000px var(--color-bg-dark) inset,
+    inset 6px 6px 12px var(--color-bg-deep),
+    inset -6px -6px 12px var(--color-surface) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 16px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  /* Bóng nổi lên */
+  box-shadow: 8px 8px 16px var(--color-bg-deep),
+              -8px -8px 16px var(--color-surface);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.auth-button:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-bg-deep); /* Brighter hover state */
+  box-shadow: 6px 6px 14px var(--color-bg-deep),
+              -6px -6px 14px var(--color-surface);
+}
+
+.auth-button:active:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  /* Bấm xuống tạo cảm giác lún */
+  box-shadow: inset 6px 6px 12px var(--color-bg-deep),
+              inset -6px -6px 12px var(--color-surface);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface);
+  border-radius: 10px;
+  color: var(--color-text-light);
+  font-size: 13.5px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.auth-link-text {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--color-accent);
+}
+
+.auth-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 22px auto 0;
+  display: block;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+  text-align: center;
+}
+
+.auth-link:hover {
+  color: var(--color-text-light);
+  text-shadow: 0 0 8px var(--color-surface);
+}
+
+.auth-back-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 14px auto 0;
+  display: block;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: 0.2s;
+  text-align: center;
+}
+
+.auth-back-btn:hover {
+  color: var(--color-text-light);
+}
+
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 30px 20px;
+    border-radius: 16px;
+  }
+  .auth-title {
+    font-size: 24px;
+  }
+}

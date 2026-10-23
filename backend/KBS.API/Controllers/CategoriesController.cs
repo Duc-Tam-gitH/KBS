@@ -33,7 +33,7 @@ public class CategoriesController(ICategoryService categoryService)
 
         return Ok(category);
     }
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPost]
     public async Task<ActionResult<CategoryResponseDto>> Create(
         [FromBody] CategoryCreateDto dto,
@@ -57,7 +57,7 @@ public class CategoriesController(ICategoryService categoryService)
             return Conflict(new { message = ex.Message });
         }
     }
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPut("{id:long}")]
     public async Task<ActionResult<CategoryResponseDto>> Update(
         long id,

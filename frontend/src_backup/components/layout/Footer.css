@@ -1,0 +1,9 @@
+.site-footer {
+  background: var(--color-bg-deep);
+  margin-top: auto;
+  padding: 24px;
+  border-top: 1px solid var(--color-surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}

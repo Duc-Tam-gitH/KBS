@@ -1,0 +1,89 @@
+/* Các trang chức năng dùng chung kiểu chữ, biến giao diện và khung bo góc với trang chủ. */
+@layer components {
+  .store-pages { @apply min-h-screen pb-16; }
+  .store-pages .page-wrap, .store-pages .catalog-page { @apply max-w-7xl mx-auto px-5 md:px-10 py-14 md:py-20; }
+  .store-pages .page-title { @apply mb-10; }
+  .store-pages h1, .store-pages h2, .store-pages h3 { @apply font-display tracking-tight text-light; }
+  .store-pages h1 { @apply text-4xl md:text-6xl font-bold leading-tight; }
+  .store-pages h2 { @apply text-3xl md:text-4xl font-semibold; }
+  .store-pages h3 { @apply text-xl font-semibold; }
+  .store-pages .eyebrow { @apply text-accent text-xs font-medium tracking-[0.2em] uppercase mb-3; }
+  .store-pages .subtle { @apply text-muted text-sm; }
+  .store-pages .glass-card { @apply bg-elevated border border-border rounded-3xl; }
+  .store-pages .ink-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary text-deep font-semibold px-7 py-3.5 transition-colors shadow-lg shadow-deep;
+  }
+  .store-pages .ink-button:hover:not(:disabled) {
+    @apply bg-accent text-deep;
+  }
+  .store-pages .back { @apply inline-block text-accent py-3 hover:text-light transition-colors; }
+  .store-pages label { @apply flex flex-col gap-2 text-sm font-medium text-light; }
+  .store-pages input, .store-pages select, .store-pages textarea {
+    @apply w-full min-w-0 bg-deep border border-border rounded-2xl px-5 py-3.5 text-light focus:border-accent focus:outline-none transition-colors;
+  }
+  .store-pages input::placeholder, .store-pages textarea::placeholder { @apply text-muted; }
+  .store-pages textarea { @apply min-h-28 resize-y; }
+  .notice { @apply max-w-6xl mx-auto my-5 px-6 py-4 rounded-2xl border border-border bg-elevated text-light; }
+  .notice button { @apply ml-4 text-accent underline underline-offset-4 hover:text-light transition-colors; }
+  .store-pages .hero { @apply grid md:grid-cols-2 items-center gap-10 max-w-7xl mx-auto p-8 md:p-14 my-6 rounded-5xl bg-elevated border border-border; }
+  .store-pages .hero h1 { @apply text-5xl md:text-7xl mb-6; }
+  .store-pages .hero em { @apply font-serif font-normal text-accent; }
+  .store-pages .hero p:not(.eyebrow) { @apply text-muted max-w-md mb-8 leading-relaxed; }
+  .store-pages .hero-key { @apply flex items-center justify-center py-14; }
+  .store-pages .keyboard { @apply w-64 max-w-full aspect-[2/1] rounded-2xl bg-deep border border-border p-3; transform: rotate(-8deg); }
+  .store-pages .keyboard__keys { @apply grid grid-cols-5 gap-1.5 h-full; }
+  .store-pages .keyboard__keys i { @apply rounded bg-border border border-border/50; }
+  .store-pages .section-heading { @apply flex flex-wrap gap-4 items-end justify-between mb-8; }
+  .store-pages .section-heading > span { @apply text-muted text-sm; }
+  .store-pages .glass-toolbar { @apply bg-elevated rounded-3xl border border-border p-4 md:p-6 mb-8 space-y-4; }
+  .store-pages .chips { @apply flex flex-wrap gap-2; }
+  .store-pages .chips button { @apply px-4 py-2 rounded-full border border-border text-sm text-light hover:bg-border transition-colors; }
+  .store-pages .chips .selected { @apply bg-primary text-deep border-primary font-semibold; }
+  .store-pages .product-grid { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-5; }
+  .store-pages .product-card { @apply overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-accent; }
+  .store-pages .product-image { @apply w-full aspect-[4/3] bg-deep flex items-center justify-center overflow-hidden; }
+  .store-pages .product-image img { @apply w-full h-full object-contain; }
+  .store-pages .product-card > div { @apply p-6; }
+  .store-pages .product-card h3 { @apply mb-2; }
+  .store-pages .card-foot { @apply flex items-center justify-between mt-6; }
+  .store-pages .plus { @apply w-11 h-11 rounded-full bg-primary text-deep font-bold text-2xl hover:bg-accent hover:text-deep transition-colors; }
+  .store-pages .product-skeleton { @apply rounded-3xl bg-elevated border border-border h-96 animate-pulse; }
+  .store-pages .empty, .store-pages .loading-panel { @apply text-center p-10 md:p-16 my-6; }
+  .store-pages .empty p { @apply text-muted mt-3 mb-6; }
+  .store-pages .detail-grid { @apply grid lg:grid-cols-2 gap-6 mt-6; }
+  .store-pages .detail-visual { @apply aspect-square flex items-center justify-center overflow-hidden p-6 bg-deep; }
+  .store-pages .detail-visual img { @apply w-full h-full object-contain; }
+  .store-pages .detail-info { @apply p-7 md:p-10 space-y-6; }
+  .store-pages .detail-info h1 { @apply text-3xl md:text-4xl; }
+  .store-pages .big-price { @apply block text-3xl font-display text-accent; }
+  .store-pages .detail-info > p:not(.eyebrow) { @apply text-muted leading-relaxed; }
+  .store-pages dl > div { @apply flex justify-between gap-4 border-b border-border py-3; }
+  .store-pages dt { @apply text-muted; }
+  .store-pages dd { @apply text-light font-medium; }
+  .store-pages .buy-row { @apply flex flex-wrap items-center gap-4; }
+  .store-pages .stepper { @apply inline-flex shrink-0 items-center gap-3 rounded-full bg-deep border border-border p-1; }
+  .store-pages .stepper button { @apply w-9 h-9 rounded-full text-light hover:bg-border transition-colors; }
+  .store-pages .cart-layout { @apply grid lg:grid-cols-[1fr_340px] gap-6 mt-6 items-start; }
+  .store-pages .cart-list { @apply p-5 md:p-8; }
+  .store-pages .cart-row { @apply flex flex-wrap items-center gap-4 py-5 border-b border-border last:border-b-0; }
+  .store-pages .cart-row > div:first-child { @apply flex-1 min-w-40; }
+  .store-pages .cart-row p { @apply text-muted mt-2; }
+  .store-pages .cart-row > button { @apply w-10 h-10 rounded-full text-muted hover:text-accent hover:bg-border transition-colors; }
+  .store-pages .summary { @apply p-7 flex flex-col gap-5; }
+  .store-pages .summary strong { @apply text-3xl font-display text-light; }
+  .store-pages .summary small { @apply text-muted; }
+  .store-pages .checkout-form { @apply max-w-2xl p-6 md:p-10 grid gap-6; }
+  .store-pages .checkout-total { @apply flex justify-between gap-4 border-t border-border pt-5 text-light; }
+  .store-pages .order-list { @apply grid gap-4; }
+  .store-pages .order-card { @apply p-6 flex flex-wrap items-center justify-between gap-5; }
+  .store-pages .order-card > p { @apply w-full text-muted; }
+  .store-pages .status { @apply text-xs tracking-wide rounded-full border border-accent text-accent px-3 py-2; }
+  .store-pages .metric-grid { @apply grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-7; }
+  .store-pages .metric { @apply p-7 flex flex-col gap-5; }
+  .store-pages .metric span { @apply text-muted; }
+  .store-pages .metric strong { @apply font-display text-3xl break-words text-light; }
+  .store-pages .chart { @apply p-6 md:p-8; }
+  .store-pages .bar { @apply grid grid-cols-[6rem_1fr_6rem] gap-3 items-center py-3 text-xs md:text-sm text-light; }
+  .store-pages .bar i { @apply block h-3 rounded-full bg-accent; }
+  .store-pages .bar b { @apply text-right text-light; }
+}

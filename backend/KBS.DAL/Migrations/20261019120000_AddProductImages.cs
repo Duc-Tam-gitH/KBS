@@ -1,3 +1,5 @@
+using KBS.DAL.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -5,6 +7,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace KBS.DAL.Migrations;
 
+[DbContext(typeof(KbsDbContext))]
+[Migration("20261019120000_AddProductImages")]
 public partial class AddProductImages : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)

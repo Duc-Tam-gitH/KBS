@@ -1,16 +1,39 @@
-# React + Vite
+# KBS frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Ứng dụng đang chạy trong src, kết hợp bố cục TypeScript/Tailwind từ Bolt với các trang và API của KBS.
+Source cũ trong src_backup được giữ nguyên để dự phòng; ứng dụng không import hoặc tải CSS từ backup.
 
-Currently, two official plugins are available:
+## Chạy local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Trong thư mục frontend:
 
-## React Compiler
+```powershell
+npm.cmd install
+npm.cmd run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Đặt VITE_API_URL trong .env.local để trỏ tới ASP.NET Core API đang chạy.
+Trang chủ và danh mục cho phép khách truy cập. Giỏ hàng, thanh toán, đơn hàng và tài khoản yêu cầu đăng nhập.
+Dashboard chỉ dành cho Admin. Access token được giữ trong bộ nhớ; tải lại trang cần đăng nhập lại.
 
-## Expanding the Oxlint configuration
+## Cấu trúc
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- src/pages/Home.tsx và src/components: landing page, thanh điều hướng nổi, footer.
+- src/Storefront.jsx: điều hướng, danh mục, chi tiết, thanh toán, đơn hàng, dashboard và state giỏ hàng.
+- src/pages/auth, src/pages/customer/Cart.jsx: các trang được chuyển từ bản cũ.
+- src/services/api.js: kết nối API và thông báo thay đổi phiên đăng nhập.
+- src/index.css: palette duy nhất; src/store.css: phong cách Tailwind cho các trang chức năng.
+
+## Kiểm tra
+
+```powershell
+npm.cmd run build
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run test:smoke
+```
+
+Smoke test kiểm tra render các trang, menu theo vai trò, độ tương phản các cặp màu chính,
+và request/phiên đăng nhập bằng fetch giả lập. Không thay thế kiểm thử mua hàng với PostgreSQL thật.
+Các file quản lý sản phẩm/người dùng trong bản backup còn trống; bản ghép khôi phục dashboard đã có.
+Ảnh landing và Google Fonts cần kết nối internet.

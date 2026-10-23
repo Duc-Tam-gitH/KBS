@@ -17,7 +17,27 @@ public class OrderService(KbsDbContext db) : IOrderService
         var order = new Order { UserId=userId, CustomerName=dto.CustomerName.Trim(), PhoneNumber=dto.PhoneNumber.Trim(), ShippingAddress=dto.ShippingAddress.Trim(), PaymentMethod=dto.PaymentMethod.Trim(), PaymentStatus="PENDING", OrderStatus="PENDING" };
         foreach (var item in requested) { var p=products.Single(x=>x.Id==item.ProductId); p.Inventory!.StockQuantity -= item.Quantity; p.Inventory.UpdatedAt=DateTimeOffset.UtcNow; order.OrderDetails.Add(new OrderDetail { ProductId=p.Id, UnitPrice=p.Price, Quantity=item.Quantity, Product=p }); }
         order.TotalPrice = order.OrderDetails.Sum(x => x.UnitPrice * x.Quantity);
-        db.Orders.Add(order); await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); return ToDto(order);
+        var cartItems = await db.CartItems
+            .Where(x => x.UserId == userId && ids.Contains(x.ProductId))
+            .ToListAsync(ct);
+        foreach (var cartItem in cartItems)
+        {
+            var purchased = requested.Single(x => x.ProductId == cartItem.ProductId).Quantity;
+            if (cartItem.Quantity <= purchased)
+            {
+                db.CartItems.Remove(cartItem);
+            }
+            else
+            {
+                cartItem.Quantity -= purchased;
+                cartItem.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+        }
+
+        db.Orders.Add(order);
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+        return ToDto(order);
     }
     public async Task<List<OrderResponseDto>> GetForUserAsync(long userId,CancellationToken ct=default) { var orders = await Query().Where(x=>x.UserId==userId).OrderByDescending(x=>x.CreatedAt).ToListAsync(ct); return orders.Select(ToDto).ToList(); }
     public async Task<List<OrderResponseDto>> GetAllAsync(CancellationToken ct=default) { var orders = await Query().OrderByDescending(x=>x.CreatedAt).ToListAsync(ct); return orders.Select(ToDto).ToList(); }

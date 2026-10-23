@@ -42,6 +42,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ILikelistService, LikelistService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddOpenApi();

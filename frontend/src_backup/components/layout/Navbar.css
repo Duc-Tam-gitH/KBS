@@ -1,0 +1,293 @@
+/* ============================================================
+   DESIGN TOKENS — khai báo tập trung, không hard-code hex
+   ============================================================ */
+:root {
+  /* Palette chính thức */
+
+  /* Alias ngữ nghĩa cho Navbar */
+  --nav-bg:            var(--color-bg-deep);
+  --nav-border:        var(--color-surface);
+  --nav-text:          var(--color-text-light);
+  --nav-text-muted:    var(--color-accent);
+  --nav-hover-bg:      var(--color-surface);
+  --nav-active-bg:     var(--color-primary);
+  --nav-active-text:   var(--color-text-light);
+  --nav-btn-bg:        var(--color-bg-dark);
+  --nav-btn-border:    var(--color-surface);
+  --nav-cart-badge-bg: var(--color-accent);
+  --nav-cart-badge-fg: var(--color-bg-deep);
+
+  /* Radius / spacing */
+  --nav-radius: 10px;
+  --nav-radius-lg: 12px;
+  --nav-gap: 8px;
+  --nav-padding-y: 10px;
+  --nav-padding-x: 20px;
+  --nav-header-height: 60px;
+
+  /* Motion */
+  --nav-transition: 0.2s ease;
+}
+
+/* ============================================================
+   Navbar base
+   ============================================================ */
+.liquid-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  padding: var(--nav-padding-y) var(--nav-padding-x);
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  box-shadow: 0 4px 18px rgba(5, 31, 32, 0.6); /* bóng tối từ palette */
+  color: var(--nav-text);
+}
+
+/* ============================================================
+   Brand
+   ============================================================ */
+.liquid-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--nav-text);
+  padding: 4px 6px;
+  border-radius: var(--nav-radius);
+  transition: background var(--nav-transition);
+}
+.liquid-brand:hover {
+  background: var(--nav-hover-bg);
+}
+.liquid-brand span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  font-weight: 900;
+}
+
+/* ============================================================
+   Nav chính
+   ============================================================ */
+.liquid-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.liquid-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.liquid-nav button {
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: var(--nav-radius);
+  border: none;
+  background: transparent;
+  color: var(--nav-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--nav-transition), color var(--nav-transition);
+}
+.liquid-nav button:hover {
+  background: var(--nav-hover-bg);
+  color: var(--nav-text);
+}
+.liquid-nav button.active {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+}
+
+/* Phần actions trong nav chỉ hiện mobile */
+.liquid-nav-mobile-actions {
+  display: none;
+}
+
+/* ============================================================
+   Actions bên phải
+   ============================================================ */
+.liquid-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  margin-left: auto;
+}
+.liquid-actions button {
+  padding: 8px 14px;
+  border-radius: var(--nav-radius);
+  border: 1px solid var(--nav-btn-border);
+  background: var(--nav-btn-bg);
+  color: var(--nav-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--nav-transition), color var(--nav-transition),
+              border-color var(--nav-transition);
+}
+.liquid-actions button:hover {
+  background: var(--nav-hover-bg);
+  color: var(--nav-text);
+  border-color: var(--color-accent);
+}
+.liquid-actions button.active {
+  border-color: var(--color-primary);
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+}
+
+/* Nút giỏ + badge */
+.liquid-cart b {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 6px;
+  border-radius: 10px;
+  background: var(--nav-cart-badge-bg);
+  color: var(--nav-cart-badge-fg);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Hamburger
+   ============================================================ */
+.liquid-hamburger {
+  display: none;
+  margin-left: auto;
+  padding: 8px 12px;
+  border-radius: var(--nav-radius);
+  border: 1px solid var(--nav-btn-border);
+  background: var(--nav-btn-bg);
+  color: var(--nav-text);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background var(--nav-transition);
+}
+.liquid-hamburger:hover {
+  background: var(--nav-hover-bg);
+}
+.liquid-hamburger span {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+.liquid-hamburger span.open {
+  transform: rotate(90deg);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+/* Tablet: nav scroll ngang, giảm spacing */
+@media (max-width: 1023px) {
+  .liquid-navbar {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .liquid-nav button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile: hamburger + drawer dọc */
+@media (max-width: 767px) {
+  .liquid-hamburger {
+    display: inline-block;
+  }
+
+  /* Ẩn actions desktop trừ nút giỏ */
+  .liquid-actions > button:not(.liquid-cart) {
+    display: none;
+  }
+
+  /* Nav thành drawer dọc */
+  .liquid-nav {
+    position: fixed;
+    top: var(--nav-header-height);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 12px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    box-shadow: 0 8px 24px rgba(5, 31, 32, 0.7);
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.28s ease, opacity 0.2s ease;
+    overflow-y: auto;
+    max-height: calc(100vh - var(--nav-header-height));
+  }
+  .liquid-nav.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .liquid-nav button {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: var(--nav-radius-lg);
+  }
+
+  .liquid-nav-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--nav-border);
+  }
+  .liquid-nav-mobile-actions button {
+    text-align: left;
+  }
+}
+
+/* ============================================================
+   Accessibility: focus visible rõ ràng
+   ============================================================ */
+.liquid-navbar button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Light mode (nếu cần) — đảo vai trò theo palette
+   ============================================================ */
+@media (prefers-color-scheme: light) {
+  :root {
+    --nav-bg:            var(--color-text-light);  /* #DAF1DE */
+    --nav-border:        var(--color-accent);      /* #8EB69B */
+    --nav-text:          var(--color-bg-deep);     /* #051F20 */
+    --nav-text-muted:    var(--color-primary);     /* #235347 */
+    --nav-hover-bg:      var(--color-accent);      /* #8EB69B */
+    --nav-active-bg:     var(--color-primary);     /* #235347 */
+    --nav-active-text:   var(--color-text-light);  /* #DAF1DE */
+    --nav-btn-bg:        var(--color-text-light);
+    --nav-btn-border:    var(--color-accent);
+    --nav-cart-badge-bg: var(--color-primary);
+    --nav-cart-badge-fg: var(--color-text-light);
+  }
+}

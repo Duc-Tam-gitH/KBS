@@ -1,0 +1,394 @@
+/* ============================================================
+   KBS CUSTOMER HOME - THEME PALETTE
+   ============================================================ */
+:root {
+  
+  --font-main: 'Inter', system-ui, sans-serif;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Reset cơ bản cho Home */
+.home-wrapper {
+  background-color: var(--color-bg-deep);
+  color: var(--color-text-light);
+  min-height: 100vh;
+  font-family: var(--font-main);
+  overflow-x: hidden;
+}
+
+/* ================= HERO SECTION ================= */
+.hero-section-v2 {
+  position: relative;
+  padding: 80px 5% 60px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 40px;
+  align-items: center;
+  min-height: 80vh;
+}
+
+/* Chữ nền mờ phía sau (như ảnh ONDERA) */
+.hero-bg-text {
+  position: absolute;
+  top: 5%;
+  left: 2%;
+  font-size: clamp(100px, 18vw, 300px);
+  font-weight: 900;
+  color: var(--color-surface);
+  opacity: 0.3;
+  line-height: 1;
+  z-index: 0;
+  pointer-events: none;
+  letter-spacing: -5px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  max-width: 400px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+/* Khối Visual bên phải */
+.hero-visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.main-image-placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--color-bg-dark);
+  border-radius: 24px;
+  border: 1px solid var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  position: relative;
+  overflow: hidden;
+}
+
+.floating-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.floating-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-bg-deep);
+}
+
+/* Khối thumbnail nổi (góc trái dưới) */
+.floating-thumb {
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  background: var(--color-bg-dark);
+  border: 1px solid var(--color-surface);
+  padding: 12px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 20px 40px var(--color-bg-deep);
+}
+
+.thumb-img {
+  width: 60px;
+  height: 60px;
+  background: var(--color-surface);
+  border-radius: 8px;
+}
+.thumb-info {
+  display: flex;
+  flex-direction: column;
+}
+.thumb-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.thumb-price {
+  color: var(--color-accent);
+  font-size: 0.85rem;
+}
+
+/* ================= SECTION 2: FEATURE ================= */
+.feature-section {
+  padding: 100px 5%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 80px; /* Text - Ảnh - Thumbs */
+  gap: 40px;
+  align-items: center;
+  border-top: 1px solid var(--color-surface);
+}
+
+.section-tag {
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.feature-title {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.feature-desc {
+  color: var(--color-accent);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.feature-image-large {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: var(--color-bg-dark);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  border: 1px solid var(--color-surface);
+}
+
+.feature-thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mini-thumb {
+  width: 80px;
+  height: 80px;
+  background: var(--color-bg-dark);
+  border-radius: 12px;
+  border: 1px solid var(--color-surface);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.mini-thumb:hover {
+  border-color: var(--color-accent);
+}
+
+/* ================= NÚT BẤM ================= */
+.btn-primary {
+  display: inline-block;
+  padding: 16px 32px;
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+.btn-primary:hover {
+  background: var(--color-accent);
+  color: var(--color-bg-deep);
+}
+
+.btn-outline {
+  display: inline-block;
+  padding: 14px 28px;
+  background: transparent;
+  color: var(--color-text-light);
+  border: 1px solid var(--color-accent);
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+.btn-outline:hover {
+  background: var(--color-surface);
+}
+
+.btn-text {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+.btn-text:hover {
+  color: var(--color-text-light);
+}
+
+/* ================= SECTION 3: SHOWCASE GRID ================= */
+.home-wrapper .page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 60px 5% 100px;
+}
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+}
+
+.home-wrapper .section-heading {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.showcase-card {
+  background: var(--color-bg-dark);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--color-surface);
+  transition: var(--transition);
+}
+.showcase-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-accent);
+}
+
+.card-img-placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  font-size: 1.2rem;
+}
+.card-img-placeholder.dark {
+  background: linear-gradient(135deg, var(--color-bg-dark), var(--color-bg-deep));
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 400px;
+}
+
+.quote {
+  font-size: 2rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--color-text-light);
+  text-align: center;
+  padding: 40px;
+}
+
+.card-content {
+  padding: 24px;
+}
+.card-content h3 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+.card-content p {
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+.card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+}
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.icon-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-bg-deep);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+  .hero-section-v2 {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding-top: 120px;
+  }
+  .hero-subtitle {
+    margin: 0 auto 32px;
+  }
+  .hero-bg-text {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.1;
+  }
+  .floating-thumb {
+    left: 20px;
+    bottom: -20px;
+  }
+  
+  .feature-section {
+    grid-template-columns: 1fr;
+  }
+  .feature-thumbnails {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .feature-image-large {
+    order: -1; /* Đưa ảnh lên trên text trên mobile */
+  }
+}
+
+@media (max-width: 768px) {
+  .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  .card-img-placeholder.dark {
+    min-height: 250px;
+  }
+  .quote {
+    font-size: 1.5rem;
+  }
+}
+.home-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+.home-wrapper .btn-text { background: transparent; border: none; }

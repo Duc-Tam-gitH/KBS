@@ -1,0 +1,144 @@
+.likelist-page {
+  max-width: 1280px;
+  margin: auto;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-light);
+}
+.likelist-page button { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+.likelist-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.likelist-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+  margin: 2rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 2rem;
+  background: linear-gradient(135deg, var(--color-bg-deep) 0%, var(--color-bg-elevated) 60%, var(--color-border) 100%);
+}
+.likelist-hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; color: var(--color-text-light); }
+.likelist-hero em { font-family: 'Instrument Serif', serif; font-weight: normal; color: var(--color-accent); }
+.likelist-hero p { margin: 1rem 0; max-width: 32rem; color: var(--color-text-muted); }
+.likelist-eyebrow { display: flex; gap: .5rem; font-size: .75rem; color: var(--color-accent); letter-spacing: .08em; }
+.likelist-stats { display: flex; gap: 1.25rem; padding: 1rem; border-radius: 1rem; background: var(--color-bg-deep); border: 1px solid var(--color-border); }
+.likelist-stats dt { font-size: .75rem; color: var(--color-text-muted); }
+.likelist-stats dd { margin-top: .5rem; font-weight: bold; color: var(--color-text-light); }
+.likelist-page .likelist-primary {
+  padding: .75rem 1rem;
+  border-radius: 2rem;
+  background: var(--color-primary);
+  color: var(--color-bg-deep);
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+.likelist-hero .likelist-primary { margin-top: 1rem; width: 100%; }
+.likelist-page .likelist-primary:hover:not(:disabled) { background: var(--color-accent); color: var(--color-bg-deep); }
+.likelist-page .likelist-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.likelist-filters { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+.likelist-page .likelist-search { display: flex; flex-direction: row; align-items: center; gap: .5rem; flex: 1; min-width: 200px; color: var(--color-text-muted); }
+.likelist-page .likelist-filters select { width: auto; }
+.likelist-filters input, .likelist-filters select {
+  min-width: 0;
+  padding: .75rem;
+  border: 1px solid var(--color-border);
+  border-radius: .75rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-light);
+}
+.likelist-filters input::placeholder { color: var(--color-text-muted); }
+.likelist-filters input:focus, .likelist-filters select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+.likelist-search input { width: 100%; }
+.likelist-filters button { padding: .75rem; border-radius: .75rem; border: 1px solid var(--color-border); color: var(--color-text-light); background: var(--color-bg-elevated); }
+.likelist-filters button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.likelist-filters [aria-pressed='true'] { background: var(--color-primary); color: var(--color-bg-deep); border-color: var(--color-primary); font-weight: 600; }
+.likelist-count { margin: 1.5rem 0; color: var(--color-text-muted); font-size: .875rem; }
+.likelist-products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.likelist-card { min-width: 0; border: 1px solid var(--color-border); border-radius: 1.5rem; overflow: hidden; background: var(--color-bg-elevated); transition: transform 0.2s, border-color 0.2s; }
+.likelist-card:hover { transform: translateY(-2px); border-color: var(--color-accent); }
+.likelist-page .likelist-image {
+  position: relative;
+  width: 100%;
+  height: 230px;
+  background: var(--color-bg-deep);
+  color: var(--color-accent);
+}
+.likelist-image img { width: 100%; height: 100%; object-fit: cover; }
+.likelist-image span { position: absolute; top: 1rem; left: 1rem; padding: .3rem .75rem; border-radius: 2rem; background: var(--color-bg-deep); color: var(--color-text-light); font-size: .75rem; border: 1px solid var(--color-border); }
+.likelist-card-body { padding: 1.5rem; }
+.likelist-page .likelist-title { text-align: left; margin: .75rem 0; background: none; border: none; color: inherit; cursor: pointer; padding: 0; }
+.likelist-title h2 { font-size: 1.15rem; font-weight: 600; color: var(--color-text-light); }
+.likelist-title:hover h2 { color: var(--color-accent); }
+.likelist-price { display: flex; gap: .75rem; flex-wrap: wrap; align-items: baseline; margin: 1rem 0; }
+.likelist-price strong { font-size: 1.35rem; color: var(--color-text-light); }
+.likelist-price del { font-size: .875rem; color: var(--color-text-muted); }
+.likelist-products--list { grid-template-columns: 1fr; }
+.likelist-products--list .likelist-card { display: flex; align-items: center; }
+.likelist-products--list .likelist-image { width: 220px; flex-shrink: 0; }
+.likelist-products--list .likelist-card-body { flex: 1; }
+.likelist-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 1rem; background: color-mix(in srgb, var(--color-bg-deep) 85%, transparent); backdrop-filter: blur(8px); }
+.likelist-modal button { margin-inline: .5rem; }
+.likelist-state > svg { margin: 0 auto 1rem; color: var(--color-accent); }
+.likelist-state h2 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--color-text-light); }
+@media (max-width: 1000px) {
+  .likelist-hero { flex-direction: column; align-items: stretch; }
+  .likelist-products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .likelist-products--list { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .likelist-hero { padding: 1.5rem; }
+  .likelist-stats { flex-wrap: wrap; }
+  .likelist-products { grid-template-columns: 1fr; }
+  .likelist-products--list .likelist-card { flex-direction: column; }
+  .likelist-products--list .likelist-image { width: 100%; }
+  .likelist-products--list .likelist-card-body { width: 100%; }
+}
+.likelist-page .likelist-state {
+  padding: 2rem;
+  margin-block: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.likelist-state button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2rem;
+  background: var(--color-primary);
+  color: var(--color-bg-deep);
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.likelist-state button:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-bg-deep);
+}
+
+.likelist-page button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.likelist-page [role='alert'] p,
+.likelist-page [role='status'] p {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .likelist-page *,
+  .likelist-page *::before,
+  .likelist-page *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

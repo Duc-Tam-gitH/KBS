@@ -1,0 +1,42 @@
+/* Container dùng chung để căn giữa nội dung */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Nút bấm tối giản chung */
+.btn-minimal {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: var(--surface-color);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-minimal:hover:not(:disabled) {
+  background-color: var(--color-surface);
+  border-color: var(--text-main);
+}
+
+.btn-minimal.primary {
+  background-color: var(--accent-color);
+  color: var(--color-text-light);
+  border-color: var(--accent-color);
+}
+
+.btn-minimal.primary:hover:not(:disabled) {
+  background-color: var(--color-accent);
+  color: var(--color-bg-deep);
+}
+.btn-minimal:active:not(:disabled) {
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+}

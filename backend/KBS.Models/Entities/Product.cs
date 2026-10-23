@@ -43,4 +43,6 @@ public class Product
     public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
 
     public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+    public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 }
