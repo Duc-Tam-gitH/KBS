@@ -12,7 +12,8 @@ GROUP BY p."Id",p."Name",b."Name";
 
 CREATE OR REPLACE VIEW vw_low_inventory AS
 SELECT p."Id" AS product_id,p."Name",i."StockQuantity",i."UpdatedAt"
-FROM "Inventories" i JOIN "Products" p ON p."Id"=i."ProductId" WHERE i."StockQuantity" <= 5;
+FROM "Inventories" i JOIN "Products" p ON p."Id"=i."ProductId"
+WHERE i."StockQuantity" <= i."LowStockThreshold";
 
 CREATE OR REPLACE VIEW vw_customer_purchase_history AS
 SELECT u."Id" AS user_id,u."FullName",u."Email",o."Id" AS order_id,o."CreatedAt",o."OrderStatus",o."PaymentStatus",o."TotalPrice"
@@ -21,7 +22,8 @@ FROM "Users" u JOIN "Orders" o ON o."UserId"=u."Id";
 -- Hàm tạo đơn thay thế an toàn cho client SQL trực tiếp. API hiện có transaction tương đương;
 -- chỉ chọn MỘT đường tạo đơn trong production để tránh trừ tồn hai lần.
 CREATE OR REPLACE FUNCTION fn_create_order(p_user_id bigint,p_customer_name text,p_phone text,p_address text,p_payment_method text,p_items jsonb) RETURNS bigint LANGUAGE plpgsql AS $$
-DECLARE v_order_id bigint; v_item jsonb; v_product_id bigint; v_quantity integer; v_price numeric(18,2);
+DECLARE v_order_id bigint; v_item jsonb; v_product_id bigint; v_quantity integer;
+        v_price numeric(18,2); v_after integer;
 BEGIN
   IF jsonb_typeof(p_items) <> 'array' OR jsonb_array_length(p_items)=0 THEN RAISE EXCEPTION 'Đơn hàng phải có sản phẩm'; END IF;
   INSERT INTO "Orders" ("UserId","CustomerName","PhoneNumber","ShippingAddress","TotalPrice","PaymentMethod","PaymentStatus","OrderStatus","CreatedAt") VALUES (p_user_id,p_customer_name,p_phone,p_address,0,p_payment_method,'PENDING','PENDING',NOW()) RETURNING "Id" INTO v_order_id;
@@ -30,8 +32,13 @@ BEGIN
     IF v_quantity IS NULL OR v_quantity<=0 THEN RAISE EXCEPTION 'Số lượng không hợp lệ'; END IF;
     SELECT "Price" INTO v_price FROM "Products" WHERE "Id"=v_product_id AND "IsActive" FOR UPDATE;
     IF NOT FOUND THEN RAISE EXCEPTION 'Sản phẩm % không tồn tại/đã ngừng bán',v_product_id; END IF;
-    UPDATE "Inventories" SET "StockQuantity"="StockQuantity"-v_quantity,"UpdatedAt"=NOW() WHERE "ProductId"=v_product_id AND "StockQuantity">=v_quantity;
+    UPDATE "Inventories" SET "StockQuantity"="StockQuantity"-v_quantity,"UpdatedAt"=NOW()
+      WHERE "ProductId"=v_product_id AND "StockQuantity">=v_quantity
+      RETURNING "StockQuantity" INTO v_after;
     IF NOT FOUND THEN RAISE EXCEPTION 'Sản phẩm % không đủ tồn kho',v_product_id; END IF;
+    INSERT INTO "InventoryMovements"
+      ("ProductId","ActorId","OrderId","Delta","QuantityBefore","QuantityAfter","Reason","CreatedAt")
+      VALUES (v_product_id,p_user_id,v_order_id,-v_quantity,v_after+v_quantity,v_after,'Xuất kho theo đơn hàng',NOW());
     INSERT INTO "OrderDetails" ("OrderId","ProductId","UnitPrice","Quantity") VALUES (v_order_id,v_product_id,v_price,v_quantity);
   END LOOP;
   UPDATE "Orders" SET "TotalPrice"=(SELECT SUM("UnitPrice"*"Quantity") FROM "OrderDetails" WHERE "OrderId"=v_order_id) WHERE "Id"=v_order_id;

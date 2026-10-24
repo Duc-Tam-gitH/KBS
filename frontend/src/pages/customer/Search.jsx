@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Search as SearchIcon, SlidersHorizontal, Package, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Search as SearchIcon, SlidersHorizontal, Package, ArrowLeft, ArrowRight } from 'lucide-react'
 import { api } from '../../services/api'
 import './Search.css'
 
@@ -120,21 +120,9 @@ export default function SearchPage({ onSelect, onAdd, busy = false }) {
                   <p className="search-result-count" role="status">{result.totalItems} sản phẩm
                     {filters.search && <> cho “{filters.search}”</>}</p>
                   {result.items.length ? <div className="search-product-grid">
-                    {result.items.map((p) => <article className="search-product-card" key={p.id}>
-                      <button type="button" className="search-product-image" aria-label={`Xem ${p.name}`}
-                        onClick={() => selectProduct(p)}>
-                        {p.images?.[0]?.imageUrl ? <img loading="lazy" src={p.images[0].imageUrl}
-                          alt={p.images[0].altText || p.name} /> : <Package size={56} aria-hidden="true" />}
-                      </button>
-                      <div className="search-product-info"><p>{p.brandName} · {p.categoryName}</p>
-                        <button type="button" className="search-product-title" onClick={() => selectProduct(p)}>
-                          <h2>{p.name}</h2></button>
-                        <div className="search-product-price"><strong>{money(p.price)}</strong>
-                          {p.originalPrice > p.price && <del>{money(p.originalPrice)}</del>}</div>
-                        <button type="button" className="search-add" disabled={busy} onClick={() => onAdd?.(p)}>
-                          <ShoppingBag size={17} /> Thêm vào giỏ</button>
-                      </div>
-                    </article>)}
+                    {result.items.map((p) => <ProductCard key={p.id}
+                      product={{ ...p, brand: p.brandName, category: p.categoryName, connection: p.connectionType }}
+                      onSelect={selectProduct} onAdd={onAdd} busy={busy} />)}
                   </div> : <div className="search-message"><Package size={40} aria-hidden="true" />
                     <h2>Chưa tìm thấy sản phẩm phù hợp</h2><p>Thử từ khóa khác hoặc mở rộng bộ lọc.</p>
                     <button type="button" onClick={reset}>Xem tất cả sản phẩm</button></div>}
@@ -152,3 +140,44 @@ export default function SearchPage({ onSelect, onAdd, busy = false }) {
     </section>
   )
 }
+
+const Keyboard = ({ tone = 'charcoal' }) => (
+  <div className={`keyboard keyboard--${tone}`}>
+    <div className="keyboard__keys">
+      {Array.from({ length: 25 }, (_, i) => (
+        <i key={i} />
+      ))}
+    </div>
+  </div>
+)
+
+function ProductCard({ product, onSelect, onAdd, busy }) {
+  const image = product.images?.[0]
+  return (
+    <article className="glass-card product-card">
+      <button type="button" className="product-image" aria-label={'Xem ' + product.name}
+        onClick={() => onSelect(product)}>
+        {image?.imageUrl ? (
+          <img src={image.imageUrl} alt={image.altText || product.name} />
+        ) : (
+          <Keyboard tone={product.color} />
+        )}
+      </button>
+      <div>
+        <p className="eyebrow">{product.brand}</p>
+        <h3>{product.name}</h3>
+        <p className="subtle">
+          {product.layout} · {product.connection}
+        </p>
+        <div className="card-foot">
+          <strong>{money(product.price)}</strong>
+          <button type="button" className="plus" disabled={busy} onClick={() => onAdd(product)}
+            title="Thêm vào giỏ" aria-label={'Thêm ' + product.name + ' vào giỏ'}>
+            +
+          </button>
+        </div>
+      </div>
+    </article>
+  )
+}
+

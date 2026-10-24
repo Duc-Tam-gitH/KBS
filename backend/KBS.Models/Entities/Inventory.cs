@@ -7,6 +7,7 @@ public class Inventory
     public long ProductId { get; set; }
 
     public int StockQuantity { get; set; }
+    public int LowStockThreshold { get; set; } = 5;
 
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 

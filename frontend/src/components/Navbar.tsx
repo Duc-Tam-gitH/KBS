@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, ShoppingBag, Heart, Menu, X, UserRound, LogOut } from 'lucide-react'
+import { ShoppingBag, Heart, Menu, X, UserRound, LogOut } from 'lucide-react'
 
 type Props = {
   route: string
@@ -15,9 +15,10 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
   const links = [
     { route: 'home', label: 'Trang chủ' },
     { route: 'shop', label: 'Khám phá' },
-    { route: 'likes', label: 'Yêu thích' },
     ...(user ? [{ route: 'orders', label: 'Đơn hàng' }] : []),
     ...(role === 'admin' ? [{ route: 'admin', label: 'Quản trị' }] : []),
+    ...(['staff', 'admin'].includes(role) ? [{ route: 'staff', label: 'Nhân viên' }]
+      : [{ route: 'support', label: 'Hỗ trợ' }]),
   ]
   const navigate = (next: string) => { setMenuOpen(false); onNavigate(next) }
   const navButton = 'px-3 py-2 rounded-full text-sm transition-colors hover:bg-border hover:text-accent'
@@ -41,9 +42,6 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
           </button>)}
         </div>
         <div className="flex-1" />
-        <button className={iconButton} aria-label="Tìm kiếm" title="Tìm sản phẩm"
-          aria-current={route === 'search' ? 'page' : undefined}
-          onClick={() => navigate('search')}><Search size={18} /></button>
         <button className={iconButton + (route === 'likes' ? ' bg-primary text-deep hover:text-deep' : '')}
           aria-label="Sản phẩm yêu thích"
           title="Sản phẩm yêu thích"
@@ -66,7 +64,7 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
           <LogOut size={18} />
         </button>}
         <button className={iconButton + ' md:hidden'} aria-label="Menu" aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}>
+          onClick={() => { setMenuOpen(!menuOpen) }}>
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </nav>

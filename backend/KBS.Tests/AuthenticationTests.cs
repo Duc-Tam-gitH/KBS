@@ -249,7 +249,9 @@ public class TestApiFactory : WebApplicationFactory<Program>
             {
                 services.Remove(registration);
             }
-            services.AddDbContext<KbsDbContext>(o => o.UseInMemoryDatabase(_databaseName));
+            services.AddDbContext<KbsDbContext>(o => o.UseInMemoryDatabase(_databaseName)
+                .ConfigureWarnings(warnings => warnings.Ignore(
+                    Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning)));
             using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
             db.Database.EnsureCreated();

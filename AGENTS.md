@@ -1,3 +1,36 @@
+# Quy Tắc Làm Việc (Agent Rules)
+
+## 1. Context Engineering
+Tối ưu hóa và tái sử dụng ngữ cảnh dự án để tránh lặp lại giữa các phiên làm việc.
+- Kích hoạt ngay khi: bắt đầu session mới, chuyển đổi task, hoặc AI bắt đầu trả lời sai hướng.
+- **Ưu tiên cao nhất** để tiết kiệm dung lượng ngữ cảnh (context window).
+
+## 2. Incremental Implementation
+Chia nhỏ tính năng thành các module/hàm độc lập.
+- Hoàn thiện và kiểm tra chạy thử nghiệm từng phần một.
+- **Tuyệt đối không** sinh toàn bộ mã nguồn của một hệ thống lớn trong một lần phản hồi để tránh phải sửa lỗi hàng loạt.
+
+## 3. Debugging & Error Recovery
+Luôn phân tích log và tìm ra nguyên nhân gốc rễ (root cause) trước khi đề xuất code sửa lỗi.
+- **Nghiêm cấm** đoán mò hoặc thử sai (trial-and-error) khiến code bị rác và làm dài lịch sử hội thoại.
+
+## 4. Test-Driven Development
+Đặt ra các tiêu chí kiểm thử (test cases/acceptance criteria) rõ ràng **trước khi** viết code.
+- Bắt buộc áp dụng khi: triển khai logic nghiệp vụ (business logic), thiết kế API, hoặc sửa bug — để đảm bảo lỗi không tái phát.
+
+## 5. Code Simplification / Ponytail
+Mặc định chọn giải pháp ngắn gọn, đơn giản và trực diện nhất.
+- Không lạm dụng tính trừu tượng (abstraction).
+- Không thêm thư viện (packages) ngoài.
+- Không áp dụng các mẫu kiến trúc phức tạp nếu không thực sự cần thiết.
+- Áp dụng triệt để khi refactor hoặc review code.
+
+## 6. Planning & API Design
+Phải có bản thiết kế trước khi thực hiện các tính năng lớn.
+- Định nghĩa rõ các Data Transfer Objects (DTO), API contracts (request/response).
+- Xác định ranh giới trách nhiệm giữa các tầng: Models → Data Access Layer (DAL) → Business Logic Layer (BLL) → API Controller **trước khi** bắt tay vào viết code thực thi.
+
+
 # Quy tắc format code C#
 
 ## Xuống dòng
@@ -110,3 +143,85 @@ Mọi thành phần UI/giao diện trong project phải chỉ sử dụng các m
 | #DAF1DE | #E0F2FE |
 
 (Phụ lục tạm thời — xóa sau khi refactor xong toàn bộ codebase.)
+
+# Agent Rules — Nhận diện giao diện & Kết nối Database
+
+## 1. Nguyên tắc cốt lõi
+Mọi dữ liệu hiển thị trên giao diện **phải đến từ database thật** của dự án.
+AI **không được phép** tự tạo, bịa, hoặc giữ lại dữ liệu mẫu (mock/placeholder/hard-code) trong bất kỳ trường hợp nào.
+
+## 2. Quy trình bắt buộc khi nhận một giao diện mới
+
+### Bước 1 — Đọc schema database trước
+Trước khi viết bất kỳ dòng code nào, AI phải:
+1. Đọc danh sách bảng (tables) và cột (columns) từ schema/migration/ERD của dự án.
+2. Xác định khóa chính (PK), khóa ngoại (FK), và quan hệ giữa các bảng.
+3. Nếu chưa có schema, **dừng lại và yêu cầu người dùng cung cấp**, không được đoán.
+
+### Bước 2 — Lập bảng ánh xạ (Mapping Table)
+Với mỗi phần tử dữ liệu trên giao diện, AI phải lập bảng ánh xạ rõ ràng:
+
+| Vị trí trên UI | Nguồn dữ liệu (bảng.cột) | Ghi chú |
+|---|---|---|
+| Tên user (sidebar) | `users.full_name` | |
+| Avatar user | `users.avatar_url` | |
+| Menu trạng thái đơn | `orders.status` (enum) | |
+| Tên shop trong đơn | `shops.name` (JOIN qua `orders.shop_id`) | |
+| Tên sản phẩm | `order_items.product_name` | Snapshot tại thời điểm mua |
+| Giá sản phẩm | `order_items.price` | |
+| Phân loại (size, màu) | `order_items.variant` | |
+| Số lượng | `order_items.quantity` | |
+| Thành tiền | `orders.total_amount` | |
+| Ảnh sản phẩm | `products.image_url` | |
+
+**Quy tắc:**
+- Không có dòng nào trong bảng ánh xạ được để trống nguồn dữ liệu.
+- Nếu một phần tử UI không tìm thấy cột tương ứng → **báo lại cho người dùng**, không tự tạo cột mới và không tự bịa giá trị.
+
+### Bước 3 — Loại bỏ toàn bộ dữ liệu mẫu
+Trước khi trả kết quả, quét toàn bộ code và **xóa/thay thế** mọi thứ sau:
+- Tên người, email, SĐT, địa chỉ bịa đặt.
+- Ảnh placeholder (`via.placeholder.com`, `placehold.co`, `dummyimage.com`, `picsum.photos`...).
+- Giá tiền, số lượng, thống kê tự chế.
+- Chuỗi `lorem ipsum`, `Sản phẩm mẫu`, `Nguyễn Văn A`...
+- Hard-code text trạng thái (`Chờ giao hàng`, `Hoàn thành`...) nếu trạng thái đó phải render từ enum trong DB.
+
+**Thay bằng:**
+- Biến bind từ DB (ví dụ: `user.full_name`, `order.status`).
+- Hoặc placeholder có đánh dấu rõ: `{{ user.full_name }}`.
+- Hoặc empty state hợp lệ: `Chưa có dữ liệu`, `--`.
+
+### Bước 4 — Xử lý trạng thái rỗng (Empty State)
+Mọi danh sách (đơn hàng, sản phẩm, thông báo...) phải có xử lý khi DB trả về rỗng:
+- Hiển thị text trung tính: `Bạn chưa có đơn hàng nào`, `Chưa có sản phẩm`.
+- Không được dùng dữ liệu giả để "lấp chỗ trống".
+
+### Bước 5 — Kiểm tra trước khi bàn giao
+Checklist bắt buộc:
+- [ ] Đã đọc schema DB.
+- [ ] Đã lập bảng ánh xạ UI → DB cho mọi trường dữ liệu.
+- [ ] Không còn bất kỳ mock/placeholder data nào trong code.
+- [ ] Không còn ảnh placeholder từ dịch vụ bên ngoài.
+- [ ] Các trường không map được đã được báo lại cho người dùng.
+- [ ] Có xử lý empty state cho mọi danh sách.
+- [ ] Không tự tạo bảng/cột mới khi chưa được duyệt.
+
+## 3. Ngoại lệ
+Chỉ được dùng dữ liệu mẫu khi người dùng **yêu cầu rõ ràng** (ví dụ: *"tạo mock data để test UI"*). Khi đó phải:
+- Ghi chú rõ trong code: `// MOCK DATA — sẽ thay bằng DB`.
+- Tách biệt mock data khỏi phần code kết nối DB thật.
+
+## 4. Hành vi khi thiếu thông tin
+- Thiếu schema DB → **dừng lại, hỏi người dùng**.
+- Thiếu cột cho một trường UI → **báo lại, không tự bịa**.
+- Yêu cầu mơ hồ → **hỏi lại trước khi code**.
+
+## 5. Ví dụ
+
+### ❌ Sai
+```html
+<div class="user-card__name">Nguyễn Văn A</div>
+<img src="https://via.placeholder.com/60" alt="Avatar">
+<span class="price">60.700đ</span>
+<span class="status">Chờ giao hàng</span>
+

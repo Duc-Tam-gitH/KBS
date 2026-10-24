@@ -1,0 +1,323 @@
+.account-page {
+  width: min(100% - 2rem, 820px);
+  margin: 3rem auto 5rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1.75rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-light);
+}
+
+.account-profile-banner {
+  position: relative;
+  height: 180px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(135deg, var(--color-bg-deep), var(--color-bg-elevated), var(--color-border));
+}
+
+.account-avatar-wrapper {
+  position: absolute;
+  bottom: -48px;
+  left: 2rem;
+  padding: 7px;
+  border-radius: 50%;
+  background: var(--color-bg-elevated);
+}
+
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 108px;
+  overflow: hidden;
+  border: 2px solid var(--color-accent);
+  border-radius: 50%;
+  background: var(--color-bg-deep);
+  color: var(--color-accent);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.account-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-content-container {
+  padding: 4rem 2rem 2rem;
+}
+
+.account-page .account-profile-header h1 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  overflow-wrap: anywhere;
+}
+
+.account-username,
+.account-email {
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.account-email {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.account-page svg {
+  flex-shrink: 0;
+}
+
+.account-menu-card {
+  margin-top: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-bg-deep);
+}
+
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.2rem;
+  text-align: left;
+  color: var(--color-text-light);
+  transition: color 150ms, background-color 150ms;
+}
+
+.account-menu-item + .account-menu-item {
+  border-top: 1px solid var(--color-border);
+}
+
+.account-menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.account-chevron,
+.account-menu-item-left > svg {
+  color: var(--color-accent);
+}
+
+.account-menu-item:hover:not(:disabled) {
+  background: var(--color-bg-elevated);
+  color: var(--color-accent);
+}
+
+.account-logout-item,
+.account-logout-item .account-menu-item-left > svg {
+  color: var(--color-primary);
+}
+
+.account-form-wrapper {
+  padding: 1.5rem;
+}
+
+.account-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.account-page .account-form-header h2 {
+  font-size: 1.4rem;
+}
+
+.account-close-btn {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+}
+
+.account-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.account-page .account-form label {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+}
+
+.account-page .account-form input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.65rem;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-light);
+}
+
+.account-page .account-form input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.account-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.account-btn-primary,
+.account-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.75rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  font-weight: 600;
+}
+
+.account-btn-primary {
+  background: var(--color-primary);
+  color: var(--color-bg-deep);
+}
+
+.account-btn-secondary {
+  border-color: var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-light);
+}
+
+.account-btn-primary:hover:not(:disabled) {
+  background: var(--color-accent);
+}
+
+.account-password-toggle,
+.account-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  color: var(--color-accent);
+}
+
+.account-password-toggle {
+  justify-self: start;
+}
+
+.account-close-btn:hover:not(:disabled),
+.account-btn-secondary:hover:not(:disabled) {
+  color: var(--color-accent);
+  background: var(--color-bg-elevated);
+}
+
+.account-back-link:hover,
+.account-password-toggle:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.account-page button:active:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-bg-deep);
+}
+
+.account-page button:active:not(:disabled) svg {
+  color: inherit;
+}
+
+.account-page .account-btn-primary:active:not(:disabled) {
+  background: var(--color-primary);
+}
+
+.account-page button:focus-visible,
+.account-page input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.account-page button:disabled,
+.account-page input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.account-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 0.75rem;
+  background: var(--color-bg-deep);
+  overflow-wrap: anywhere;
+}
+
+.account-notice.is-error {
+  border-color: var(--color-primary);
+}
+
+.account-footer-nav {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.account-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .account-page {
+    margin-top: 1.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .account-profile-banner {
+    height: 140px;
+  }
+
+  .account-avatar-wrapper {
+    left: 1rem;
+  }
+
+  .account-content-container {
+    padding: 4rem 1rem 1.5rem;
+  }
+
+  .account-form-wrapper {
+    padding: 1rem;
+  }
+
+  .account-form-actions > button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-page *,
+  .account-page *::before,
+  .account-page *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

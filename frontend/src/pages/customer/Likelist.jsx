@@ -156,11 +156,8 @@ export default function Likelist({
   })
 
   const handleViewDetail = (product) => runAction(async () => {
-    const detail = await api.product(product.id)
-    const selected = { ...detail, brand: detail.brandName, category: detail.categoryName,
-      connection: detail.connectionType }
-    if (onSelectProduct) onSelectProduct(selected)
-    else onNavigate?.('detail', selected)
+    if (onSelectProduct) onSelectProduct(product)
+    else onNavigate?.('detail', product)
   })
 
   return (

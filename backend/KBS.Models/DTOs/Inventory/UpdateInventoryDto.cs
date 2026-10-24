@@ -1,10 +1,12 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace KBS.Models.DTOs.Inventory;
 
 public class UpdateInventoryDto
 {
-    [Required(ErrorMessage = "StockQuantity là bắt buộc")]
-    [Range(0, int.MaxValue, ErrorMessage = "StockQuantity phải lớn hơn hoặc bằng 0")]
+    [Range(0, int.MaxValue)]
     public int StockQuantity { get; set; }
+    [Required]
+    [StringLength(500)]
+    public string Reason { get; set; } = string.Empty;
 }

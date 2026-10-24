@@ -1,0 +1,3 @@
+﻿.staff-workspace .sf-customers td:first-child { min-width: 180px; }
+.staff-workspace .sf-customers small { overflow-wrap: anywhere; }
+.staff-workspace .sf-customer-detail .sf-activity { max-height: 540px; overflow-y: auto; }

@@ -1,0 +1,9 @@
+﻿.staff-workspace .sf-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+.staff-workspace .sf-metric { display: grid; gap: 16px; padding: 24px; text-align: left; }
+.staff-workspace .sf-metric strong { font-size: 2.4rem; color: var(--color-accent); }
+@media (max-width: 760px) {
+  .staff-workspace .sf-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .staff-workspace .sf-metrics { grid-template-columns: 1fr; }
+}

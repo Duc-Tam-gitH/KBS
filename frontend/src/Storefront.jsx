@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { api, ApiError, authStore } from './services/api'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
@@ -7,46 +7,53 @@ import Footer from './components/Footer'
 import Home from './pages/Home'
 import Cart from './pages/customer/Cart'
 import Likelist from './pages/customer/Likelist'
-import ManaAccount from './pages/customer/Mana_account'
+import Account from './pages/customer/Account'
 import SearchPage from './pages/customer/Search'
+import Detail from './pages/customer/productdetail'
+import Orders from './pages/customer/orderProduct'
+import StaffWorkspace from './pages/Staff/StaffWorkspace'
+import SupportChat from './pages/Staff/SupportChat'
+
+export { default as Detail } from './pages/customer/productdetail'
+export { default as Orders } from './pages/customer/orderProduct'
 
 
 const money = (n) => new Intl.NumberFormat('vi-VN').format(n || 0) + '₫'
 
-const Keyboard = ({ tone = 'charcoal' }) => (
-  <div className={`keyboard keyboard--${tone}`}>
-    <div className="keyboard__keys">
-      {Array.from({ length: 25 }, (_, i) => (
-        <i key={i} />
-      ))}
-    </div>
-  </div>
-)
+const linkedProduct = () => {
+  if (typeof window === 'undefined') return null
+  const id = new URLSearchParams(window.location.hash.slice(1)).get('product')
+  return id && /^[1-9]\d*$/.test(id) && Number.isSafeInteger(Number(id)) ? { id: Number(id) } : null
+}
 
 function App() {
   const user = useSyncExternalStore(authStore.subscribe, () => authStore.user, () => authStore.user)
-  const [search, setSearch] = useState('')
   const [retry, setRetry] = useState(0)
   const [notice, setNotice] = useState('')
   const pendingRoute = useRef('home')
-  const [route, setRoute] = useState('home')
-  const [products, setProducts] = useState([])
-  const [selected, setSelected] = useState(null)
+  const pendingProduct = useRef(null)
+  const [route, setRoute] = useState(() => linkedProduct() ? 'detail' : 'home')
+  const [selected, setSelected] = useState(linkedProduct)
   const [cart, setCart] = useState([])
   const [cartError, setCartError] = useState('')
   const [cartBusy, setCartBusy] = useState(true)
   const cartLock = useRef(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   const go = (next, item = null) => {
-    if (!authStore.user && ['cart', 'checkout', 'orders', 'account', 'admin', 'likes'].includes(next)) {
+    if (next === 'auth' && route === 'detail' && selected) {
+      pendingRoute.current = 'detail'
+      pendingProduct.current = selected
+    }
+    if (!authStore.user && ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(next)) {
       pendingRoute.current = next
       next = 'auth'
     }
     setNotice('')
     setSelected(item)
     setRoute(next)
+    const url = new URL(window.location.href)
+    url.hash = next === 'detail' && item?.id ? `product=${item.id}` : ''
+    window.history.replaceState(null, '', url)
     window.scrollTo(0, 0)
   }
 
@@ -54,13 +61,15 @@ function App() {
     await api.login(credentials)
     setCartBusy(true)
     setCartError('')
-    go(pendingRoute.current)
+    go(pendingRoute.current, pendingProduct.current)
     pendingRoute.current = 'home'
+    pendingProduct.current = null
   }
 
   const logout = () => {
     authStore.clear()
     pendingRoute.current = 'home'
+    pendingProduct.current = null
     setCartError('')
     setCart([])
     go('auth')
@@ -104,6 +113,15 @@ function App() {
   })
 
   useEffect(() => {
+    const openLinkedProduct = () => {
+      const product = linkedProduct()
+      if (product) { setSelected(product); setRoute('detail') }
+    }
+    window.addEventListener('hashchange', openLinkedProduct)
+    return () => window.removeEventListener('hashchange', openLinkedProduct)
+  }, [])
+
+  useEffect(() => {
     if (!user) return
     let active = true
     api.cart()
@@ -113,29 +131,8 @@ function App() {
     return () => { active = false }
   }, [user, retry])
 
-  useEffect(() => {
-    let active = true
-    api.products({ page: 1, pageSize: 100 })
-      .then((r) => {
-        if (active) {
-          setProducts(
-            (r.items || []).map((p) => ({
-              ...p,
-              brand: p.brandName || 'KBS',
-              category: p.categoryName || 'Sản phẩm',
-              layout: p.layout || 'Tiêu chuẩn',
-              connection: p.connectionType || 'Có dây',
-              color: 'charcoal',
-            }))
-          )
-        }
-      })
-      .catch(() => { if (active) setError('Không thể tải sản phẩm. Kiểm tra kết nối rồi thử lại.') })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [retry])
 
-  const privateRoute = ['cart', 'checkout', 'orders', 'account', 'admin', 'likes'].includes(route)
+  const privateRoute = ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(route)
   const visibleRoute = !user && privateRoute ? 'auth' : route
   const page =
     visibleRoute === 'auth' ? (
@@ -144,13 +141,12 @@ function App() {
       <Register onRegister={api.register} onNavigate={go} />
     ) : visibleRoute === 'home' ? (
       <Home onNavigate={go} />
-    ) : route === 'shop' ? (
-      <Catalog products={products} loading={loading} error={error} onSelect={(p) => go('detail', p)} onAdd={addCart} busy={!!user && cartBusy} query={search} onQuery={setSearch}
-        onRetry={() => { setLoading(true); setError(''); setRetry((n) => n + 1) }} />
-    ) : route === 'search' ? (
+    ) : route === 'shop' || route === 'search' ? (
       <SearchPage onSelect={(p) => go('detail', p)} onAdd={addCart} busy={!!user && cartBusy} />
     ) : route === 'detail' ? (
-      <Detail key={selected?.id} busy={!!user && cartBusy} product={selected || products[0]} onBack={() => go('shop')} onAdd={addCart} />
+      <Detail key={`${selected?.id}-${user?.id || 'guest'}`} busy={!!user && cartBusy}
+        product={selected} onBack={() => go('shop')} onAdd={addCart} user={user}
+        onNavigate={go} onSelect={(product) => go('detail', product)} />
     ) : route === 'cart' ? (
       <Cart cart={cart} busy={cartBusy || !!cartError} onUpdate={updateCart} onRemove={removeCart}
         onCheckout={() => go('checkout')} onNavigate={go} />
@@ -170,11 +166,15 @@ function App() {
         onDone={() => go('orders')}
       />
     ) : route === 'orders' ? (
-      <Orders />
+      <Orders key={user.id} user={user} onNavigate={go} onAdd={addCart} busy={cartBusy} />
+    ) : route === 'staff' ? (
+      <StaffWorkspace key={user.id} user={user} onNavigate={go} onLogout={logout} />
+    ) : route === 'support' ? (
+      <SupportChat key={user.id} user={user} />
     ) : route === 'admin' ? (
       user.roleName?.toLowerCase() === 'admin' ? <Admin /> : <Empty title="Không có quyền truy cập" />
     ) : route === 'account' ? (
-      <ManaAccount key={user.id} user={user} onNavigate={go} onLogout={logout} />
+      <Account key={user.id} user={user} onNavigate={go} onLogout={logout} />
     ) : (
       <Empty title="Trang không tồn tại" action="Về trang chủ" onAction={() => go('home')} />
     )
@@ -200,172 +200,6 @@ function App() {
       </main>
       <Footer onNavigate={go} />
     </div>
-  )
-}
-
-export function Catalog({ products, loading, error, onSelect, onAdd, busy, query: q, onQuery, onRetry }) {
-  const [category, setCategory] = useState('Tất cả')
-
-  const list = useMemo(
-    () =>
-      products.filter(
-        (p) =>
-          (category === 'Tất cả' || p.category === category) &&
-          `${p.name} ${p.brand}`.toLowerCase().includes(q.toLowerCase())
-      ),
-    [products, category, q]
-  )
-
-  const cats = ['Tất cả', ...new Set(products.map((p) => p.category))]
-
-  return (
-    <>
-      <section className="hero glass-hero">
-        <div>
-          <p className="eyebrow">KBS / 2026 COLLECTION</p>
-          <h1>
-            Cảm giác gõ,<br />
-            <em>trong veo.</em>
-          </h1>
-          <p>Những bàn phím được chọn lọc cho nhịp làm việc và khoảnh khắc sáng tạo của bạn.</p>
-          <button className="ink-button" onClick={() => document.querySelector('#catalog')?.scrollIntoView()}>
-            Khám phá bộ sưu tập →
-          </button>
-        </div>
-        <div className="hero-key">
-          <Keyboard tone="hero" />
-        </div>
-      </section>
-
-      <section className="catalog-page" id="catalog">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">SẢN PHẨM</p>
-            <h2>Tìm đúng chất của bạn</h2>
-          </div>
-          <span>{list.length} lựa chọn</span>
-        </div>
-
-        <div className="glass-toolbar">
-          <input
-            value={q}
-            onChange={(e) => onQuery(e.target.value)}
-            aria-label="Tìm sản phẩm"
-            placeholder="Tìm bàn phím hoặc thương hiệu"
-          />
-          <div className="chips">
-            {cats.map((c) => (
-              <button
-                key={c}
-                className={category === c ? 'selected' : ''}
-                onClick={() => setCategory(c)}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {error && <p className="notice" role="alert">{error} <button onClick={onRetry}>Thử lại</button></p>}
-
-        <div className="product-grid">
-          {loading
-            ? Array.from({ length: 6 }, (_, i) => <div className="product-skeleton" key={i} />)
-            : list.map((p) => (
-                <ProductCard key={p.id} product={p} onSelect={onSelect} onAdd={onAdd} busy={busy} />
-              ))}
-        </div>
-
-        {!loading && !error && !list.length && (
-          <Empty title="Không tìm thấy sản phẩm" text="Thử đổi từ khóa hoặc danh mục bạn đang chọn." />
-        )}
-      </section>
-    </>
-  )
-}
-
-function ProductCard({ product, onSelect, onAdd, busy }) {
-  const image = product.images?.[0]
-  return (
-    <article className="glass-card product-card">
-      <button className="product-image" aria-label={'Xem ' + product.name} onClick={() => onSelect(product)}>
-        {image?.imageUrl ? (
-          <img src={image.imageUrl} alt={image.altText || product.name} />
-        ) : (
-          <Keyboard tone={product.color} />
-        )}
-      </button>
-      <div>
-        <p className="eyebrow">{product.brand}</p>
-        <h3>{product.name}</h3>
-        <p className="subtle">
-          {product.layout} · {product.connection}
-        </p>
-        <div className="card-foot">
-          <strong>{money(product.price)}</strong>
-          <button className="plus" disabled={busy} onClick={() => onAdd(product)} title="Thêm vào giỏ">
-            +
-          </button>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-export function Detail({ product, onBack, onAdd, busy }) {
-  const [qty, setQty] = useState(1)
-  if (!product) return <Empty title="Không tìm thấy sản phẩm" action="Về cửa hàng" onAction={onBack} />
-  return (
-    <section className="page-wrap detail-page">
-      <button className="back" onClick={onBack}>
-        ← Trở lại cửa hàng
-      </button>
-      <div className="detail-grid">
-        <div className="glass-card detail-visual">
-          {product.images?.[0]?.imageUrl ? (
-            <img src={product.images[0].imageUrl} alt={product.name} />
-          ) : (
-            <Keyboard tone={product.color} />
-          )}
-        </div>
-        <div className="glass-card detail-info">
-          <p className="eyebrow">{product.brand}</p>
-          <h1>{product.name}</h1>
-          <strong className="big-price">{money(product.price)}</strong>
-          <p>{product.description || 'Thiết kế cân bằng giữa cảm giác gõ, hiệu năng và vẻ đẹp tối giản.'}</p>
-          <dl>
-            <div>
-              <dt>Layout</dt>
-              <dd>{product.layout}</dd>
-            </div>
-            <div>
-              <dt>Kết nối</dt>
-              <dd>{product.connection}</dd>
-            </div>
-            <div>
-              <dt>Switch</dt>
-              <dd>{product.switchType || 'Tuỳ chọn'}</dd>
-            </div>
-          </dl>
-          <div className="buy-row">
-            <div className="stepper">
-              <button aria-label="Giảm số lượng" disabled={qty <= 1} onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
-              <span>{qty}</span>
-              <button aria-label="Tăng số lượng" disabled={qty >= 100} onClick={() => setQty(Math.min(100, qty + 1))}>+</button>
-            </div>
-            <button
-              className="ink-button"
-              disabled={busy}
-              onClick={async () => {
-                if (await onAdd(product, qty)) onBack()
-              }}
-            >
-              Thêm vào giỏ
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
   )
 }
 
@@ -449,46 +283,6 @@ export function Checkout({ cart, onPlaced, onDone }) {
         </button>
         {status && status !== 'loading' && <p className="notice">{status}</p>}
       </form>
-    </section>
-  )
-}
-
-export function Orders() {
-  const [orders, setOrders] = useState(null)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    api.myOrders()
-      .then(setOrders)
-      .catch((e) => setError(e.message))
-  }, [])
-
-  return (
-    <section className="page-wrap">
-      <PageTitle eyebrow="TÀI KHOẢN" title="Lịch sử đơn hàng" />
-      {error ? (
-        <Empty title="Chưa thể tải đơn hàng" text={error} />
-      ) : orders === null ? (
-        <div className="glass-card loading-panel">Đang tải đơn hàng…</div>
-      ) : (
-        <div className="order-list">
-          {orders.length ? (
-            orders.map((o) => (
-              <article className="glass-card order-card" key={o.id}>
-                <div>
-                  <p className="eyebrow">ĐƠN #{o.id}</p>
-                  <h3>{new Date(o.createdAt).toLocaleDateString('vi-VN')}</h3>
-                </div>
-                <span className={`status ${o.orderStatus?.toLowerCase() || ''}`}>{o.orderStatus}</span>
-                <strong>{money(o.totalPrice)}</strong>
-                <p>{o.orderDetails?.map((x) => `${x.productName} × ${x.quantity}`).join(', ') || ''}</p>
-              </article>
-            ))
-          ) : (
-            <Empty title="Bạn chưa có đơn hàng" text="Khi đặt hàng, đơn của bạn sẽ xuất hiện tại đây." />
-          )}
-        </div>
-      )}
     </section>
   )
 }

@@ -20,6 +20,7 @@ public class Order
     public string PaymentStatus { get; set; } = "PENDING";
 
     public string OrderStatus { get; set; } = "PENDING";
+    public string? TrackingNumber { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 

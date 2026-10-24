@@ -30,11 +30,16 @@ erDiagram
 | `Users` | `Id` | `RoleId → Roles`; `Username`, `Email`, `PhoneNumber` unique | Tài khoản khách/quản trị. |
 | `Categories`, `Brands` | `Id` | — | Danh mục và thương hiệu. |
 | `Products` | `Id` | `CategoryId`, `BrandId` | Thông tin và giá sản phẩm. |
+| `ProductReviews` | `Id` | `ProductId`, `UserId`; unique `(UserId, ProductId)`; `Rating` 1–5 | Đánh giá sau mua. |
 | `Inventories` | `Id` | `ProductId → Products` unique | Một bản ghi tồn kho cho một sản phẩm. |
 | `Orders` | `Id` | `UserId → Users` | Header đơn hàng, snapshot giao nhận/thanh toán. |
 | `OrderDetails` | `Id` | `OrderId → Orders`, `ProductId → Products` | Dòng hàng, snapshot `UnitPrice` và số lượng. |
 
-Mọi FK đang dùng `RESTRICT`; vì vậy không thể xóa danh mục, thương hiệu, khách hoặc sản phẩm còn được tham chiếu. Đây là lựa chọn bảo toàn lịch sử bán hàng.
+Các FK lịch sử đơn hàng dùng `RESTRICT` để bảo toàn lịch sử bán hàng.
+`ProductReviews.ProductId` dùng `CASCADE`, `UserId` dùng `RESTRICT`; nội dung tối đa 2000 ký tự.
+Migration `AddProductReviews` tạo bảng và index `(ProductId, CreatedAt)` phục vụ phân trang đánh giá.
+Có thể dùng `add_product_reviews.sql` thay cho EF update nếu DB đã áp dụng `AddLikelist`;
+script có kiểm tra lịch sử migration để không tạo lại bảng khi chạy lần hai.
 
 ## Chuẩn hóa đến 3NF
 
@@ -45,6 +50,12 @@ Mọi FK đang dùng `RESTRICT`; vì vậy không thể xóa danh mục, thươn
 `CustomerName`, `PhoneNumber`, `ShippingAddress` trong `Orders` cũng là snapshot nghiệp vụ: khách đổi hồ sơ sau này không làm sai chứng từ cũ.
 
 ## Chạy dữ liệu và báo cáo
+
+Module Staff bổ sung migration `AddStaffOperations` (5 bảng, 2 cột, đã được duyệt).
+Chi tiết PK/FK, ánh xạ UI và request/response nằm tại [staff-mapping.md](staff-mapping.md).
+`add_staff_operations.sql` là script idempotent từ migration `AddProductReviews` đến `AddStaffOperations`;
+chỉ dùng khi DB đã có toàn bộ migrations trước đó. Có thể dùng `dotnet ef database update` thay cho script.
+Sau migration, chạy lại `reporting.sql` nếu đã sử dụng các view/function báo cáo.
 
 Sau khi chạy EF migrations, thực hiện theo thứ tự:
 

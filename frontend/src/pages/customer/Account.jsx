@@ -1,11 +1,12 @@
+import './Account.css'
 import { useRef, useState } from 'react'
 import {
-  ArrowLeft, ArrowRight, Check, Eye, EyeOff, Heart, LockKeyhole,
-  LogOut, Mail, Package, Phone, Save, ShieldCheck, UserRound,
+  ArrowLeft, Check, Eye, EyeOff, Heart, LockKeyhole,
+  LogOut, Mail, Package, Save, ShieldCheck, UserRound,
   Edit3, XCircle, ChevronRight
 } from 'lucide-react'
 
-export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile, onChangePassword }) {
+export default function Account({ user, onNavigate, onLogout, onSaveProfile, onChangePassword }) {
   const [section, setSection] = useState('profile')
   const [editing, setEditing] = useState(false)
   const [showPasswords, setShowPasswords] = useState(false)
@@ -15,11 +16,11 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
 
   if (!user) {
     return (
-      <section className="discord-account-page discord-empty-state">
+      <section className="account-page account-empty-state">
         <UserRound size={48} aria-hidden="true" />
         <h1>Tài khoản của bạn</h1>
         <p>Đăng nhập để xem và quản lý thông tin cá nhân.</p>
-        <button type="button" className="discord-btn-primary" onClick={() => onNavigate?.('auth')}>
+        <button type="button" className="account-btn-primary" onClick={() => onNavigate?.('auth')}>
           Đăng nhập
         </button>
       </section>
@@ -70,12 +71,12 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
   }
 
   return (
-    <section className="discord-account-page">
+    <section className="account-page">
       {/* 1. Banner & Avatar (Giống khung Discord) */}
-      <div className="discord-profile-banner">
-        <div className="discord-avatar-wrapper">
+      <div className="account-profile-banner">
+        <div className="account-avatar-wrapper">
           {/* Nếu user có trường avatar (url ảnh) thì dùng, không thì hiển thị chữ cái đầu */}
-          <div className="discord-avatar">
+          <div className="account-avatar">
             {user.avatar ? (
               <img src={user.avatar} alt={displayName} />
             ) : (
@@ -85,58 +86,59 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
         </div>
       </div>
 
-      <div className="discord-content-container">
+      <div className="account-content-container">
         {/* 2. Thông tin cơ bản */}
-        <header className="discord-profile-header">
+        <header className="account-profile-header">
           <div>
             <h1>{displayName}</h1>
-            <p className="discord-username">@{user.username}</p>
-            <p className="discord-email"><Mail size={14} /> {user.email}</p>
+            <p className="account-username">@{user.username}</p>
+            <p className="account-email"><Mail size={14} /> {user.email}</p>
           </div>
         </header>
 
         {/* Thanh thông báo */}
         {notice && (
-          <div className={`discord-notice ${notice.error ? 'is-error' : 'is-success'}`} role={notice.error ? 'alert' : 'status'}>
+          <div className={`account-notice ${notice.error ? 'is-error' : 'is-success'}`} role={notice.error ? 'alert' : 'status'}>
             {!notice.error && <Check size={18} aria-hidden="true" />} {notice.text}
           </div>
         )}
 
         {/* 3. Khu vực chức năng (Card Layout như Discord) */}
-        <div className="discord-menu-card">
+        <div className="account-menu-card">
           
           {/* Nút chỉnh sửa hồ sơ */}
           {section === 'profile' && !editing && (
-            <button type="button" className="discord-menu-item" onClick={() => setEditing(true)}>
-              <div className="discord-menu-item-left">
+            <button type="button" className="account-menu-item" onClick={() => setEditing(true)}>
+              <div className="account-menu-item-left">
                 <Edit3 size={18} />
                 <span>Sửa Hồ Sơ</span>
               </div>
-              <ChevronRight size={18} className="discord-chevron" />
+              <ChevronRight size={18} className="account-chevron" />
             </button>
           )}
 
           {/* Nút chuyển sang bảo mật */}
           {section === 'profile' && !editing && (
-            <button type="button" className="discord-menu-item" onClick={() => navigateSection('security')}>
-              <div className="discord-menu-item-left">
+            <button type="button" className="account-menu-item" onClick={() => navigateSection('security')}>
+              <div className="account-menu-item-left">
                 <LockKeyhole size={18} />
                 <span>Mật khẩu & Bảo mật</span>
               </div>
-              <ChevronRight size={18} className="discord-chevron" />
+              <ChevronRight size={18} className="account-chevron" />
             </button>
           )}
 
           {/* Form chỉnh sửa hồ sơ (Hiện ra khi bấm Edit) */}
           {section === 'profile' && editing && (
-            <div className="discord-form-wrapper">
-              <div className="discord-form-header">
+            <div className="account-form-wrapper">
+              <div className="account-form-header">
                 <h2>Chỉnh sửa hồ sơ</h2>
-                <button type="button" className="discord-close-btn" onClick={() => setEditing(false)}>
+                <button type="button" className="account-close-btn" aria-label="Đóng chỉnh sửa hồ sơ"
+                  disabled={saving} onClick={() => setEditing(false)}>
                   <XCircle size={20} />
                 </button>
               </div>
-              <form className="discord-form" onSubmit={(e) => submit(e, 'profile')}>
+              <form className="account-form" onSubmit={(e) => submit(e, 'profile')}>
                 <label>
                   <span>Tên đăng nhập (Không thể đổi)</span>
                   <input value={user.username || ''} readOnly disabled />
@@ -154,11 +156,11 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
                   <input name="phoneNumber" type="tel" defaultValue={user.phoneNumber || ''} disabled={saving} placeholder="Chưa cập nhật" />
                 </label>
                 
-                <div className="discord-form-actions">
-                  <button type="button" className="discord-btn-secondary" disabled={saving} onClick={() => setEditing(false)}>
+                <div className="account-form-actions">
+                  <button type="button" className="account-btn-secondary" disabled={saving} onClick={() => setEditing(false)}>
                     Hủy
                   </button>
-                  <button type="submit" className="discord-btn-primary" disabled={saving || !onSaveProfile}>
+                  <button type="submit" className="account-btn-primary" disabled={saving || !onSaveProfile}>
                     <Save size={18} /> {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
                   </button>
                 </div>
@@ -168,14 +170,15 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
 
           {/* Form đổi mật khẩu (Section security) */}
           {section === 'security' && (
-            <div className="discord-form-wrapper">
-              <div className="discord-form-header">
+            <div className="account-form-wrapper">
+              <div className="account-form-header">
                 <h2>Đổi mật khẩu</h2>
-                <button type="button" className="discord-close-btn" onClick={() => navigateSection('profile')}>
+                <button type="button" className="account-close-btn" aria-label="Quay lại hồ sơ"
+                  disabled={saving} onClick={() => navigateSection('profile')}>
                   <ArrowLeft size={20} />
                 </button>
               </div>
-              <form className="discord-form" onSubmit={(e) => submit(e, 'password')}>
+              <form className="account-form" onSubmit={(e) => submit(e, 'password')}>
                 <label>
                   <span>Mật khẩu hiện tại</span>
                   <input name="currentPassword" required disabled={saving} type={showPasswords ? 'text' : 'password'} />
@@ -188,12 +191,12 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
                   <span>Xác nhận mật khẩu mới</span>
                   <input name="confirmNewPassword" required minLength={8} disabled={saving} type={showPasswords ? 'text' : 'password'} />
                 </label>
-                <button type="button" className="discord-password-toggle" onClick={() => setShowPasswords(!showPasswords)}>
+                <button type="button" className="account-password-toggle" onClick={() => setShowPasswords(!showPasswords)}>
                   {showPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
                   {showPasswords ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 </button>
-                <div className="discord-form-actions">
-                  <button type="submit" className="discord-btn-primary" disabled={saving || !onChangePassword}>
+                <div className="account-form-actions">
+                  <button type="submit" className="account-btn-primary" disabled={saving || !onChangePassword}>
                     <ShieldCheck size={18} /> {saving ? 'Đang cập nhật…' : 'Cập nhật mật khẩu'}
                   </button>
                 </div>
@@ -203,37 +206,37 @@ export default function ManaAccount({ user, onNavigate, onLogout, onSaveProfile,
         </div>
 
         {/* 4. Các nút liên kết phụ (Đơn hàng, Yêu thích) */}
-        <div className="discord-menu-card">
-          <button type="button" className="discord-menu-item" onClick={() => onNavigate?.('orders')}>
-            <div className="discord-menu-item-left">
+        <div className="account-menu-card">
+          <button type="button" className="account-menu-item" onClick={() => onNavigate?.('orders')}>
+            <div className="account-menu-item-left">
               <Package size={18} />
               <span>Đơn hàng của tôi</span>
             </div>
-            <ChevronRight size={18} className="discord-chevron" />
+            <ChevronRight size={18} className="account-chevron" />
           </button>
           
-          <button type="button" className="discord-menu-item" onClick={() => onNavigate?.('likes')}>
-            <div className="discord-menu-item-left">
+          <button type="button" className="account-menu-item" onClick={() => onNavigate?.('likes')}>
+            <div className="account-menu-item-left">
               <Heart size={18} />
               <span>Sản phẩm yêu thích</span>
             </div>
-            <ChevronRight size={18} className="discord-chevron" />
+            <ChevronRight size={18} className="account-chevron" />
           </button>
         </div>
 
         {/* 5. Nút Đăng xuất (Nằm cuối cùng) */}
-        <div className="discord-menu-card discord-logout-card">
-          <button type="button" className="discord-menu-item discord-logout-item" disabled={saving} onClick={onLogout}>
-            <div className="discord-menu-item-left">
+        <div className="account-menu-card account-logout-card">
+          <button type="button" className="account-menu-item account-logout-item" disabled={saving} onClick={onLogout}>
+            <div className="account-menu-item-left">
               <LogOut size={18} />
               <span>Đăng xuất</span>
             </div>
-            <ChevronRight size={18} className="discord-chevron" />
+            <ChevronRight size={18} className="account-chevron" />
           </button>
         </div>
         
-        <div className="discord-footer-nav">
-          <button type="button" className="discord-back-link" onClick={() => onNavigate?.('shop')}>
+        <div className="account-footer-nav">
+          <button type="button" className="account-back-link" onClick={() => onNavigate?.('shop')}>
             <ArrowLeft size={16} /> Tiếp tục mua sắm
           </button>
         </div>

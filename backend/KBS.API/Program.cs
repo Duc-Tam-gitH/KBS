@@ -44,6 +44,9 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ILikelistService, LikelistService>();
+builder.Services.AddScoped<ProductReviewService>();
+builder.Services.AddScoped<StaffService>();
+builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddOpenApi();
@@ -79,6 +82,21 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var idText = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var role = context.Principal?.FindFirstValue(ClaimTypes.Role);
+                var db = context.HttpContext.RequestServices.GetRequiredService<KbsDbContext>();
+                if (!long.TryParse(idText, out var id)
+                    || !await db.Users.AnyAsync(x => x.Id == id && x.IsActive && x.Role!.Name == role,
+                        context.HttpContext.RequestAborted))
+                {
+                    context.Fail("Tài khoản đã bị khóa hoặc quyền truy cập đã thay đổi.");
+                }
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

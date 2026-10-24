@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
@@ -15,20 +15,48 @@ try {
   assert.match(html, /KBS/)
   assert.match(html, /aria-pressed="true"/)
   assert.doesNotMatch(html, /TCKR|bg-cream|text-ink|bg-white/)
-  const { Catalog, Detail, Checkout, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
+  const { Detail, Checkout, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
+  const { default: SearchPage } = await server.ssrLoadModule('/src/pages/customer/Search.jsx')
   const { default: Login } = await server.ssrLoadModule('/src/pages/auth/Login.jsx')
   const { default: Register } = await server.ssrLoadModule('/src/pages/auth/Register.jsx')
   const { default: Cart } = await server.ssrLoadModule('/src/pages/customer/Cart.jsx')
   const { default: Navigation } = await server.ssrLoadModule('/src/components/Navbar.tsx')
   const product = { id: 7, name: 'KBS Test', brand: 'KBS', price: 1200000, category: 'Keyboard' }
   const noop = () => {}
-  const catalogProps = { products: [product], query: 'kbs', onQuery: noop, onRetry: noop,
-    onSelect: noop, onAdd: noop, busy: false, loading: false, error: '' }
-  const catalog = renderToString(createElement(Catalog, catalogProps))
-  assert.match(catalog, /KBS Test/)
-  assert.match(catalog, /1.200.000₫/)
-  assert.doesNotMatch(renderToString(createElement(Catalog, { ...catalogProps, query: 'missing' })), /KBS Test/)
-  assert.match(renderToString(createElement(Detail, { product, onBack: noop, onAdd: noop, busy: true })), /disabled=""/)
+  const { default: StaffWorkspace } = await server.ssrLoadModule('/src/pages/Staff/StaffWorkspace.jsx')
+  assert.match(renderToString(createElement(StaffWorkspace, { user: null })), /Không có quyền truy cập/)
+  const staffUser = { id: 1, username: 'staff', roleName: 'Staff' }
+  assert.match(renderToString(createElement(StaffWorkspace, {
+    user: staffUser, onNavigate: noop, onLogout: noop,
+  })), /Tổng quan/)
+  for (const filename of ['StaffDashboard', 'OrderManager', 'Inventory', 'CustomerManager', 'SupportChat']) {
+    const { default: Page } = await server.ssrLoadModule(`/src/pages/Staff/${filename}.jsx`)
+    const markup = renderToString(createElement(Page, { user: staffUser, onOpen: noop }))
+    assert.match(markup, /Đang tải/)
+    assert.doesNotMatch(markup, /MOCK_|Nhân viên A|Nguyễn Văn A|placeholder\.com/)
+  }
+  const staffDirectory = new URL('../src/pages/Staff/', import.meta.url)
+  for (const filename of readdirSync(staffDirectory).filter((name) => name.endsWith('.css'))) {
+    assert.doesNotMatch(readFileSync(new URL(filename, staffDirectory), 'utf8'), /#[0-9a-f]{3,8}\b|rgba?\(/i)
+  }
+  const search = renderToString(createElement(SearchPage, { onSelect: noop, onAdd: noop }))
+  assert.match(search, /search-sidebar/)
+  assert.match(search, /name="search"/)
+  assert.match(search, /name="categoryId"/)
+  assert.match(search, /name="brandId"/)
+  assert.match(search, /name="minPrice"/)
+  assert.match(search, /name="maxPrice"/)
+  assert.match(search, /Đang tìm sản phẩm/)
+  const searchNav = renderToString(createElement(Navigation, {
+    route: 'search', onNavigate: noop, cartCount: 0, user: null, role: 'customer', onLogout: noop,
+  }))
+  assert.doesNotMatch(searchNav, /aria-label="Tìm kiếm"/)
+  assert.match(searchNav, /aria-label="Sản phẩm yêu thích"/)
+  assert.doesNotMatch(searchNav, /<form/)
+  const detail = renderToString(createElement(Detail, { product, onBack: noop, onAdd: noop, busy: true }))
+  assert.match(detail, /Đang tải chi tiết sản phẩm/)
+  assert.doesNotMatch(detail, /KBS Test/)
+  assert.match(renderToString(createElement(Detail, { onBack: noop })), /Không tìm thấy sản phẩm/)
   assert.match(renderToString(createElement(Login, { onLogin: noop, onNavigate: noop })), /name="password"/)
   assert.match(renderToString(createElement(Register, { onRegister: noop, onNavigate: noop })), /confirmPassword/)
   const cart = [{ ...product, quantity: 2 }]
@@ -36,7 +64,8 @@ try {
     onRemove: noop, onCheckout: noop, onNavigate: noop })), /2.400.000₫/)
   assert.match(renderToString(createElement(Checkout, { cart, onPlaced: noop, onDone: noop })), /name="address"/)
   assert.match(renderToString(createElement(Checkout, { cart: [], onPlaced: noop, onDone: noop })), /Không có sản phẩm/)
-  assert.match(renderToString(createElement(Orders)), /Đang tải đơn hàng/)
+  assert.match(renderToString(createElement(Orders)), /Đăng nhập để xem đơn hàng/)
+  assert.match(renderToString(createElement(Orders, { user: { id: 1 } })), /Đang tải đơn hàng/)
   assert.match(renderToString(createElement(Admin)), /Đang tổng hợp/)
   const navProps = { route: 'shop', onNavigate: noop, onSearch: noop, cartCount: 2,
     user: { username: 'test' }, role: 'customer', onLogout: noop }
@@ -62,10 +91,23 @@ try {
     }
     await api.products({ page: 1, pageSize: 100 })
     assert.equal(requests.at(-1).headers.get('Authorization'), null)
+    await api.product(7)
+    assert.ok(requests.at(-1).url.endsWith('/api/products/7'))
+    await api.productReviews(7, { rating: 5, page: 2 })
+    assert.ok(requests.at(-1).url.endsWith('/api/products/7/reviews?rating=5&page=2'))
     await api.register({ username: 'test', email: 'test@example.com', password: 'Example123' })
     assert.equal(requests.at(-1).method, 'POST')
     await api.login({ loginIdentifier: 'test', password: 'Example123' })
     assert.equal(authStore.user.username, 'test')
+    await api.confirmOrderReceipt(7)
+    assert.ok(requests.at(-1).url.endsWith('/api/orders/7/receipt'))
+    assert.equal(requests.at(-1).method, 'PUT')
+    assert.equal(requests.at(-1).headers.get('Authorization'), 'Bearer customer-token')
+    await api.addProductReview(7, { rating: 5, comment: 'Good keyboard' })
+    assert.ok(requests.at(-1).url.endsWith('/api/products/7/reviews'))
+    assert.equal(requests.at(-1).method, 'POST')
+    assert.equal(requests.at(-1).headers.get('Authorization'), 'Bearer customer-token')
+    assert.deepEqual(JSON.parse(requests.at(-1).body), { rating: 5, comment: 'Good keyboard' })
     await api.addCartItem(7, 2)
     assert.equal(requests.at(-1).headers.get('Authorization'), 'Bearer customer-token')
     assert.equal(requests.at(-1).method, 'POST')

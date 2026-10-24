@@ -17,6 +17,7 @@ public class ProductResponseDto
     public string? Color { get; set; }
     public bool IsHotSwap { get; set; }
     public bool IsRGB { get; set; }
+    public int StockQuantity { get; set; }
     public bool IsActive { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public List<ProductImageDto> Images { get; set; } = new();

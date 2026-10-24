@@ -1,4 +1,5 @@
 using KBS.BLL.Interfaces;
+using System.Security.Claims;
 using KBS.Models.DTOs.Inventory;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace KBS.API.Controllers;
 [ApiController]
 [Route("api/inventory")]
 [Authorize(Roles = "Admin,Staff")]
+[TypeFilter(typeof(StaffOperationFilter))]
 public class InventoryController(IInventoryService service) : ControllerBase
 {
     [HttpGet("product/{productId:long}")]
@@ -25,7 +27,8 @@ public class InventoryController(IInventoryService service) : ControllerBase
         UpdateInventoryDto dto,
         CancellationToken ct)
     {
-        var inventory = await service.UpdateAsync(productId, dto, ct);
+        var actorId = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var inventory = await service.UpdateAsync(productId, dto, actorId, ct);
         return inventory is null ? NotFound() : Ok(inventory);
     }
 }

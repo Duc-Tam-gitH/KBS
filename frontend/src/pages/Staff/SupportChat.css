@@ -1,0 +1,27 @@
+﻿.staff-workspace .sf-chat-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 20px;
+}
+.staff-workspace.sf-customer-chat { display: block; width: 100%; }
+.staff-workspace .sf-conversation-list { display: flex; flex-direction: column; gap: 12px; align-self: start; }
+.staff-workspace .sf-conversation { display: grid; gap: 6px; text-align: left; }
+.staff-workspace .sf-conversation > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.staff-workspace .sf-chat-thread { display: flex; flex-direction: column; min-width: 0; }
+.staff-workspace .sf-messages { height: 440px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.staff-workspace .sf-message {
+  max-width: 88%;
+  align-self: flex-start;
+  padding: 12px 16px;
+  background: var(--color-bg-deep);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+.staff-workspace .sf-message p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.staff-workspace .sf-message-own { align-self: flex-end; border-color: var(--color-accent); }
+.staff-workspace .sf-chat-composer { margin-bottom: 0; }
+@media (max-width: 900px) {
+  .staff-workspace .sf-chat-layout { grid-template-columns: 1fr; }
+  .staff-workspace .sf-conversation-list { max-height: 320px; overflow-y: auto; }
+  .staff-workspace .sf-messages { height: 360px; }
+}

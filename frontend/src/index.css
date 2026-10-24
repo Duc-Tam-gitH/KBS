@@ -4,16 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Palette for the product search page. */
-.search-page {
-  --color-bg-deep: #051F20;
-  --color-bg-dark: #0B2B26;
-  --color-surface: #163832;
-  --color-primary: #235347;
-  --color-accent: #8EB69B;
-  --color-text-light: #DAF1DE;
-}
-
 @layer base {
   :root {
     color-scheme: dark;

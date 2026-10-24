@@ -18,10 +18,67 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<LikelistItem> Likelist => Set<LikelistItem>();
+    public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
+    public DbSet<StaffShift> StaffShifts => Set<StaffShift>();
+    public DbSet<OrderNote> OrderNotes => Set<OrderNote>();
+    public DbSet<InventoryMovement> InventoryMovements => Set<InventoryMovement>();
+    public DbSet<ChatConversation> ChatConversations => Set<ChatConversation>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Order>().Property(x => x.TrackingNumber).HasMaxLength(100);
+        modelBuilder.Entity<Inventory>().Property(x => x.LowStockThreshold).HasDefaultValue(5);
+        modelBuilder.Entity<Inventory>().ToTable("Inventories", table =>
+        {
+            table.HasCheckConstraint("CK_Inventories_Stock", "\"StockQuantity\" >= 0");
+            table.HasCheckConstraint("CK_Inventories_Threshold", "\"LowStockThreshold\" >= 0");
+        });
+        modelBuilder.Entity<StaffShift>().HasOne(x => x.Staff).WithMany()
+            .HasForeignKey(x => x.StaffId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<StaffShift>().HasIndex(x => x.StaffId).IsUnique().HasFilter("\"EndedAt\" IS NULL");
+        modelBuilder.Entity<OrderNote>().HasOne(x => x.Order).WithMany()
+            .HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<OrderNote>().HasOne(x => x.Staff).WithMany()
+            .HasForeignKey(x => x.StaffId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<OrderNote>().Property(x => x.Content).HasMaxLength(2000);
+        modelBuilder.Entity<OrderNote>().HasIndex(x => new { x.OrderId, x.CreatedAt });
+        modelBuilder.Entity<InventoryMovement>().HasOne(x => x.Product).WithMany()
+            .HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryMovement>().HasOne(x => x.Actor).WithMany()
+            .HasForeignKey(x => x.ActorId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryMovement>().HasOne(x => x.Order).WithMany()
+            .HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryMovement>().Property(x => x.Reason).HasMaxLength(500);
+        modelBuilder.Entity<InventoryMovement>().HasIndex(x => new { x.ProductId, x.CreatedAt });
+        modelBuilder.Entity<InventoryMovement>().ToTable("InventoryMovements", table =>
+            table.HasCheckConstraint("CK_InventoryMovements_Balance",
+                "\"QuantityAfter\" >= 0 AND \"QuantityBefore\" >= 0 "
+                + "AND \"QuantityAfter\"::bigint = \"QuantityBefore\"::bigint + \"Delta\"::bigint"));
+        modelBuilder.Entity<ChatConversation>().HasIndex(x => x.CustomerId).IsUnique();
+        modelBuilder.Entity<ChatConversation>().HasOne(x => x.Customer).WithMany()
+            .HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ChatConversation>().HasOne(x => x.Staff).WithMany()
+            .HasForeignKey(x => x.StaffId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ChatMessage>().HasOne(x => x.Conversation).WithMany(x => x.Messages)
+            .HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ChatMessage>().HasOne(x => x.Sender).WithMany()
+            .HasForeignKey(x => x.SenderId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ChatMessage>().Property(x => x.Content).HasMaxLength(4000);
+        modelBuilder.Entity<ChatMessage>().HasIndex(x => new { x.ConversationId, x.Id });
+
+        modelBuilder.Entity<ProductReview>()
+            .ToTable("ProductReviews", table =>
+                table.HasCheckConstraint("CK_ProductReviews_Rating", "\"Rating\" BETWEEN 1 AND 5"));
+        modelBuilder.Entity<ProductReview>().Property(x => x.Comment).HasMaxLength(2000);
+        modelBuilder.Entity<ProductReview>().HasIndex(x => new { x.UserId, x.ProductId }).IsUnique();
+        modelBuilder.Entity<ProductReview>().HasIndex(x => new { x.ProductId, x.CreatedAt });
+        modelBuilder.Entity<ProductReview>().HasOne(x => x.Product).WithMany()
+            .HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductReview>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<LikelistItem>().ToTable("Likelist");
         modelBuilder.Entity<LikelistItem>()

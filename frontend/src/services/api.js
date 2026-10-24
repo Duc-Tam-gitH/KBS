@@ -40,9 +40,47 @@ export const api = {
   register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
   products: (params = {}) => request(`/api/products?${new URLSearchParams(params)}`),
   product: (id) => request(`/api/products/${id}`),
+  productReviews: (id, params = {}) => request(`/api/products/${id}/reviews?${new URLSearchParams(params)}`),
+  addProductReview: (id, payload) => request(`/api/products/${id}/reviews`, { method: 'POST', body: payload }),
   brands: () => request('/api/brands'),
   categories: () => request('/api/categories'),
   myOrders: () => request('/api/orders/mine'),
+  confirmOrderReceipt: (id) => request(`/api/orders/${id}/receipt`, { method: 'PUT' }),
+  staff: {
+    get: (resource) => request(`/api/staff/${resource}`),
+    orders: () => request('/api/orders'),
+    orderStatus: (id, orderStatus) => request(`/api/orders/${id}/status`, {
+      method: 'PUT', body: { orderStatus },
+    }),
+    tracking: (id, trackingNumber) => request(`/api/staff/orders/${id}/tracking`, {
+      method: 'PUT', body: { trackingNumber },
+    }),
+    note: (id, content) => request(`/api/staff/orders/${id}/notes`, { method: 'POST', body: { content } }),
+    adjustStock: (id, payload) => request(`/api/staff/inventory/${id}/adjustments`, {
+      method: 'POST', body: payload,
+    }),
+    threshold: (id, lowStockThreshold) => request(`/api/staff/inventory/${id}/threshold`, {
+      method: 'PUT', body: { lowStockThreshold },
+    }),
+    customerStatus: (id, isActive) => request(`/api/staff/customers/${id}/status`, {
+      method: 'PUT', body: { isActive },
+    }),
+  },
+  chat: {
+    conversations: () => request('/api/chat/conversations'),
+    open: (customerId) => request(`/api/chat/conversations${customerId ? `?customerId=${customerId}` : ''}`, {
+      method: 'POST',
+    }),
+    claim: (id) => request(`/api/chat/conversations/${id}/claim`, { method: 'PUT' }),
+    messages: (id, beforeId, afterId) => request(`/api/chat/conversations/${id}/messages?${
+      new URLSearchParams({ ...(beforeId ? { beforeId } : {}), ...(afterId ? { afterId } : {}) })}`),
+    send: (id, content) => request(`/api/chat/conversations/${id}/messages`, {
+      method: 'POST', body: { content },
+    }),
+    read: (id, throughMessageId) => request(`/api/chat/conversations/${id}/read`, {
+      method: 'PUT', body: { throughMessageId },
+    }),
+  },
   createOrder: (payload) => request('/api/orders', { method: 'POST', body: payload }),
   cart: () => request('/api/cart'),
   addCartItem: (productId, quantity) =>
@@ -65,7 +103,9 @@ export const api = {
     updateOrderStatus: (id, orderStatus) => request(`/api/orders/${id}/status`, { method: 'PUT', body: { orderStatus } }),
     updateProduct: (id, payload) => request(`/api/products/${id}`, { method: 'PUT', body: payload }),
     inventory: (productId) => request(`/api/inventory/product/${productId}`),
-    updateInventory: (productId, stockQuantity) => request(`/api/inventory/product/${productId}`, { method: 'PUT', body: { stockQuantity } }),
+    updateInventory: (productId, stockQuantity, reason) => request(`/api/inventory/product/${productId}`, {
+      method: 'PUT', body: { stockQuantity, reason },
+    }),
     createProduct: (payload) => request('/api/products', { method: 'POST', body: payload }),
   },
 }

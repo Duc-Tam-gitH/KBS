@@ -1,0 +1,25 @@
+﻿.staff-workspace .sf-order-detail > button { margin: 16px 0; }
+.staff-workspace .sf-total { font-size: 1.2rem; font-weight: 700; margin-top: 16px; }
+.staff-workspace .sf-invoice p { overflow-wrap: anywhere; }
+@media print {
+  body:has(.sf-invoice) :not(.sf-invoice):not(.sf-invoice *):not(:has(.sf-invoice)) { display: none; }
+  body:has(.sf-invoice) :has(.sf-invoice) {
+    display: block;
+    position: static;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+  }
+  body:has(.sf-invoice) .sf-invoice {
+    width: 100%;
+    padding: 20px;
+    background: var(--color-text-light);
+    color: var(--color-bg-deep);
+  }
+  body:has(.sf-invoice) .sf-invoice * { color: var(--color-bg-deep); }
+  body:has(.sf-invoice) .sf-invoice .sf-table-wrap { overflow: visible; }
+  body:has(.sf-invoice) .sf-invoice tr { break-inside: avoid; }
+}
