@@ -1,4 +1,4 @@
--- Chạy sau EF Core migrations. Dữ liệu chỉ dành cho development/demo.
+-- MOCK DATA — dữ liệu mẫu do người dùng yêu cầu, chỉ dành cho development/demo.
 BEGIN;
 
 INSERT INTO "Brands" ("Name", "Description", "IsActive", "CreatedAt")
@@ -7,10 +7,10 @@ FROM (VALUES ('Keychron','Bàn phím cơ và custom'), ('Akko','Bàn phím và s
 WHERE NOT EXISTS (SELECT 1 FROM "Brands" b WHERE lower(b."Name") = lower(v.name));
 
 INSERT INTO "Users" ("Username","Email","PasswordHash","FullName","PhoneNumber","RoleId","IsActive","CreatedAt")
-SELECT v.username, v.email, 'AQAAAAEAAYagAAAAEG3JTvT3V+IWs2IJ+rZDRE3MSJJYsG7he40/goSG55xZ7mjiPfc9MxPy5gZyUmbDtw==', v.full_name, v.phone, r."Id", true, NOW()
+SELECT v.username, v.email, 'AQAAAAIAAYagAAAAEAUXkApn6knwaqbFcJWH4hjVb99w1b1dQ63IKfhBFUdDOGyYIpbexYIMG3ovbSYnSQ==', v.full_name, v.phone, r."Id", true, NOW()
 FROM (VALUES ('minh.demo','minh.demo@kbs.local','Nguyễn Minh','0901000001'), ('lan.demo','lan.demo@kbs.local','Trần Lan','0901000002')) AS v(username,email,full_name,phone)
 JOIN "Roles" r ON r."Name" = 'Customer'
-WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u."Email" = v.email);
+WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u."Email" = v.email OR u."Username" = v.username OR u."PhoneNumber" = v.phone);
 
 INSERT INTO "Products" ("Name","Price","OriginalPrice","Description","CategoryId","BrandId","SwitchType","Layout","ConnectionType","Keycap","Color","IsHotSwap","IsRGB","IsActive","CreatedAt")
 SELECT v.name,v.price,v.original_price,v.description,c."Id",b."Id",v.switch_type,v.layout,v.connection_type,'PBT',v.color,true,true,true,NOW()
@@ -31,17 +31,56 @@ SELECT p."Id", CASE p."Name" WHEN 'Keychron K8 Pro' THEN 35 WHEN 'Keychron Q1 Ma
 FROM "Products" p WHERE p."Name" IN ('Keychron K8 Pro','Keychron Q1 Max','Akko 5075B Plus','Akko MOD 007B HE','NuPhy Air75 V2','NuPhy Halo75 V2')
 ON CONFLICT ("ProductId") DO NOTHING;
 
--- Đơn demo không trừ tồn: mục đích là tạo dữ liệu báo cáo đã chốt.
-INSERT INTO "Orders" ("UserId","CustomerName","PhoneNumber","ShippingAddress","TotalPrice","PaymentMethod","PaymentStatus","OrderStatus","CreatedAt")
-SELECT u."Id",u."FullName",u."PhoneNumber",'Quận 1, TP. Hồ Chí Minh',2490000,'COD','PAID','COMPLETED',NOW()-INTERVAL '6 days' FROM "Users" u WHERE u."Email"='minh.demo@kbs.local' AND NOT EXISTS (SELECT 1 FROM "Orders" o WHERE o."PhoneNumber"=u."PhoneNumber" AND o."CreatedAt"::date=(NOW()-INTERVAL '6 days')::date);
-INSERT INTO "OrderDetails" ("OrderId","ProductId","UnitPrice","Quantity") SELECT o."Id",p."Id",p."Price",1 FROM "Orders" o JOIN "Products" p ON p."Name"='Keychron K8 Pro' WHERE o."PhoneNumber"='0901000001' AND NOT EXISTS (SELECT 1 FROM "OrderDetails" d WHERE d."OrderId"=o."Id");
+-- Tồn kho phía trên là số dư demo hiện tại; đơn lịch sử không trừ tồn lần nữa.
+-- Chỉ thêm dòng hàng cho đơn vừa tạo; chạy lại không thay đổi đơn đã có.
+WITH demo(email, address, product_name, payment_method, payment_status, order_status, age) AS (
+    VALUES
+    ('minh.demo@kbs.local', '[DEMO-01] Quận 1, TP. Hồ Chí Minh', 'Keychron K8 Pro', 'COD', 'PAID', 'COMPLETED', 6),
+    ('lan.demo@kbs.local', '[DEMO-02] Hải Châu, Đà Nẵng', 'Akko 5075B Plus', 'BANKING', 'PAID', 'COMPLETED', 3),
+    ('minh.demo@kbs.local', '[DEMO-03] Cầu Giấy, Hà Nội', 'NuPhy Air75 V2', 'COD', 'PENDING', 'PENDING', 1)
+), inserted AS (
+    INSERT INTO "Orders" (
+        "UserId", "CustomerName", "PhoneNumber", "ShippingAddress", "TotalPrice",
+        "PaymentMethod", "PaymentStatus", "OrderStatus", "CreatedAt"
+    )
+    SELECT u."Id", u."FullName", u."PhoneNumber", d.address, p."Price",
+        d.payment_method, d.payment_status, d.order_status, NOW() - d.age * INTERVAL '1 day'
+    FROM demo d
+    JOIN "Users" u ON u."Email" = d.email
+    JOIN "Products" p ON p."Name" = d.product_name
+    WHERE NOT EXISTS (
+        SELECT 1 FROM "Orders" o WHERE o."UserId" = u."Id" AND o."ShippingAddress" = d.address
+    )
+    RETURNING "Id", "ShippingAddress", "TotalPrice"
+)
+INSERT INTO "OrderDetails" ("OrderId", "ProductId", "UnitPrice", "Quantity")
+SELECT o."Id", p."Id", o."TotalPrice", 1
+FROM inserted o
+JOIN demo d ON d.address = o."ShippingAddress"
+JOIN "Products" p ON p."Name" = d.product_name;
 
-INSERT INTO "Orders" ("UserId","CustomerName","PhoneNumber","ShippingAddress","TotalPrice","PaymentMethod","PaymentStatus","OrderStatus","CreatedAt")
-SELECT u."Id",u."FullName",u."PhoneNumber",'Hải Châu, Đà Nẵng',1890000,'BANKING','PAID','COMPLETED',NOW()-INTERVAL '3 days' FROM "Users" u WHERE u."Email"='lan.demo@kbs.local' AND NOT EXISTS (SELECT 1 FROM "Orders" o WHERE o."PhoneNumber"=u."PhoneNumber" AND o."ShippingAddress"='Hải Châu, Đà Nẵng');
-INSERT INTO "OrderDetails" ("OrderId","ProductId","UnitPrice","Quantity") SELECT o."Id",p."Id",p."Price",1 FROM "Orders" o JOIN "Products" p ON p."Name"='Akko 5075B Plus' WHERE o."PhoneNumber"='0901000002' AND o."ShippingAddress"='Hải Châu, Đà Nẵng' AND NOT EXISTS (SELECT 1 FROM "OrderDetails" d WHERE d."OrderId"=o."Id");
-
-INSERT INTO "Orders" ("UserId","CustomerName","PhoneNumber","ShippingAddress","TotalPrice","PaymentMethod","PaymentStatus","OrderStatus","CreatedAt")
-SELECT u."Id",u."FullName",u."PhoneNumber",'Cầu Giấy, Hà Nội',2990000,'COD','PENDING','PENDING',NOW()-INTERVAL '1 day' FROM "Users" u WHERE u."Email"='minh.demo@kbs.local' AND NOT EXISTS (SELECT 1 FROM "Orders" o WHERE o."PhoneNumber"=u."PhoneNumber" AND o."ShippingAddress"='Cầu Giấy, Hà Nội');
-INSERT INTO "OrderDetails" ("OrderId","ProductId","UnitPrice","Quantity") SELECT o."Id",p."Id",p."Price",1 FROM "Orders" o JOIN "Products" p ON p."Name"='NuPhy Air75 V2' WHERE o."PhoneNumber"='0901000001' AND o."ShippingAddress"='Cầu Giấy, Hà Nội' AND NOT EXISTS (SELECT 1 FROM "OrderDetails" d WHERE d."OrderId"=o."Id");
+-- Acceptance checks: đủ dữ liệu, FK do DB bảo vệ, tổng tiền khớp chi tiết.
+DO $$
+BEGIN
+    IF (SELECT count(*) FROM "Products" WHERE "Name" IN (
+        'Keychron K8 Pro', 'Keychron Q1 Max', 'Akko 5075B Plus',
+        'Akko MOD 007B HE', 'NuPhy Air75 V2', 'NuPhy Halo75 V2')) <> 6 THEN
+        RAISE EXCEPTION 'Seed requires six unique demo products and their categories/brands';
+    END IF;
+    IF (SELECT count(*) FROM "Users" WHERE "Email" IN ('minh.demo@kbs.local', 'lan.demo@kbs.local')) <> 2 THEN
+        RAISE EXCEPTION 'Demo accounts missing or conflict with an existing username/phone';
+    END IF;
+    IF (SELECT count(*) FROM "Orders" WHERE "ShippingAddress" LIKE '[DEMO-0%') <> 3 THEN
+        RAISE EXCEPTION 'Expected three demo orders';
+    END IF;
+    IF EXISTS (
+        SELECT 1 FROM "Orders" o LEFT JOIN "OrderDetails" d ON d."OrderId" = o."Id"
+        WHERE o."ShippingAddress" LIKE '[DEMO-0%'
+        GROUP BY o."Id", o."TotalPrice"
+        HAVING count(d."Id") = 0 OR sum(d."UnitPrice" * d."Quantity") <> o."TotalPrice"
+    ) THEN
+        RAISE EXCEPTION 'Demo order totals do not match their lines';
+    END IF;
+END $$;
 
 COMMIT;

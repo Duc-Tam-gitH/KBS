@@ -4,6 +4,8 @@ namespace KBS.BLL.Interfaces;
 
 public interface ICategoryService
 {
+    Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
+
     Task<List<CategoryResponseDto>> GetAllAsync(
         CancellationToken cancellationToken = default);
 

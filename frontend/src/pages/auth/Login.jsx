@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Login({ onLogin, onNavigate }) {
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
@@ -46,9 +48,9 @@ export default function Login({ onLogin, onNavigate }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group auth-password-field">
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               name="password"
               className="auth-input"
               placeholder="Mật khẩu" aria-label="Mật khẩu"
@@ -56,6 +58,14 @@ export default function Login({ onLogin, onNavigate }) {
               onChange={handleChange}
               required
             />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+            </button>
           </div>
 
           <button type="submit" className="auth-button" disabled={isSubmitting}>

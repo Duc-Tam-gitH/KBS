@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react'
 import { api } from '../../services/api'
+import ConfirmBankPayment from '../../components/ConfirmBankPayment'
 import { dateTime, money, nextStatuses, statusLabels, useStaffAction, useStaffData } from './staffHooks'
 import { StaffNotice, StaffState } from './StaffState'
 import './OrderManager.css'
@@ -82,6 +83,7 @@ function OrderDetails({ order, reload }) {
       <p>Thanh toán: {order.paymentMethod} · {order.paymentStatus}</p>
     </section>
     <button type="button" onClick={() => window.print()}>In hóa đơn</button>
+    <ConfirmBankPayment order={order} onConfirmed={reload} />
     <StaffNotice notice={action.notice} />
     {!!nextStatuses[order.orderStatus]?.length && <form onSubmit={saveStatus}>
       <label>Trạng thái tiếp theo<select required value={next} onChange={(event) => setNext(event.target.value)}>

@@ -72,8 +72,6 @@
   .store-pages .summary { @apply p-7 flex flex-col gap-5; }
   .store-pages .summary strong { @apply text-3xl font-display text-light; }
   .store-pages .summary small { @apply text-muted; }
-  .store-pages .checkout-form { @apply max-w-2xl p-6 md:p-10 grid gap-6; }
-  .store-pages .checkout-total { @apply flex justify-between gap-4 border-t border-border pt-5 text-light; }
   .store-pages .order-list { @apply grid gap-4; }
   .store-pages .order-card { @apply p-6 flex flex-wrap items-center justify-between gap-5; }
   .store-pages .order-card > p { @apply w-full text-muted; }

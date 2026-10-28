@@ -20,7 +20,8 @@ public class CategoryService(KbsDbContext dbContext) : ICategoryService
                 Name = c.Name,
                 Description = c.Description,
                 IsActive = c.IsActive,
-                CreatedAt = c.CreatedAt
+                CreatedAt = c.CreatedAt,
+                ProductCount = c.Products.Count
             })
             .ToListAsync(cancellationToken);
     }
@@ -38,7 +39,8 @@ public class CategoryService(KbsDbContext dbContext) : ICategoryService
                 Name = c.Name,
                 Description = c.Description,
                 IsActive = c.IsActive,
-                CreatedAt = c.CreatedAt
+                CreatedAt = c.CreatedAt,
+                ProductCount = c.Products.Count
             })
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -47,7 +49,7 @@ public class CategoryService(KbsDbContext dbContext) : ICategoryService
         CategoryCreateDto dto,
         CancellationToken cancellationToken = default)
     {
-        var name = dto.Name.Trim();
+        var name = dto.Name?.Trim();
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -96,7 +98,7 @@ public class CategoryService(KbsDbContext dbContext) : ICategoryService
             return null;
         }
 
-        var name = dto.Name.Trim();
+        var name = dto.Name?.Trim();
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -126,7 +128,29 @@ public class CategoryService(KbsDbContext dbContext) : ICategoryService
             Name = category.Name,
             Description = category.Description,
             IsActive = category.IsActive,
-            CreatedAt = category.CreatedAt
+            CreatedAt = category.CreatedAt,
+            ProductCount = await dbContext.Products.CountAsync(p => p.CategoryId == id, cancellationToken)
         };
+    }
+
+    public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
+    {
+        var category = await dbContext.Categories.FindAsync([id], cancellationToken);
+        if (category is null) return false;
+        if (await dbContext.Products.AnyAsync(p => p.CategoryId == id, cancellationToken))
+        {
+            throw new InvalidOperationException("Danh mục đang có sản phẩm. Hãy chuyển sản phẩm trước khi xóa.");
+        }
+
+        dbContext.Categories.Remove(category);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException error) when (error.InnerException is Npgsql.PostgresException { SqlState: "23503" })
+        {
+            throw new InvalidOperationException("Danh mục đang có sản phẩm, không thể xóa.", error);
+        }
+        return true;
     }
 }

@@ -1,6 +1,7 @@
 import Hero from '@/components/Hero';
 import BentoGrid from '@/components/BentoGrid';
 import SwitchShowcase from '@/components/SwitchShowcase';
+import './Home.css';
 
 const marqueeItems = [
   'Hot-Swappable',
@@ -37,7 +38,7 @@ function Marquee() {
 
 function Home({ onNavigate }: { onNavigate: (route: string) => void }) {
   return (
-    <div className="min-h-screen bg-deep font-body text-light overflow-x-hidden">
+    <div className="home-page min-h-screen bg-deep font-body text-light overflow-x-hidden">
 
       <div>
         <Hero onNavigate={onNavigate} />

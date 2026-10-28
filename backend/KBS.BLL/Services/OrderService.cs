@@ -16,6 +16,8 @@ public class OrderService(KbsDbContext db) : IOrderService
     {
         if (dto.OrderItems.Count == 0)
             throw new ArgumentException("Đơn hàng phải có ít nhất một sản phẩm.");
+        if (dto.PaymentMethod is not ("COD" or "BANKING"))
+            throw new ArgumentException("Phương thức thanh toán không hợp lệ.");
         if (string.IsNullOrWhiteSpace(dto.CustomerName) || string.IsNullOrWhiteSpace(dto.PhoneNumber)
             || string.IsNullOrWhiteSpace(dto.ShippingAddress) || string.IsNullOrWhiteSpace(dto.PaymentMethod))
             throw new ArgumentException("Thiếu thông tin giao hàng hoặc thanh toán.");
@@ -36,6 +38,10 @@ public class OrderService(KbsDbContext db) : IOrderService
             if (product.Inventory is null || product.Inventory.StockQuantity < item.Quantity)
                 throw new InvalidOperationException($"Sản phẩm '{product.Name}' không đủ tồn kho.");
         }
+
+        var amount = requested.Sum(item => products.Single(product => product.Id == item.ProductId).Price * item.Quantity);
+        if (dto.PaymentMethod == "BANKING" && (amount <= 0 || amount != decimal.Truncate(amount)))
+            throw new ArgumentException("Thanh toán trực tuyến yêu cầu số tiền nguyên dương.");
 
         var order = new Order
         {

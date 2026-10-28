@@ -116,6 +116,7 @@ public class CartService(KbsDbContext db) : ICartService
             .AsNoTracking()
             .Where(x => x.UserId == userId)
             .Include(x => x.Product)
+            .ThenInclude(x => x!.Images)
             .OrderBy(x => x.Id);
     }
 
@@ -129,6 +130,10 @@ public class CartService(KbsDbContext db) : ICartService
                 {
                     ProductId = x.ProductId,
                     ProductName = x.Product!.Name,
+                    ImageUrl = x.Product.Images.OrderBy(image => image.SortOrder).ThenBy(image => image.Id)
+                        .FirstOrDefault()?.ImageUrl,
+                    Color = x.Product.Color,
+                    Layout = x.Product.Layout,
                     UnitPrice = x.Product.Price,
                     Quantity = x.Quantity
                 })

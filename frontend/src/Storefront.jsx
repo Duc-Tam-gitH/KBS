@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { api, ApiError, authStore } from './services/api'
+import { api, authStore } from './services/api'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
 import Cart from './pages/customer/Cart'
+import Checkout from './pages/customer/Checkout'
 import Likelist from './pages/customer/Likelist'
 import Account from './pages/customer/Account'
 import SearchPage from './pages/customer/Search'
@@ -13,12 +14,15 @@ import Detail from './pages/customer/productdetail'
 import Orders from './pages/customer/orderProduct'
 import StaffWorkspace from './pages/Staff/StaffWorkspace'
 import SupportChat from './pages/Staff/SupportChat'
+import Admin from './pages/admin/AdminWorkspace'
+
+export { default as Admin } from './pages/admin/AdminWorkspace'
 
 export { default as Detail } from './pages/customer/productdetail'
 export { default as Orders } from './pages/customer/orderProduct'
 
 
-const money = (n) => new Intl.NumberFormat('vi-VN').format(n || 0) + '₫'
+
 
 const linkedProduct = () => {
   if (typeof window === 'undefined') return null
@@ -40,6 +44,7 @@ function App() {
   const cartLock = useRef(false)
 
   const go = (next, item = null) => {
+    if (authStore.hasRole('Admin')) { next = 'admin'; item = null }
     if (next === 'auth' && route === 'detail' && selected) {
       pendingRoute.current = 'detail'
       pendingProduct.current = selected
@@ -78,6 +83,7 @@ function App() {
 
   const receiveCart = (response) => setCart((response.items || []).map((item) => ({
     id: item.productId, name: item.productName, price: item.unitPrice, quantity: item.quantity,
+    imageUrl: item.imageUrl, color: item.color, layout: item.layout,
   })))
 
   const mutateCart = async (operation) => {
@@ -122,7 +128,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!user) return
+    if (!user || user.roleName === 'Admin') return
     let active = true
     api.cart()
       .then((response) => { if (active) receiveCart(response) })
@@ -131,6 +137,11 @@ function App() {
     return () => { active = false }
   }, [user, retry])
 
+
+  // Admin luôn dùng workspace riêng, kể cả khi URL đang trỏ tới sản phẩm hay trang nhân viên.
+  if (user?.roleName === 'Admin') return <main className="min-h-screen bg-deep text-light font-body">
+    <Admin key={user.id} user={user} onLogout={logout} />
+  </main>
 
   const privateRoute = ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(route)
   const visibleRoute = !user && privateRoute ? 'auth' : route
@@ -161,7 +172,13 @@ function App() {
       />
     ) : route === 'checkout' ? (
       <Checkout
+        key={user.id}
         cart={cart}
+        user={user}
+        busy={cartBusy}
+        cartError={cartError}
+        onBack={() => go('cart')}
+        onShop={() => go('shop')}
         onPlaced={() => setCart([])}
         onDone={() => go('orders')}
       />
@@ -172,7 +189,7 @@ function App() {
     ) : route === 'support' ? (
       <SupportChat key={user.id} user={user} />
     ) : route === 'admin' ? (
-      user.roleName?.toLowerCase() === 'admin' ? <Admin /> : <Empty title="Không có quyền truy cập" />
+      <Empty title="Không có quyền truy cập" action="Về trang chủ" onAction={() => go('home')} />
     ) : route === 'account' ? (
       <Account key={user.id} user={user} onNavigate={go} onLogout={logout} />
     ) : (
@@ -181,14 +198,14 @@ function App() {
 
   return (
     <div className="min-h-screen bg-deep text-light font-body overflow-x-hidden">
-      <Navbar
+      {visibleRoute !== 'admin' && <Navbar
         route={visibleRoute}
         onNavigate={go}
         cartCount={user ? cart.reduce((n, x) => n + x.quantity, 0) : 0}
         user={user}
         role={user?.roleName?.toLowerCase() || 'customer'}
         onLogout={logout}
-      />
+      />}
       <main className={visibleRoute === 'home' ? '' : 'store-pages'}>
         {notice && <p className="notice" role="status">{notice}</p>}
         {user && cartError && <div className="notice" role="alert">{cartError}
@@ -198,156 +215,10 @@ function App() {
         </div>}
         {page}
       </main>
-      <Footer onNavigate={go} />
+      {visibleRoute !== 'admin' && <Footer onNavigate={go} />}
     </div>
   )
 }
-
-export function Checkout({ cart, onPlaced, onDone }) {
-  const [status, setStatus] = useState('')
-  const submitting = useRef(false)
-  const total = cart.reduce((n, x) => n + x.price * x.quantity, 0)
-
-  const submit = async (e) => {
-    e.preventDefault()
-    if (submitting.current) return
-    submitting.current = true
-    setStatus('loading')
-    const f = new FormData(e.currentTarget)
-    try {
-      await api.createOrder({
-        customerName: f.get('name'),
-        phoneNumber: f.get('phone'),
-        shippingAddress: f.get('address'),
-        paymentMethod: f.get('payment'),
-        orderItems: cart.map((x) => ({ productId: x.id, quantity: x.quantity })),
-      })
-      setStatus('done')
-      onPlaced()
-    } catch (err) {
-      submitting.current = false
-      setStatus(err instanceof ApiError ? err.message : 'Không thể tạo đơn hàng.')
-    }
-  }
-
-  if (!cart.length && status !== 'done') {
-    return (
-      <section className="page-wrap">
-        <Empty title="Không có sản phẩm để thanh toán" text="Quay lại cửa hàng để thêm sản phẩm." />
-      </section>
-    )
-  }
-
-  if (status === 'done') {
-    return (
-      <section className="page-wrap">
-        <Empty
-          title="Đặt hàng thành công"
-          text="Đơn hàng đã được ghi nhận. Bạn có thể theo dõi trong lịch sử đơn."
-          action="Xem đơn hàng"
-          onAction={onDone}
-        />
-      </section>
-    )
-  }
-
-  return (
-    <section className="page-wrap">
-      <PageTitle eyebrow="THANH TOÁN" title="Một bước thật nhẹ nhàng" />
-      <form className="glass-card checkout-form" onSubmit={submit}>
-        <label>
-          Họ và tên
-          <input name="name" required />
-        </label>
-        <label>
-          Số điện thoại
-          <input name="phone" required pattern="[0-9+ ()-]{8,20}" />
-        </label>
-        <label>
-          Địa chỉ giao hàng
-          <textarea name="address" required />
-        </label>
-        <label>
-          Thanh toán
-          <select name="payment" defaultValue="COD">
-            <option value="COD">Thanh toán khi nhận hàng</option>
-            <option value="BANKING">Chuyển khoản</option>
-          </select>
-        </label>
-        <div className="checkout-total">
-          <span>Tổng cộng</span>
-          <strong>{money(total)}</strong>
-        </div>
-        <button className="ink-button" disabled={status === 'loading'}>
-          {status === 'loading' ? 'Đang xử lý…' : 'Đặt hàng'}
-        </button>
-        {status && status !== 'loading' && <p className="notice">{status}</p>}
-      </form>
-    </section>
-  )
-}
-
-export function Admin() {
-  const [dashboard, setDashboard] = useState(null)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    api.admin.dashboard()
-      .then(setDashboard)
-      .catch((e) => setError(e.message))
-  }, [])
-
-  return (
-    <section className="page-wrap">
-      <PageTitle eyebrow="ADMIN CONSOLE" title="Nhịp vận hành hôm nay" />
-      {error ? (
-        <Empty title="Không thể tải dashboard" text={error} />
-      ) : !dashboard ? (
-        <div className="glass-card loading-panel">Đang tổng hợp số liệu…</div>
-      ) : (
-        <>
-          <div className="metric-grid">
-            <Metric label="Doanh thu" value={money(dashboard.revenue)} />
-            <Metric label="Tổng đơn" value={dashboard.totalOrders} />
-            <Metric label="Đang chờ" value={dashboard.pendingOrders} />
-            <Metric label="Sắp hết hàng" value={dashboard.lowStockProducts} />
-          </div>
-          <div className="glass-card chart">
-            <p className="eyebrow">DOANH THU 7 NGÀY</p>
-            {dashboard.revenueLast7Days?.map((x) => (
-              <div className="bar" key={x.date}>
-                <span>{x.date}</span>
-                <i
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      (Number(x.revenue) / Math.max(1, Number(dashboard.revenue))) * 100
-                    )}%`,
-                  }}
-                />
-                <b>{money(x.revenue)}</b>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </section>
-  )
-}
-
-const PageTitle = ({ eyebrow, title }) => (
-  <div className="page-title">
-    <p className="eyebrow">{eyebrow}</p>
-    <h1>{title}</h1>
-  </div>
-)
-
-const Metric = ({ label, value }) => (
-  <div className="glass-card metric">
-    <span>{label}</span>
-    <strong>{value}</strong>
-  </div>
-)
 
 function Empty({ title, text, action, onAction }) {
   return (

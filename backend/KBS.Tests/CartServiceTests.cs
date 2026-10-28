@@ -9,6 +9,29 @@ namespace KBS.Tests;
 public class CartServiceTests
 {
     [Fact]
+    public async Task Cart_returns_product_specs_and_first_image_or_null()
+    {
+        await using var db = NewDb();
+        var product = await SeedProduct(db, 100, 3);
+        product.Color = "Black";
+        product.Layout = "75%";
+        product.Images.Add(new ProductImage { ImageUrl = "/second.jpg", SortOrder = 2 });
+        product.Images.Add(new ProductImage { ImageUrl = "/first.jpg", SortOrder = 0 });
+        await db.SaveChangesAsync();
+        var service = new CartService(db);
+        var result = await service.AddAsync(1, new AddCartItemDto { ProductId = product.Id, Quantity = 2 });
+        var item = Assert.Single(result.Items);
+        Assert.Equal("/first.jpg", item.ImageUrl);
+        Assert.Equal("Black", item.Color);
+        Assert.Equal("75%", item.Layout);
+        Assert.Equal(200, item.Subtotal);
+        db.ProductImages.RemoveRange(product.Images);
+        await db.SaveChangesAsync();
+        Assert.Null(Assert.Single((await service.GetAsync(1)).Items).ImageUrl);
+        Assert.Empty((await service.GetAsync(2)).Items);
+    }
+
+    [Fact]
     public async Task Add_merges_existing_item_and_uses_current_product_price()
     {
         await using var db = NewDb();

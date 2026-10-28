@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using KBS.BLL.Interfaces;
+using KBS.BLL.Services;
 using KBS.Models.DTOs.Orders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace KBS.API.Controllers;
 [Route("api/orders")]
 [Authorize]
 [TypeFilter(typeof(StaffOperationFilter))]
-public class OrdersController(IOrderService service) : ControllerBase
+public class OrdersController(IOrderService service, PaymentService payments) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<OrderResponseDto>> Create(
@@ -20,6 +21,7 @@ public class OrdersController(IOrderService service) : ControllerBase
     {
         try
         {
+            payments.ValidateMethod(dto.PaymentMethod);
             var order = await service.CreateAsync(UserId(), dto, ct);
             return CreatedAtAction(nameof(MyOrders), order);
         }

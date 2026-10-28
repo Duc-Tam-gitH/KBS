@@ -10,6 +10,11 @@ namespace KBS.API.Controllers;
 [Route("api/products")]
 public class ProductsController(IProductService service) : ControllerBase
 {
+    [Authorize(Roles = "Admin")]
+    [HttpGet("management")]
+    public Task<List<ProductResponseDto>> GetForManagement(CancellationToken ct)
+        => service.GetForManagementAsync(ct);
+
     [AllowAnonymous]
     [HttpGet]
     public Task<PagedResponse<ProductResponseDto>> GetAll(

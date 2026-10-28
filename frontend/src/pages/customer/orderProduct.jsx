@@ -1,6 +1,7 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Check, Package, ShoppingCart, Star, UserRound } from 'lucide-react'
 import { api } from '../../services/api'
+import PaymentPanel from './PaymentPanel'
 import './orderProduct.css'
 
 // Labels translate database status codes; they do not assign an order's status.
@@ -211,6 +212,8 @@ export default function OrderProduct({ user = null, onNavigate, onAdd, busy = fa
                         <div><dt>Thanh toán</dt>
                           <dd>{paymentLabels[order.paymentStatus] || order.paymentStatus}</dd></div>
                       </dl>
+                      {order.paymentMethod === 'BANKING' && order.paymentStatus === 'PENDING'
+                        && order.orderStatus !== 'CANCELLED' && <OrderPayment order={order} />}
                     </details>
                     <footer className="op-card-footer">
                       <p>Thành tiền: <strong>{money(order.totalPrice)}</strong></p>
@@ -234,4 +237,10 @@ export default function OrderProduct({ user = null, onNavigate, onAdd, busy = fa
       </div>
     </section>
   )
+}
+
+function OrderPayment({ order }) {
+  const [open, setOpen] = useState(false)
+  return open ? <PaymentPanel orderId={order.id} method={order.paymentMethod} />
+    : <button type="button" onClick={() => setOpen(true)}>Tiếp tục thanh toán</button>
 }

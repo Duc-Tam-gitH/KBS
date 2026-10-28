@@ -11,6 +11,22 @@ namespace KBS.API.Controllers;
 public class CategoriesController(ICategoryService categoryService)
     : ControllerBase
 {
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id:long}")]
+    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await categoryService.DeleteAsync(id, cancellationToken)
+                ? NoContent()
+                : NotFound(new { message = "Không tìm thấy danh mục." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
     [HttpGet]
     public async Task<ActionResult<List<CategoryResponseDto>>> GetAll(
         CancellationToken cancellationToken)

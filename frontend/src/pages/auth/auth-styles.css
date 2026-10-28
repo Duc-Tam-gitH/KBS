@@ -227,6 +227,43 @@
     padding-left: 44px;
   }
 
+  .store-pages .auth-password-field {
+    position: relative;
+  }
+
+  .store-pages .auth-password-help {
+    margin: -8px 0 18px;
+    color: var(--color-text-muted);
+    font-size: 0.825rem;
+    line-height: 1.5;
+  }
+
+  .store-pages .auth-password-field .auth-input {
+    padding-right: 52px;
+  }
+
+  .store-pages .auth-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .store-pages .auth-password-toggle:hover,
+  .store-pages .auth-password-toggle:focus-visible {
+    color: var(--color-accent);
+  }
+
   .store-pages .auth-input::placeholder {
     color: var(--color-text-muted);
     opacity: 1;

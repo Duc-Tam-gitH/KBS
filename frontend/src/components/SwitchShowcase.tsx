@@ -81,7 +81,6 @@ export default function SwitchShowcase() {
               <div
                 key={sw.type}
                 className="reveal group relative rounded-3xl overflow-hidden cursor-pointer min-h-[380px] md:min-h-[440px] border border-border hover:border-accent transition-colors"
-                style={{ transitionDelay: `${i * 100}ms` }}
               >
                 <img
                   src={sw.image}

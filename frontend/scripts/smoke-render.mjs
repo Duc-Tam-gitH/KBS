@@ -15,7 +15,8 @@ try {
   assert.match(html, /KBS/)
   assert.match(html, /aria-pressed="true"/)
   assert.doesNotMatch(html, /TCKR|bg-cream|text-ink|bg-white/)
-  const { Detail, Checkout, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
+  const { Detail, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
+  const { default: Checkout } = await server.ssrLoadModule('/src/pages/customer/Checkout.jsx')
   const { default: SearchPage } = await server.ssrLoadModule('/src/pages/customer/Search.jsx')
   const { default: Login } = await server.ssrLoadModule('/src/pages/auth/Login.jsx')
   const { default: Register } = await server.ssrLoadModule('/src/pages/auth/Register.jsx')
@@ -64,9 +65,77 @@ try {
     onRemove: noop, onCheckout: noop, onNavigate: noop })), /2.400.000₫/)
   assert.match(renderToString(createElement(Checkout, { cart, onPlaced: noop, onDone: noop })), /name="address"/)
   assert.match(renderToString(createElement(Checkout, { cart: [], onPlaced: noop, onDone: noop })), /Không có sản phẩm/)
+  const checkoutMarkup = renderToString(createElement(Checkout, { cart, onPlaced: noop, onDone: noop }))
+  assert.match(checkoutMarkup, /co-summary/)
+  assert.match(checkoutMarkup, /2.400.000₫/)
+  assert.match(checkoutMarkup, /type="radio" name="payment"/)
+  assert.doesNotMatch(checkoutMarkup, /GIAM50K|ZaloPay|Nguyễn Văn A|Đã bao gồm VAT/)
+  for (const name of ['province', 'district', 'ward']) {
+    assert.match(checkoutMarkup, new RegExp('<select name="' + name + '"[^>]*disabled'))
+  }
+  assert.equal((checkoutMarkup.match(/name="payment"/g) || []).length, 2)
+  const checkoutLoading = renderToString(createElement(Checkout, { cart, busy: true }))
+  assert.match(checkoutLoading, /Đang tải giỏ hàng/)
+  assert.doesNotMatch(checkoutLoading, /type="submit"/)
+  const checkoutError = renderToString(createElement(Checkout, { cart, cartError: 'Không thể tải giỏ hàng' }))
+  assert.match(checkoutError, /role="alert"/)
+  assert.doesNotMatch(checkoutError, /type="submit"/)
   assert.match(renderToString(createElement(Orders)), /Đăng nhập để xem đơn hàng/)
   assert.match(renderToString(createElement(Orders, { user: { id: 1 } })), /Đang tải đơn hàng/)
-  assert.match(renderToString(createElement(Admin)), /Đang tổng hợp/)
+  assert.match(renderToString(createElement(Admin)), /Không có quyền truy cập/)
+  const adminMarkup = renderToString(createElement(Admin, { user: { roleName: 'Admin' } }))
+  assert.match(adminMarkup, /Đang tổng hợp/)
+  assert.match(adminMarkup, /Xin chào/)
+  assert.match(adminMarkup, /ad-sidebar/)
+  assert.match(adminMarkup, /ad-details/)
+  assert.doesNotMatch(adminMarkup, /Về cửa hàng/)
+  for (const label of ['Dashboard', 'Quản lý tài khoản', 'Quản lý sản phẩm', 'Quản lý danh mục',
+    'Quản lý kho', 'Quản lý cửa hàng', 'Quản lý AI']) {
+    assert.ok(adminMarkup.includes(label), 'Thiếu trang quản trị: ' + label)
+  }
+  for (const filename of ['AccountManagement',
+    'InventoryManagement', 'ShopManagement', 'AIManagement']) {
+    const { default: Page } = await server.ssrLoadModule('/src/pages/admin/' + filename + '.jsx')
+    assert.match(renderToString(createElement(Page)), /chưa được triển khai/)
+  }
+  const { default: CategoryManagement, CategoryForm } =
+    await server.ssrLoadModule('/src/pages/admin/CategoryManagement.jsx')
+  const { default: ProductManagement, ProductTable } =
+    await server.ssrLoadModule('/src/pages/admin/ProductManagement.jsx')
+  const { filterProducts } = await server.ssrLoadModule('/src/pages/admin/filterProducts.js')
+  const { default: ProductForm } = await server.ssrLoadModule('/src/pages/admin/ProductForm.jsx')
+  assert.match(renderToString(createElement(ProductManagement)), /Đang tải sản phẩm/)
+  assert.match(renderToString(createElement(ProductTable, { products: [] })), /Chưa có sản phẩm nào/)
+  assert.match(renderToString(createElement(ProductTable, { products: [], hasFilters: true })), /Không tìm thấy/)
+  assert.deepEqual(filterProducts([], '', '', ''), [])
+  // Verify filtering against existing DB-shaped records supplied by the service contract.
+  const filterRecords = [{ id: 1, name: 'Alpha', categoryId: 2, isActive: true },
+    { id: 2, name: 'Beta', categoryId: 3, isActive: false }]
+  assert.deepEqual(filterProducts(filterRecords, ' ALPHA ', '2', 'active'), [filterRecords[0]])
+  assert.deepEqual(filterProducts(filterRecords, '#2', '', 'inactive'), [filterRecords[1]])
+  assert.deepEqual(filterProducts(filterRecords, 'Alpha', '', 'inactive'), [])
+  const productForm = renderToString(createElement(ProductForm, { categories: [], brands: [], onSave: noop }))
+  assert.match(productForm, /name="brandId"/)
+  assert.match(productForm, /name="price"/)
+  assert.match(productForm, /Cần có danh mục và thương hiệu/)
+  assert.doesNotMatch(productForm, /SKU|iPhone|placeholder\.com/)
+  assert.doesNotMatch(readFileSync(new URL('../src/pages/admin/ProductManagement.css', import.meta.url), 'utf8'),
+    /#[0-9a-f]{3,8}\b|rgba?\(/i)
+  assert.match(renderToString(createElement(CategoryManagement)), /Đang tải danh mục/)
+  const categoryForm = renderToString(createElement(CategoryForm, { onSave: noop, onCancel: noop }))
+  assert.match(categoryForm, /name="name"/)
+  assert.match(categoryForm, /name="description"/)
+  assert.match(categoryForm, /name="isActive"/)
+  const { DashboardContent, DashboardDetails } = await server.ssrLoadModule('/src/pages/admin/Dashboard.jsx')
+  assert.match(renderToString(createElement(DashboardContent, { tab: 'orders', data: [] })), /Chưa có đơn hàng/)
+  assert.match(renderToString(createElement(DashboardContent, {
+    tab: 'revenue', data: { revenueLast7Days: [] },
+  })), /Chưa có dữ liệu trong 7 ngày/)
+  assert.match(renderToString(createElement(DashboardDetails)), /Chọn một chỉ số/)
+  const adminDirectory = new URL('../src/pages/admin/', import.meta.url)
+  assert.doesNotMatch(readFileSync(new URL('Dashboard.css', adminDirectory), 'utf8'), /#[0-9a-f]{3,8}\b|rgba?\(/i)
+  assert.doesNotMatch(readFileSync(new URL('Dashboard.jsx', adminDirectory), 'utf8'),
+    /Codexr|Sage|placeholder|Anna Jones|Carlos Brown|Joel Carrier/)
   const navProps = { route: 'shop', onNavigate: noop, onSearch: noop, cartCount: 2,
     user: { username: 'test' }, role: 'customer', onLogout: noop }
   const customerNav = renderToString(createElement(Navigation, navProps))
@@ -75,7 +144,10 @@ try {
   assert.match(renderToString(createElement(Navigation, { ...navProps, role: 'admin' })), /Quản trị/)
   const { api, authStore } = await server.ssrLoadModule('/src/services/api.js')
   authStore.setSession({ accessToken: 'test', user: { username: 'admin', roleName: 'Admin' } })
-  assert.match(renderToString(createElement(App)), /Quản trị/)
+  const adminApp = renderToString(createElement(App))
+  assert.match(adminApp, /Khu vực quản trị/)
+  assert.match(adminApp, /Đang tổng hợp/)
+  assert.doesNotMatch(adminApp, /Feel Every|Keystroke|Giỏ hàng|Về cửa hàng|Chức năng nhân viên|<footer/)
   authStore.clear()
   assert.doesNotMatch(renderToString(createElement(App)), /Quản trị/)
   const originalFetch = globalThis.fetch
@@ -99,6 +171,30 @@ try {
     assert.equal(requests.at(-1).method, 'POST')
     await api.login({ loginIdentifier: 'test', password: 'Example123' })
     assert.equal(authStore.user.username, 'test')
+    const controller = new AbortController()
+    await api.admin.dashboard(controller.signal)
+    assert.ok(requests.at(-1).url.endsWith('/api/admin/dashboard'))
+    assert.equal(requests.at(-1).signal, controller.signal)
+    assert.equal(requests.at(-1).headers.get('Authorization'), 'Bearer customer-token')
+    await api.admin.orders(controller.signal)
+    assert.ok(requests.at(-1).url.endsWith('/api/orders'))
+    assert.equal(requests.at(-1).signal, controller.signal)
+    await api.admin.categories(controller.signal)
+    assert.ok(requests.at(-1).url.endsWith('/api/categories'))
+    assert.equal(requests.at(-1).signal, controller.signal)
+    await api.admin.products(controller.signal)
+    assert.ok(requests.at(-1).url.endsWith('/api/products/management'))
+    assert.equal(requests.at(-1).signal, controller.signal)
+    await api.admin.createCategory({ name: '', description: null, isActive: false })
+    assert.equal(requests.at(-1).method, 'POST')
+    assert.ok(requests.at(-1).url.endsWith('/api/categories'))
+    assert.equal(JSON.parse(requests.at(-1).body).isActive, false)
+    await api.admin.updateCategory(7, { name: '', isActive: true })
+    assert.equal(requests.at(-1).method, 'PUT')
+    assert.ok(requests.at(-1).url.endsWith('/api/categories/7'))
+    await api.admin.deleteCategory(7)
+    assert.equal(requests.at(-1).method, 'DELETE')
+    assert.ok(requests.at(-1).url.endsWith('/api/categories/7'))
     await api.confirmOrderReceipt(7)
     assert.ok(requests.at(-1).url.endsWith('/api/orders/7/receipt'))
     assert.equal(requests.at(-1).method, 'PUT')
@@ -122,6 +218,16 @@ try {
     await api.createOrder(order)
     assert.ok(requests.at(-1).url.endsWith('/api/orders'))
     assert.deepEqual(JSON.parse(requests.at(-1).body), order)
+    await api.paymentOptions(controller.signal)
+    assert.ok(requests.at(-1).url.endsWith('/api/payments/options'))
+    assert.equal(requests.at(-1).signal, controller.signal)
+    await api.createPayment(7)
+    assert.ok(requests.at(-1).url.endsWith('/api/payments/orders/7'))
+    assert.equal(requests.at(-1).method, 'POST')
+    assert.equal(requests.at(-1).body, undefined)
+    await api.confirmBankPayment(7)
+    assert.ok(requests.at(-1).url.endsWith('/api/payments/orders/7/bank-confirmation'))
+    assert.equal(requests.at(-1).method, 'PUT')
     let notifications = 0
     const unsubscribe = authStore.subscribe(() => notifications++)
     globalThis.fetch = async () => Response.json({ message: 'Expired' }, { status: 401 })
@@ -138,6 +244,14 @@ try {
     resolveOld(Response.json({ message: 'Old session' }, { status: 401 }))
     await assert.rejects(oldRequest, /Old session/)
     assert.equal(authStore.user.username, 'new')
+    const passwordError = 'Mật khẩu phải có ít nhất 8 ký tự, gồm chữ và số.'
+    globalThis.fetch = async () => Response.json({
+      message: 'Vui lòng kiểm tra lại dữ liệu nhập.',
+      errors: { Password: [passwordError] },
+    }, { status: 400 })
+    await assert.rejects(api.register({}), { message: passwordError, status: 400 })
+    globalThis.fetch = async () => Response.json({ message: 'Email đã tồn tại.' }, { status: 400 })
+    await assert.rejects(api.register({}), { message: 'Email đã tồn tại.', status: 400 })
   } finally {
     globalThis.fetch = originalFetch
     authStore.clear()

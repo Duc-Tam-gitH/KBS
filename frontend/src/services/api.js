@@ -30,7 +30,11 @@ async function request(path, options = {}) {
   if (response.status === 401 && requestToken && requestToken === accessToken) authStore.clear()
   if (!response.ok) {
     const payload = await response.json().catch(() => null)
-    throw new ApiError(payload?.message || 'Không thể kết nối đến máy chủ.', response.status)
+    const validationMessage = Object.values(payload?.errors || {}).flat().join(' ')
+    throw new ApiError(
+      validationMessage || payload?.message || 'Không thể kết nối đến máy chủ.',
+      response.status,
+    )
   }
   return response.status === 204 ? null : response.json()
 }
@@ -82,6 +86,10 @@ export const api = {
     }),
   },
   createOrder: (payload) => request('/api/orders', { method: 'POST', body: payload }),
+  paymentOptions: (signal) => request('/api/payments/options', { signal }),
+  createPayment: (id) => request(`/api/payments/orders/${id}`, { method: 'POST' }),
+  paymentStatus: (id, signal) => request(`/api/payments/orders/${id}`, { signal }),
+  confirmBankPayment: (id) => request(`/api/payments/orders/${id}/bank-confirmation`, { method: 'PUT' }),
   cart: () => request('/api/cart'),
   addCartItem: (productId, quantity) =>
     request('/api/cart/items', { method: 'POST', body: { productId, quantity } }),
@@ -98,8 +106,13 @@ export const api = {
   removeLikeItem: (productId) =>
     request(`/api/likelist/items/${productId}`, { method: 'DELETE' }),
   admin: {
-    dashboard: () => request('/api/admin/dashboard'),
-    orders: () => request('/api/orders'),
+    products: (signal) => request('/api/products/management', { signal }),
+    categories: (signal) => request('/api/categories', { signal }),
+    createCategory: (payload) => request('/api/categories', { method: 'POST', body: payload }),
+    updateCategory: (id, payload) => request(`/api/categories/${id}`, { method: 'PUT', body: payload }),
+    deleteCategory: (id) => request(`/api/categories/${id}`, { method: 'DELETE' }),
+    dashboard: (signal) => request('/api/admin/dashboard', { signal }),
+    orders: (signal) => request('/api/orders', { signal }),
     updateOrderStatus: (id, orderStatus) => request(`/api/orders/${id}/status`, { method: 'PUT', body: { orderStatus } }),
     updateProduct: (id, payload) => request(`/api/products/${id}`, { method: 'PUT', body: payload }),
     inventory: (productId) => request(`/api/inventory/product/${productId}`),

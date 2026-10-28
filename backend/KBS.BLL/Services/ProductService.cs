@@ -9,6 +9,12 @@ namespace KBS.BLL.Services;
 
 public class ProductService(KbsDbContext db) : IProductService
 {
+    public async Task<List<ProductResponseDto>> GetForManagementAsync(CancellationToken ct = default)
+    {
+        var products = await Query().OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.Id).ToListAsync(ct);
+        return products.Select(ToDto).ToList();
+    }
+
     public async Task<PagedResponse<ProductResponseDto>> GetAllAsync(
         string? search,
         long? categoryId,

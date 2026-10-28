@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Register({ onRegister, onNavigate }) {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ export default function Register({ onRegister, onNavigate }) {
   })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
@@ -77,10 +80,11 @@ export default function Register({ onRegister, onNavigate }) {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="form-group auth-password-field">
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               name="password"
+              aria-describedby="register-password-help"
               className="auth-input"
               placeholder="Mật khẩu (tối thiểu 8 ký tự chứa chữ cái và số)" aria-label="Mật khẩu (tối thiểu 8 ký tự chứa chữ cái và số)"
               value={formData.password}
@@ -88,10 +92,21 @@ export default function Register({ onRegister, onNavigate }) {
               required
               minLength="8"
             />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+            </button>
           </div>
-          <div className="form-group">
+          <p id="register-password-help" className="auth-password-help">
+            Mật khẩu phải có ít nhất 8 ký tự, gồm chữ cái (A–Z, a–z) và số.
+          </p>
+          <div className="form-group auth-password-field">
             <input
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
               className="auth-input"
               placeholder="Xác nhận mật khẩu" aria-label="Xác nhận mật khẩu"
@@ -100,6 +115,14 @@ export default function Register({ onRegister, onNavigate }) {
               required
               minLength="8"
             />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              aria-label={showConfirmPassword ? 'Ẩn mật khẩu xác nhận' : 'Hiện mật khẩu xác nhận'}
+              onClick={() => setShowConfirmPassword((visible) => !visible)}
+            >
+              {showConfirmPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+            </button>
           </div>
 
           <button type="submit" className="auth-button" disabled={isSubmitting}>
