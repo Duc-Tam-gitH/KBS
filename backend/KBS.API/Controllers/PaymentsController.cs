@@ -14,9 +14,9 @@ public class PaymentsController(PaymentService service) : ControllerBase
 {
     [AllowAnonymous]
     [HttpGet("options")]
-    public IActionResult Options() => Ok(new
+    public async Task<IActionResult> Options(CancellationToken ct) => Ok(new
     {
-        bankAvailable = service.BankAvailable
+        bankAvailable = await service.BankAvailableAsync(ct)
     });
 
     [HttpGet("orders/{id:long}")]

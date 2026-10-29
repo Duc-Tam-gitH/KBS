@@ -30,6 +30,7 @@ export default function OrderProduct({ user = null, onNavigate, onAdd, busy = fa
   const [filter, setFilter] = useState('')
   const [paymentFilter, setPaymentFilter] = useState('')
   const [confirmId, setConfirmId] = useState(null)
+  const [cancelId, setCancelId] = useState(null)
   const [working, setWorking] = useState(false)
   const [notice, setNotice] = useState(null)
   const lock = useRef(false)
@@ -54,6 +55,7 @@ export default function OrderProduct({ user = null, onNavigate, onAdd, busy = fa
     setError('')
     setConfirmId(null)
     setRetry((value) => value + 1)
+    setCancelId(null)
   }
 
   const runAction = async (action) => {
@@ -77,6 +79,14 @@ export default function OrderProduct({ user = null, onNavigate, onAdd, busy = fa
     setOrders((items) => items.map((order) => order.id === updated.id ? updated : order))
     setConfirmId(null)
     setNotice({ text: `Đã xác nhận nhận hàng cho đơn #${updated.id}.` })
+  })
+
+  const cancelOrder = (id) => runAction(async () => {
+    const updated = await api.cancelOrder(id)
+    if (!mounted.current) return
+    setOrders((items) => items.map((order) => order.id === updated.id ? updated : order))
+    setCancelId(null)
+    setNotice({ text: `Đã huỷ đơn hàng #${updated.id}.` })
   })
 
   const buyAgain = (item) => runAction(async () => {
@@ -217,6 +227,18 @@ export default function OrderProduct({ user = null, onNavigate, onAdd, busy = fa
                     </details>
                     <footer className="op-card-footer">
                       <p>Thành tiền: <strong>{money(order.totalPrice)}</strong></p>
+                      {order.orderStatus === 'PENDING' && (cancelId === order.id
+                        ? <div className="op-confirm" role="group" aria-label={`Xác nhận huỷ đơn #${order.id}`}>
+                          <p>Bạn có chắc muốn huỷ đơn hàng này?</p>
+                          <button type="button" disabled={working} onClick={() => setCancelId(null)}>Quay lại</button>
+                          <button type="button" className="op-primary" disabled={working}
+                            onClick={() => cancelOrder(order.id)}>
+                            {working ? 'Đang huỷ…' : 'Xác nhận huỷ đơn'}
+                          </button>
+                        </div>
+                        : <button type="button" disabled={working} onClick={() => setCancelId(order.id)}>
+                          Huỷ đơn
+                        </button>)}
                       {order.orderStatus === 'SHIPPING' && (confirmId === order.id
                         ? <div className="op-confirm" role="group" aria-label={`Xác nhận nhận đơn #${order.id}`}>
                           <p>Bạn đã nhận đủ sản phẩm trong đơn hàng này?</p>

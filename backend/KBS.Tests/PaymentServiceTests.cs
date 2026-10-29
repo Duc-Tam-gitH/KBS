@@ -4,7 +4,6 @@ using KBS.Models.DTOs.Payments;
 using KBS.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Options;
 
 namespace KBS.Tests;
 
@@ -24,18 +23,25 @@ public class PaymentServiceTests
 
     private static PaymentService Service(KbsDbContext db, PaymentOptions? settings = null)
     {
-        var options = Options.Create(settings ?? Settings());
-        return new PaymentService(db, options);
+        var bank = (settings ?? Settings()).Bank;
+        // MOCK DATA — isolated database fixture for payment tests.
+        db.ShopSettings.Add(new ShopSettings
+        {
+            BankBin = bank.BankBin, BankName = bank.BankName,
+            AccountNumber = bank.AccountNumber, AccountName = bank.AccountName
+        });
+        db.SaveChanges();
+        return new PaymentService(db);
     }
 
     [Fact]
-    public void Only_cod_and_banking_are_supported()
+    public async Task Only_cod_and_banking_are_supported()
     {
         using var db = NewDb();
         var service = Service(db);
-        service.ValidateMethod("COD");
-        service.ValidateMethod("BANKING");
-        Assert.Throws<ArgumentException>(() => service.ValidateMethod("WALLET"));
+        await service.ValidateMethodAsync("COD", default);
+        await service.ValidateMethodAsync("BANKING", default);
+        await Assert.ThrowsAsync<ArgumentException>(() => service.ValidateMethodAsync("WALLET", default));
         var dto = new KBS.Models.DTOs.Orders.CreateOrderDto { PaymentMethod = "WALLET" };
         var context = new System.ComponentModel.DataAnnotations.ValidationContext(dto)
         {

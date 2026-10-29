@@ -1,0 +1,34 @@
+.iv-layout h1, .iv-actions, .iv-toolbar, .iv-pagination { display: flex; align-items: center; gap: 10px; }
+.iv-actions, .iv-toolbar, .iv-pagination, .iv-layout .ad-heading { flex-wrap: wrap; }
+.iv-layout .ad-heading { align-items: flex-start; }
+.iv-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.iv-stats button { display: grid; text-align: left; gap: 12px; }
+.iv-stats strong { font-size: 28px; }
+.iv-muted, .iv-layout small, .iv-details time { color: var(--color-text-muted); }
+.iv-layout small, .iv-details time { display: block; margin-top: 6px; }
+.iv-toolbar > input { flex: 1; min-width: 150px; }
+.iv-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.iv-filters label, .iv-form, .iv-form label, .iv-form fieldset { display: grid; gap: 10px; min-width: 0; }
+.iv-form { margin: 20px 0; }
+.iv-form fieldset { border: 0; margin: 0; padding: 0; }
+.iv-layout input:not([type='checkbox']), .iv-layout select, .iv-form input, .iv-form textarea {
+  font: inherit; color: var(--color-text-light); background: var(--color-bg-deep);
+  border: 1px solid var(--color-border); border-radius: 8px; padding: 10px; min-width: 0; min-height: 44px;
+}
+.iv-form input, .iv-form textarea { width: 100%; }
+.iv-layout input::placeholder { color: var(--color-text-muted); }
+.iv-layout input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--color-accent); }
+.iv-table-wrap { overflow-x: auto; }
+.iv-status { white-space: nowrap; }
+.iv-status-low, .iv-status-empty { color: var(--color-primary); }
+.iv-status-available { color: var(--color-accent); }
+.iv-notice { padding: 16px; border: 1px solid var(--color-border); border-radius: 12px; overflow-wrap: anywhere; }
+.iv-empty { padding: 32px 12px; text-align: center; color: var(--color-text-muted); }
+.iv-history { list-style: none; padding: 0; }
+.iv-history li { padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+.iv-history p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.admin-dashboard .iv-primary { background: var(--color-primary); color: var(--color-bg-deep); font-weight: 700; }
+.admin-dashboard .iv-primary:hover:not(:disabled) { background: var(--color-accent); color: var(--color-bg-deep); }
+.iv-layout :disabled, .iv-details :disabled { opacity: .5; cursor: not-allowed; }
+.iv-layout :focus-visible, .iv-details :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 900px) { .iv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .iv-filters { grid-template-columns: 1fr; } }

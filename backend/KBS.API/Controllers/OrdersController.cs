@@ -21,7 +21,7 @@ public class OrdersController(IOrderService service, PaymentService payments) : 
     {
         try
         {
-            payments.ValidateMethod(dto.PaymentMethod);
+            await payments.ValidateMethodAsync(dto.PaymentMethod, ct);
             var order = await service.CreateAsync(UserId(), dto, ct);
             return CreatedAtAction(nameof(MyOrders), order);
         }
@@ -47,6 +47,22 @@ public class OrdersController(IOrderService service, PaymentService payments) : 
         try
         {
             var order = await service.ConfirmReceiptAsync(UserId(), id, ct);
+            return order is null ? NotFound() : Ok(order);
+        }
+        catch (InvalidOperationException error)
+        {
+            return Conflict(new { message = error.Message });
+        }
+    }
+
+    [HttpPut("{id:long}/cancel")]
+    public async Task<ActionResult<OrderResponseDto>> Cancel(
+        [Range(1, long.MaxValue)] long id,
+        CancellationToken ct)
+    {
+        try
+        {
+            var order = await service.CancelAsync(UserId(), id, ct);
             return order is null ? NotFound() : Ok(order);
         }
         catch (InvalidOperationException error)

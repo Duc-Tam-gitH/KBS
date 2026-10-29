@@ -10,6 +10,49 @@ namespace KBS.Tests;
 public class OrderServiceTests
 {
     [Fact]
+    public async Task Customer_cancellation_checks_owner_and_restores_stock_only_once()
+    {
+        await using var db = NewDb();
+        var product = await SeedProduct(db, price: 100, stock: 5);
+        var service = new OrderService(db);
+        var created = await service.CreateAsync(1, Order(product.Id, 2));
+
+        Assert.Null(await service.CancelAsync(2, created.Id));
+        Assert.Null(await service.CancelAsync(1, long.MaxValue));
+        Assert.Equal(3, (await db.Inventories.SingleAsync()).StockQuantity);
+
+        var cancelled = await service.CancelAsync(1, created.Id);
+        Assert.Equal("CANCELLED", cancelled!.OrderStatus);
+        Assert.Equal(created.PaymentStatus, cancelled.PaymentStatus);
+        Assert.Equal(5, (await db.Inventories.SingleAsync()).StockQuantity);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CancelAsync(1, created.Id));
+        var movement = Assert.Single(await db.InventoryMovements.Where(x => x.Delta > 0).ToListAsync());
+        Assert.Equal(2, movement.Delta);
+        Assert.Equal(1L, movement.ActorId);
+        Assert.Equal(5, (await db.Inventories.SingleAsync()).StockQuantity);
+    }
+
+    [Theory]
+    [InlineData("CONFIRMED")]
+    [InlineData("SHIPPING")]
+    [InlineData("COMPLETED")]
+    public async Task Customer_cannot_cancel_after_confirmation(string status)
+    {
+        await using var db = NewDb();
+        var product = await SeedProduct(db, price: 100, stock: 5);
+        var service = new OrderService(db);
+        var created = await service.CreateAsync(1, Order(product.Id, 2));
+        var order = await db.Orders.SingleAsync();
+        order.OrderStatus = status;
+        await db.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CancelAsync(1, created.Id));
+        Assert.Equal(status, order.OrderStatus);
+        Assert.Equal(3, (await db.Inventories.SingleAsync()).StockQuantity);
+        Assert.Empty(await db.InventoryMovements.Where(x => x.Delta > 0).ToListAsync());
+    }
+
+    [Fact]
     public async Task Create_order_uses_server_price_and_decrements_inventory()
     {
         await using var db = NewDb();

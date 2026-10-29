@@ -63,7 +63,7 @@ public class StaffController(StaffService service, IOrderService orders) : Contr
         UpdateUserStatusDto dto,
         CancellationToken ct)
     {
-        await service.SetCustomerStatusAsync(id, dto.IsActive, ct);
+        await service.SetCustomerStatusAsync(id, dto.IsActive!.Value, ct);
         return NoContent();
     }
 
@@ -72,12 +72,9 @@ public class StaffController(StaffService service, IOrderService orders) : Contr
         service.OrderOperationsAsync(id, ct);
 
     [HttpPut("orders/{id:long}/tracking")]
-    public async Task<IActionResult> Tracking(
-        long id,
-        TrackingRequest dto,
-        CancellationToken ct)
+    public async Task<IActionResult> Tracking(long id, CancellationToken ct)
     {
-        await service.TrackingAsync(id, dto.TrackingNumber, ct);
+        await service.TrackingAsync(id, ct);
         return NoContent();
     }
 

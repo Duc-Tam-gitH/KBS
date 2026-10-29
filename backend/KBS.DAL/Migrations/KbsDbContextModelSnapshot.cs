@@ -22,6 +22,152 @@ namespace KBS.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("KBS.Models.Entities.AiEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("ActorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ModuleId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<long?>("OrderId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ModuleId", "Id");
+
+                    b.HasIndex("ModuleId", "OrderId", "Kind")
+                        .IsUnique();
+
+                    b.ToTable("AiEvents");
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.AiModule", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal?>("ApprovalLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsIntegrated")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastHeartbeatAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("SourceFile")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AiModules", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AiModules_Enabled", "NOT \"IsEnabled\" OR \"IsIntegrated\"");
+
+                            t.HasCheckConstraint("CK_AiModules_Limit", "\"ApprovalLimit\" IS NULL OR \"ApprovalLimit\" > 0");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "ai_auto",
+                            ApprovalLimit = 10000000m,
+                            Description = "Xác nhận đơn chờ dưới 10 triệu; từ 10 triệu cần staff xác nhận.",
+                            IsEnabled = false,
+                            IsIntegrated = true,
+                            Name = "Tự động xác nhận đơn",
+                            SourceFile = "ai_auto.py",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = "ai_anti",
+                            Description = "Phát hiện mua trên 100 sản phẩm trong 24 giờ.",
+                            IsEnabled = false,
+                            IsIntegrated = false,
+                            Name = "Phát hiện mua gom",
+                            SourceFile = "ai_anti.py",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = "ai_security",
+                            Description = "Phát hiện giá trị đơn hàng bất thường.",
+                            IsEnabled = false,
+                            IsIntegrated = false,
+                            Name = "Giám sát đơn hàng",
+                            SourceFile = "ai_security.py",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = "ai_reviewnpl",
+                            Description = "Lọc từ khóa và phát hiện spam đánh giá.",
+                            IsEnabled = false,
+                            IsIntegrated = false,
+                            Name = "Kiểm tra đánh giá",
+                            SourceFile = "ai_reviewnpl.py",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = "ai_recommender",
+                            Description = "Gợi ý sản phẩm theo kịch bản mua hàng.",
+                            IsEnabled = false,
+                            IsIntegrated = false,
+                            Name = "Gợi ý sản phẩm",
+                            SourceFile = "ai_recommender.py",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.Brand", b =>
                 {
                     b.Property<long>("Id")
@@ -607,6 +753,76 @@ namespace KBS.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("KBS.Models.Entities.ShopSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AccountName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("AccountNumber")
+                        .HasMaxLength(19)
+                        .HasColumnType("character varying(19)");
+
+                    b.Property<string>("BankBin")
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("BannerContentType")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<byte[]>("BannerData")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("Hotline")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("LogoContentType")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<byte[]>("LogoData")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Slogan")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("WarehouseAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShopSettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ShopSettings_Singleton", "\"Id\" = 1");
+                        });
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.StaffShift", b =>
                 {
                     b.Property<long>("Id")
@@ -683,6 +899,27 @@ namespace KBS.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.AiEvent", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("KBS.Models.Entities.AiModule", "Module")
+                        .WithMany()
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KBS.Models.Entities.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Module");
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.CartItem", b =>

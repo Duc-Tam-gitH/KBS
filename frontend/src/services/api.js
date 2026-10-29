@@ -22,11 +22,13 @@ export class ApiError extends Error {
 
 async function request(path, options = {}) {
   const headers = new Headers(options.headers)
+  const multipart = options.body instanceof FormData
   headers.set('Accept', 'application/json')
-  if (options.body !== undefined) headers.set('Content-Type', 'application/json')
+  if (options.body !== undefined && !multipart) headers.set('Content-Type', 'application/json')
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
   const requestToken = accessToken
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers, body: options.body === undefined ? undefined : JSON.stringify(options.body) })
+  const response = await fetch(`${API_URL}${path}`, { ...options, headers,
+    body: multipart ? options.body : options.body === undefined ? undefined : JSON.stringify(options.body) })
   if (response.status === 401 && requestToken && requestToken === accessToken) authStore.clear()
   if (!response.ok) {
     const payload = await response.json().catch(() => null)
@@ -40,6 +42,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  shop: (signal) => request('/api/shop', { signal }),
   login: async (credentials) => { const session = await request('/api/auth/login', { method: 'POST', body: credentials }); authStore.setSession(session); return session },
   register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
   products: (params = {}) => request(`/api/products?${new URLSearchParams(params)}`),
@@ -56,8 +59,8 @@ export const api = {
     orderStatus: (id, orderStatus) => request(`/api/orders/${id}/status`, {
       method: 'PUT', body: { orderStatus },
     }),
-    tracking: (id, trackingNumber) => request(`/api/staff/orders/${id}/tracking`, {
-      method: 'PUT', body: { trackingNumber },
+    tracking: (id) => request(`/api/staff/orders/${id}/tracking`, {
+      method: 'PUT',
     }),
     note: (id, content) => request(`/api/staff/orders/${id}/notes`, { method: 'POST', body: { content } }),
     adjustStock: (id, payload) => request(`/api/staff/inventory/${id}/adjustments`, {
@@ -86,6 +89,7 @@ export const api = {
     }),
   },
   createOrder: (payload) => request('/api/orders', { method: 'POST', body: payload }),
+  cancelOrder: (id) => request(`/api/orders/${id}/cancel`, { method: 'PUT' }),
   paymentOptions: (signal) => request('/api/payments/options', { signal }),
   createPayment: (id) => request(`/api/payments/orders/${id}`, { method: 'POST' }),
   paymentStatus: (id, signal) => request(`/api/payments/orders/${id}`, { signal }),
@@ -106,6 +110,26 @@ export const api = {
   removeLikeItem: (productId) =>
     request(`/api/likelist/items/${productId}`, { method: 'DELETE' }),
   admin: {
+    shop: (signal) => request('/api/admin/shop', { signal }),
+    saveShop: (body) => request('/api/admin/shop', { method: 'PUT', body }),
+    uploadShopImage: (kind, file) => {
+      const body = new FormData(); body.append('file', file)
+      return request(`/api/admin/shop/media/${kind}`, { method: 'PUT', body })
+    },
+    deleteShopImage: (kind) => request(`/api/admin/shop/media/${kind}`, { method: 'DELETE' }),
+    users: (signal) => request('/api/users', { signal }),
+    userRoles: (signal) => request('/api/users/roles', { signal }),
+    createUser: (body) => request('/api/users', { method: 'POST', body }),
+    saveUser: (id, body) => request(`/api/users/${id}`, { method: 'PUT', body }),
+    userStatus: (id, isActive) => request(`/api/users/${id}/status`, { method: 'PUT', body: { isActive } }),
+    deleteUser: (id) => request(`/api/users/${id}`, { method: 'DELETE' }),
+    aiModules: (signal) => request('/api/admin/ai/modules', { signal }),
+    aiEnabled: (id, isEnabled) => request(`/api/admin/ai/modules/${encodeURIComponent(id)}/enabled`, {
+      method: 'PUT', body: { isEnabled },
+    }),
+    aiEvents: (moduleId, beforeId, signal) => request(`/api/admin/ai/events?${new URLSearchParams({
+      ...(moduleId ? { moduleId } : {}), ...(beforeId ? { beforeId } : {}), limit: 50,
+    })}`, { signal }),
     products: (signal) => request('/api/products/management', { signal }),
     categories: (signal) => request('/api/categories', { signal }),
     createCategory: (payload) => request('/api/categories', { method: 'POST', body: payload }),

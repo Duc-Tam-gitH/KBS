@@ -51,6 +51,10 @@ script có kiểm tra lịch sử migration để không tạo lại bảng khi 
 
 ## Chạy dữ liệu và báo cáo
 
+AI Management bổ sung migration `20261029043203_AddAiManagement` với hai bảng `AiModules`, `AiEvents`.
+Thiết kế và ánh xạ UI: [ai-management-design.md](ai-management-design.md).
+Hướng dẫn khởi động worker: [ai/README.md](../ai/README.md).
+
 Module Staff bổ sung migration `AddStaffOperations` (5 bảng, 2 cột, đã được duyệt).
 Chi tiết PK/FK, ánh xạ UI và request/response nằm tại [staff-mapping.md](staff-mapping.md).
 `add_staff_operations.sql` là script idempotent từ migration `AddProductReviews` đến `AddStaffOperations`;

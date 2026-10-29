@@ -136,27 +136,33 @@ public class OrderService(KbsDbContext db) : IOrderService
         return ToDto(order);
     }
 
-    public async Task<OrderResponseDto?> UpdateStatusAsync(
+    public Task<OrderResponseDto?> CancelAsync(
+        long userId,
+        long orderId,
+        CancellationToken ct = default) =>
+        ChangeStatusAsync(orderId, "CANCELLED", userId, true, ct);
+
+    public Task<OrderResponseDto?> UpdateStatusAsync(
         long id,
         UpdateOrderStatusDto dto,
         long actorId,
-        CancellationToken ct = default)
+        CancellationToken ct = default) =>
+        ChangeStatusAsync(id, dto.OrderStatus.Trim().ToUpperInvariant(), actorId, false, ct);
+
+    private async Task<OrderResponseDto?> ChangeStatusAsync(
+        long id,
+        string status,
+        long actorId,
+        bool customerCancellation,
+        CancellationToken ct)
     {
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var status = dto.OrderStatus.Trim().ToUpperInvariant();
-        var allowed = new Dictionary<string, string[]>
-        {
-            { "PENDING", ["CONFIRMED", "CANCELLED"] },
-            { "CONFIRMED", ["SHIPPING", "CANCELLED"] },
-            { "SHIPPING", ["COMPLETED"] },
-            { "COMPLETED", [] },
-            { "CANCELLED", [] }
-        };
-        if (!allowed.ContainsKey(status)) throw new ArgumentException("Trạng thái đơn hàng không hợp lệ.");
-        var order = await Query().SingleOrDefaultAsync(x => x.Id == id, ct);
+        var order = await Query().SingleOrDefaultAsync(
+            x => x.Id == id && (!customerCancellation || x.UserId == actorId), ct);
         if (order is null) return null;
-        if (!allowed.TryGetValue(order.OrderStatus, out var next) || !next.Contains(status))
-            throw new InvalidOperationException($"Không thể chuyển từ {order.OrderStatus} sang {status}.");
+        if (customerCancellation && order.OrderStatus != "PENDING")
+            throw new InvalidOperationException("Chỉ có thể hủy đơn hàng khi chưa được xác nhận.");
+        ValidateTransition(order.OrderStatus, status);
         if (status == "CANCELLED")
         {
             foreach (var detail in order.OrderDetails)
@@ -179,6 +185,15 @@ public class OrderService(KbsDbContext db) : IOrderService
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         return ToDto(order);
+    }
+
+    internal static void ValidateTransition(string current, string next)
+    {
+        if (next is not ("PENDING" or "CONFIRMED" or "SHIPPING" or "COMPLETED" or "CANCELLED"))
+            throw new ArgumentException("Trạng thái đơn hàng không hợp lệ.");
+        var valid = (current, next) is ("PENDING", "CONFIRMED" or "CANCELLED")
+            or ("CONFIRMED", "SHIPPING" or "CANCELLED") or ("SHIPPING", "COMPLETED");
+        if (!valid) throw new InvalidOperationException($"Không thể chuyển từ {current} sang {next}.");
     }
 
     private IQueryable<Order> Query() => db.Orders

@@ -30,6 +30,9 @@ try {
   assert.match(renderToString(createElement(StaffWorkspace, {
     user: staffUser, onNavigate: noop, onLogout: noop,
   })), /Tổng quan/)
+  assert.match(renderToString(createElement(StaffWorkspace, {
+    user: staffUser, onNavigate: noop, onLogout: noop,
+  })), />AI<\/button>/)
   for (const filename of ['StaffDashboard', 'OrderManager', 'Inventory', 'CustomerManager', 'SupportChat']) {
     const { default: Page } = await server.ssrLoadModule(`/src/pages/Staff/${filename}.jsx`)
     const markup = renderToString(createElement(Page, { user: staffUser, onOpen: noop }))
@@ -93,11 +96,29 @@ try {
     'Quản lý kho', 'Quản lý cửa hàng', 'Quản lý AI']) {
     assert.ok(adminMarkup.includes(label), 'Thiếu trang quản trị: ' + label)
   }
-  for (const filename of ['AccountManagement',
-    'InventoryManagement', 'ShopManagement', 'AIManagement']) {
+  const { default: AccountManagement } = await server.ssrLoadModule('/src/pages/admin/AccountManagement.jsx')
+  assert.match(renderToString(createElement(AccountManagement)), /Đang tải tài khoản/)
+  const { default: InventoryManagement } = await server.ssrLoadModule('/src/pages/admin/InventoryManagement.jsx')
+  assert.match(renderToString(createElement(InventoryManagement)), /Đang tải tồn kho/)
+  for (const filename of ['ShopManagement']) {
     const { default: Page } = await server.ssrLoadModule('/src/pages/admin/' + filename + '.jsx')
     assert.match(renderToString(createElement(Page)), /chưa được triển khai/)
   }
+  const { default: AIManagement } = await server.ssrLoadModule('/src/pages/admin/AIManagement.jsx')
+  const aiMarkup = renderToString(createElement(AIManagement))
+  assert.match(aiMarkup, /Đang tải danh sách AI/)
+  assert.match(aiMarkup, /ALL AI/)
+  assert.match(aiMarkup, /Thông tin AI được chọn/)
+  assert.match(aiMarkup, /Chọn một AI/)
+  assert.doesNotMatch(aiMarkup, /chưa được triển khai/)
+  const staffAiMarkup = renderToString(createElement(AIManagement, { readOnly: true }))
+  assert.match(staffAiMarkup, /Theo dõi AI/)
+  assert.match(staffAiMarkup, /Chế độ chỉ đọc/)
+  assert.match(staffAiMarkup, /ALL AI/)
+  assert.match(staffAiMarkup, /Thông tin AI được chọn/)
+  assert.doesNotMatch(staffAiMarkup, /role="switch"/)
+  assert.doesNotMatch(readFileSync(new URL('../src/pages/admin/AIManagement.css', import.meta.url), 'utf8'),
+    /#[0-9a-f]{3,8}\b|rgba?\(/i)
   const { default: CategoryManagement, CategoryForm } =
     await server.ssrLoadModule('/src/pages/admin/CategoryManagement.jsx')
   const { default: ProductManagement, ProductTable } =
@@ -142,6 +163,16 @@ try {
   assert.match(customerNav, /Giỏ hàng: 2 sản phẩm/)
   assert.doesNotMatch(customerNav, /Quản trị/)
   assert.match(renderToString(createElement(Navigation, { ...navProps, role: 'admin' })), /Quản trị/)
+  const staffNav = renderToString(createElement(Navigation, { ...navProps, role: 'staff' }))
+  assert.doesNotMatch(staffNav, /Giỏ hàng|Sản phẩm yêu thích|Đơn hàng/)
+  assert.match(staffNav, /Nhân viên/)
+  assert.match(staffNav, /Tài khoản/)
+  for (const role of ['customer', 'admin']) {
+    const markup = renderToString(createElement(Navigation, { ...navProps, role }))
+    assert.match(markup, /Giỏ hàng: 2 sản phẩm/)
+    assert.match(markup, /Sản phẩm yêu thích/)
+    assert.match(markup, /Đơn hàng/)
+  }
   const { api, authStore } = await server.ssrLoadModule('/src/services/api.js')
   authStore.setSession({ accessToken: 'test', user: { username: 'admin', roleName: 'Admin' } })
   const adminApp = renderToString(createElement(App))

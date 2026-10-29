@@ -14,6 +14,92 @@ namespace KBS.Tests;
 public class StaffWorkflowTests
 {
     [Fact]
+    public async Task Admin_inventory_reports_open_orders_and_uses_validated_stock_movements()
+    {
+        using var app = new TestApiFactory();
+        using var admin = await Login(app, "admin", "Admin123");
+        using var customer = await Login(app, "customer", "Customer1");
+        using var anonymous = app.CreateClient();
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
+        var customerId = await db.Users.Where(x => x.Username == "customer").Select(x => x.Id).SingleAsync();
+        // MOCK DATA — isolated test records, never used by the application UI.
+        var product = new Product
+        {
+            Name = "Inventory API test", CategoryId = 1,
+            Brand = new Brand { Name = "Inventory test brand" },
+            Inventory = new Inventory { StockQuantity = 10, LowStockThreshold = 3 }
+        };
+        db.Products.Add(product);
+        foreach (var status in new[] { "PENDING", "CONFIRMED", "SHIPPING", "COMPLETED", "CANCELLED" })
+        {
+            db.Orders.Add(new Order
+            {
+                UserId = customerId, OrderStatus = status,
+                OrderDetails = [new OrderDetail { Product = product, Quantity = 2 }]
+            });
+        }
+        await db.SaveChangesAsync();
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync("/api/staff/inventory")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await customer.GetAsync("/api/staff/inventory")).StatusCode);
+        var items = await admin.GetFromJsonAsync<List<StaffInventoryDto>>("/api/staff/inventory");
+        var item = Assert.Single(items!);
+        Assert.Equal(6, item.OrderedQuantity);
+        Assert.Equal(10, item.StockQuantity);
+        Assert.Equal(1, item.CategoryId);
+        Assert.Equal((await db.Categories.FindAsync(1L))!.Name, item.CategoryName);
+        var path = $"/api/staff/inventory/{product.Id}/adjustments";
+        var request = new StockAdjustmentRequest { Delta = -11, ExpectedQuantity = 10, Reason = "Count check" };
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.PostAsJsonAsync(path, request)).StatusCode);
+        request.Delta = 3;
+        Assert.Equal(HttpStatusCode.NoContent, (await admin.PostAsJsonAsync(path, request)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await admin.PostAsJsonAsync(path, request)).StatusCode);
+        request.ExpectedQuantity = 13;
+        request.Delta = -4;
+        Assert.Equal(HttpStatusCode.NoContent, (await admin.PostAsJsonAsync(path, request)).StatusCode);
+        var history = await admin.GetFromJsonAsync<List<InventoryMovementDto>>(
+            $"/api/staff/inventory/{product.Id}/movements");
+        Assert.Equal(2, history!.Count);
+        Assert.Equal(13, history[0].QuantityBefore);
+        Assert.Equal(9, history[0].QuantityAfter);
+        Assert.Equal(await db.Users.Where(x => x.Username == "admin").Select(x => x.Id).SingleAsync(), history[0].ActorId);
+    }
+
+    [Fact]
+    public async Task Tracking_generation_is_authorized_persisted_and_does_not_overwrite_existing_codes()
+    {
+        using var app = new TestApiFactory();
+        using var anonymous = app.CreateClient();
+        using var staff = await Login(app, "staff", "Staff123");
+        using var customer = await Login(app, "customer", "Customer1");
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
+        var customerId = await db.Users.Where(x => x.Username == "customer").Select(x => x.Id).SingleAsync();
+        var order = new Order { UserId = customerId };
+        var existing = new Order { UserId = customerId, TrackingNumber = "EXISTING-CODE" };
+        db.Orders.AddRange(order, existing);
+        await db.SaveChangesAsync();
+        var path = $"/api/staff/orders/{order.Id}/tracking";
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.PutAsync(path, null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await customer.PutAsync(path, null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await staff.PutAsync($"/api/staff/orders/{long.MaxValue}/tracking", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await staff.PutAsync(path, null)).StatusCode);
+        var operations = await staff.GetFromJsonAsync<OrderOperationsDto>(
+            $"/api/staff/orders/{order.Id}/operations");
+        var code = operations!.TrackingNumber;
+        Assert.Matches($"^TEMP-{order.Id}-[a-f0-9]{{32}}$", code!);
+
+        Assert.Equal(HttpStatusCode.NoContent, (await staff.PutAsync(path, null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await staff.PutAsync($"/api/staff/orders/{existing.Id}/tracking", null)).StatusCode);
+        db.ChangeTracker.Clear();
+        Assert.Equal(code, (await db.Orders.SingleAsync(x => x.Id == order.Id)).TrackingNumber);
+        Assert.Equal("EXISTING-CODE", (await db.Orders.SingleAsync(x => x.Id == existing.Id)).TrackingNumber);
+    }
+
+    [Fact]
     public async Task Stock_adjustments_are_validated_and_logged_and_notes_are_private()
     {
         using var app = new TestApiFactory();

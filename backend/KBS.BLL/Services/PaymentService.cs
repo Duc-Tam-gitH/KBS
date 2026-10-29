@@ -5,21 +5,28 @@ using KBS.DAL.Data;
 using KBS.Models.DTOs.Payments;
 using KBS.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace KBS.BLL.Services;
 
-public class PaymentService(
-    KbsDbContext db,
-    IOptions<PaymentOptions> options)
+public class PaymentService(KbsDbContext db)
 {
-    public bool BankAvailable => Regex.IsMatch(options.Value.Bank.BankBin, @"^\d{6}$")
-        && Regex.IsMatch(options.Value.Bank.AccountNumber, @"^\d{6,19}$")
-        && !string.IsNullOrWhiteSpace(options.Value.Bank.AccountName);
+    private Task<BankOptions?> BankAsync(CancellationToken ct) => db.ShopSettings.AsNoTracking()
+        .Select(x => new BankOptions
+        {
+            BankBin = x.BankBin ?? "", BankName = x.BankName ?? "",
+            AccountNumber = x.AccountNumber ?? "", AccountName = x.AccountName ?? ""
+        }).SingleOrDefaultAsync(ct);
 
-    public void ValidateMethod(string method)
+    private static bool Configured(BankOptions? bank) => bank != null
+        && Regex.IsMatch(bank.BankBin, @"^[0-9]{6}$")
+        && Regex.IsMatch(bank.AccountNumber, @"^[0-9]{6,19}$")
+        && !string.IsNullOrWhiteSpace(bank.AccountName) && !string.IsNullOrWhiteSpace(bank.BankName);
+
+    public async Task<bool> BankAvailableAsync(CancellationToken ct) => Configured(await BankAsync(ct));
+
+    public async Task ValidateMethodAsync(string method, CancellationToken ct)
     {
-        if (method == "BANKING" && !BankAvailable)
+        if (method == "BANKING" && !await BankAvailableAsync(ct))
             throw new InvalidOperationException("Chưa cấu hình tài khoản nhận chuyển khoản.");
         if (method is not ("COD" or "BANKING"))
             throw new ArgumentException("Phương thức thanh toán không hợp lệ.");
@@ -41,14 +48,16 @@ public class PaymentService(
         if (order.PaymentStatus == "PAID") return result;
         if (order.OrderStatus == "CANCELLED" || order.PaymentStatus != "PENDING")
             throw new InvalidOperationException("Đơn hàng không còn chờ thanh toán.");
-        ValidateMethod(order.PaymentMethod);
+        if (order.PaymentMethod is not ("COD" or "BANKING"))
+            throw new ArgumentException("Phương thức thanh toán không hợp lệ.");
         if (order.PaymentMethod == "BANKING")
         {
             if (order.TotalPrice <= 0 || order.TotalPrice != decimal.Truncate(order.TotalPrice))
                 throw new InvalidOperationException("QR chuyển khoản yêu cầu số tiền nguyên dương.");
-            var bank = options.Value.Bank;
+            var bank = await BankAsync(ct);
+            if (!Configured(bank)) throw new InvalidOperationException("Chưa cấu hình tài khoản nhận chuyển khoản.");
             result.TransferContent = $"KBS{order.Id}";
-            result.BankName = bank.BankName;
+            result.BankName = bank!.BankName;
             result.AccountNumber = bank.AccountNumber;
             result.AccountName = bank.AccountName;
             result.QrImageUrl = $"https://img.vietqr.io/image/{bank.BankBin}-{bank.AccountNumber}-compact2.svg"

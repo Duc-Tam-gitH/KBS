@@ -17,7 +17,7 @@ public class StaffOperationFilter : IExceptionFilter
             ArgumentException => 400,
             InvalidOperationException => 409,
             PostgresException { SqlState: "40001" or "23505" } => 409,
-            DbUpdateException { InnerException: PostgresException { SqlState: "40001" or "23505" } } => 409,
+            DbUpdateException { InnerException: PostgresException { SqlState: "40001" or "23505" or "23503" } } => 409,
             _ => 0
         };
         if (code == 0) return;

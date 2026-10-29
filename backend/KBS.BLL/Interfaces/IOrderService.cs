@@ -12,6 +12,11 @@ public interface IOrderService
     Task<List<OrderResponseDto>> GetForUserAsync(long userId, CancellationToken ct = default);
     Task<List<OrderResponseDto>> GetAllAsync(CancellationToken ct = default);
 
+    Task<OrderResponseDto?> CancelAsync(
+        long userId,
+        long orderId,
+        CancellationToken ct = default);
+
     Task<OrderResponseDto?> ConfirmReceiptAsync(
         long userId,
         long orderId,

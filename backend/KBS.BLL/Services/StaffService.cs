@@ -36,6 +36,10 @@ public class StaffService(KbsDbContext db)
         .Select(x => new StaffInventoryDto
         {
             ProductId = x.ProductId, Name = x.Product!.Name, Description = x.Product.Description,
+            CategoryId = x.Product.CategoryId, CategoryName = x.Product.Category!.Name,
+            OrderedQuantity = x.Product.OrderDetails.Where(d => d.Order!.OrderStatus == "PENDING"
+                || d.Order.OrderStatus == "CONFIRMED" || d.Order.OrderStatus == "SHIPPING")
+                .Sum(d => (long?)d.Quantity) ?? 0,
             Price = x.Product.Price, IsActive = x.Product.IsActive,
             StockQuantity = x.StockQuantity, LowStockThreshold = x.LowStockThreshold, UpdatedAt = x.UpdatedAt
         }).ToListAsync(ct);
@@ -133,13 +137,16 @@ public class StaffService(KbsDbContext db)
         return new OrderOperationsDto { TrackingNumber = order.TrackingNumber, Notes = notes };
     }
 
-    public async Task TrackingAsync(long id, string? tracking, CancellationToken ct)
+    public async Task TrackingAsync(long id, CancellationToken ct)
     {
-        if (tracking?.Length > 100) throw new ArgumentException("Mã vận đơn tối đa 100 ký tự.");
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var order = await db.Orders.SingleOrDefaultAsync(x => x.Id == id, ct)
             ?? throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
-        order.TrackingNumber = string.IsNullOrWhiteSpace(tracking) ? null : tracking.Trim();
+        if (!string.IsNullOrWhiteSpace(order.TrackingNumber)) return;
+        // MOCK DATA — mã tạm, sẽ thay bằng mã từ đơn vị vận chuyển.
+        order.TrackingNumber = $"TEMP-{order.Id}-{Guid.NewGuid():N}";
         await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
     }
 
     public async Task AddNoteAsync(

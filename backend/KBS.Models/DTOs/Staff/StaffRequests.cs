@@ -9,12 +9,6 @@ public class TextRequest
     public string Content { get; set; } = string.Empty;
 }
 
-public class TrackingRequest
-{
-    [StringLength(100)]
-    public string? TrackingNumber { get; set; }
-}
-
 public class StockAdjustmentRequest
 {
     public int Delta { get; set; }

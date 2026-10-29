@@ -15,7 +15,7 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
   const links = [
     { route: 'home', label: 'Trang chủ' },
     { route: 'shop', label: 'Khám phá' },
-    ...(user ? [{ route: 'orders', label: 'Đơn hàng' }] : []),
+    ...(user && role !== 'staff' ? [{ route: 'orders', label: 'Đơn hàng' }] : []),
     ...(role === 'admin' ? [{ route: 'admin', label: 'Quản trị' }] : []),
     ...(['staff', 'admin'].includes(role) ? [{ route: 'staff', label: 'Nhân viên' }]
       : [{ route: 'support', label: 'Hỗ trợ' }]),
@@ -42,20 +42,20 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
           </button>)}
         </div>
         <div className="flex-1" />
-        <button className={iconButton + (route === 'likes' ? ' bg-primary text-deep hover:text-deep' : '')}
+        {role !== 'staff' && <button className={iconButton + (route === 'likes' ? ' bg-primary text-deep hover:text-deep' : '')}
           aria-label="Sản phẩm yêu thích"
           title="Sản phẩm yêu thích"
           onClick={() => navigate('likes')}>
           <Heart size={18} className={route === 'likes' ? 'fill-deep stroke-deep' : ''} />
-        </button>
-        <button className={iconButton + ' relative' + (route === 'cart' ? ' bg-primary text-deep hover:text-deep' : '')}
+        </button>}
+        {role !== 'staff' && <button className={iconButton + ' relative' + (route === 'cart' ? ' bg-primary text-deep hover:text-deep' : '')}
           aria-label={'Giỏ hàng: ' + cartCount + ' sản phẩm'}
           onClick={() => navigate('cart')}>
           <ShoppingBag size={18} />
           {cartCount > 0 && <span className="absolute -top-1 -right-1 rounded-full bg-primary text-deep font-bold text-xs px-1.5 shadow">
             {cartCount}
           </span>}
-        </button>
+        </button>}
         <button className={iconButton} title={user?.username || 'Đăng nhập'}
           aria-label={user ? 'Tài khoản' : 'Đăng nhập'} onClick={() => navigate(user ? 'account' : 'auth')}>
           <UserRound size={18} />

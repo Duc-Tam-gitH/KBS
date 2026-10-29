@@ -7,6 +7,9 @@ namespace KBS.DAL.Data;
 public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     : DbContext(options)
 {
+    public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();
+    public DbSet<AiModule> AiModules => Set<AiModule>();
+    public DbSet<AiEvent> AiEvents => Set<AiEvent>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Brand> Brands => Set<Brand>();
@@ -28,6 +31,10 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<ShopSettings>().Property(x => x.Id).ValueGeneratedNever();
+        modelBuilder.Entity<ShopSettings>().ToTable("ShopSettings", table =>
+            table.HasCheckConstraint("CK_ShopSettings_Singleton", "\"Id\" = 1"));
+        AiMapping.Configure(modelBuilder);
 
         modelBuilder.Entity<Order>().Property(x => x.TrackingNumber).HasMaxLength(100);
         modelBuilder.Entity<Inventory>().Property(x => x.LowStockThreshold).HasDefaultValue(5);

@@ -46,10 +46,11 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ILikelistService, LikelistService>();
 builder.Services.AddScoped<ProductReviewService>();
 builder.Services.AddScoped<StaffService>();
+builder.Services.AddScoped<AiManagementService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.Configure<KBS.Models.DTOs.Payments.PaymentOptions>(builder.Configuration.GetSection("Payments"));
 builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<ShopSettingsService>();
 
 builder.Services.AddOpenApi();
 

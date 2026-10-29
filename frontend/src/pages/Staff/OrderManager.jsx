@@ -57,10 +57,8 @@ function OrderDetails({ order, reload }) {
     if (next === 'CANCELLED' && !window.confirm(`Hủy đơn #${order.id} và hoàn lại tồn kho?`)) return
     if (await action.run(() => api.staff.orderStatus(order.id, next))) reload()
   }
-  const saveTracking = async (event) => {
-    event.preventDefault()
-    const value = new FormData(event.currentTarget).get('tracking')
-    if (await action.run(() => api.staff.tracking(order.id, value))) operations.reload()
+  const generateTracking = async () => {
+    if (await action.run(() => api.staff.tracking(order.id))) operations.reload()
   }
   const saveNote = async (event) => {
     event.preventDefault()
@@ -95,10 +93,16 @@ function OrderDetails({ order, reload }) {
     </form>}
     <StaffState {...operations} />
     {operations.data && <>
-      <form key={operations.data.trackingNumber || 'empty'} onSubmit={saveTracking}>
-        <label>Mã vận đơn<input name="tracking" maxLength={100} defaultValue={operations.data.trackingNumber || ''} />
-        </label><button type="submit" disabled={action.busy}>Lưu mã vận đơn</button>
-      </form>
+      <section>
+        <label>Mã vận đơn<input readOnly value={operations.data.trackingNumber || ''} /></label>
+        {operations.data.trackingNumber?.startsWith('TEMP-') && <p>Mã tạm thời</p>}
+        {!operations.data.trackingNumber?.trim() && <>
+          <p>Chưa có mã vận đơn. Mã được tạo là mã tạm thời.</p>
+          <button type="button" disabled={action.busy} onClick={generateTracking}>
+            {action.busy ? 'Đang xử lý…' : 'Tạo mã vận đơn'}
+          </button>
+        </>}
+      </section>
       <form onSubmit={saveNote}><label>Ghi chú nội bộ<textarea name="content" required maxLength={2000} rows={3} />
       </label><button type="submit" disabled={action.busy}>Thêm ghi chú</button></form>
       <h3>Lịch sử ghi chú</h3>

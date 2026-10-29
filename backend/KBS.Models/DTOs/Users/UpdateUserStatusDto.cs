@@ -1,6 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace KBS.Models.DTOs.Users;
 
 public class UpdateUserStatusDto
 {
-    public bool IsActive { get; set; }
+    [Required]
+    public bool? IsActive { get; set; }
 }

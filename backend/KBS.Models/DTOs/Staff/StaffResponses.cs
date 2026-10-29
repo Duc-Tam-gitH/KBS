@@ -22,6 +22,9 @@ public class StaffSummaryDto
 public class StaffInventoryDto
 {
     public long ProductId { get; set; }
+    public long CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public long OrderedQuantity { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Price { get; set; }
