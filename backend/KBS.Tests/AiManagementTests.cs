@@ -14,6 +14,40 @@ namespace KBS.Tests;
 
 public class AiManagementTests
 {
+    [Fact]
+    public async Task Event_filters_combine_module_kind_time_and_pagination()
+    {
+        using var app = new AiFactory();
+        using var client = app.CreateClient();
+        var from = DateTimeOffset.Parse("2026-10-30T08:00:00+07:00");
+        var to = from.AddHours(1);
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
+            db.AiEvents.AddRange(
+                new AiEvent { ModuleId = "ai_auto", Kind = "ERROR", CreatedAt = from },
+                new AiEvent { ModuleId = "ai_auto", Kind = "ERROR", CreatedAt = to },
+                new AiEvent { ModuleId = "ai_auto", Kind = "ERROR", CreatedAt = from.AddTicks(-1) },
+                new AiEvent { ModuleId = "ai_auto", Kind = "ERROR", CreatedAt = to.AddTicks(1) },
+                new AiEvent { ModuleId = "ai_auto", Kind = "ENABLED", CreatedAt = from },
+                new AiEvent { ModuleId = "ai_anti", Kind = "ERROR", CreatedAt = from });
+            await db.SaveChangesAsync();
+        }
+        await Login(client, "admin", "Admin123");
+        var query = "/api/admin/ai/events?moduleId=ai_auto&kind=ERROR&limit=1"
+            + $"&from={Uri.EscapeDataString(from.ToString("O"))}&to={Uri.EscapeDataString(to.ToString("O"))}";
+        var first = await client.GetFromJsonAsync<AiEventsPage>(query);
+        Assert.Equal(to, Assert.Single(first!.Items).CreatedAt);
+        Assert.NotNull(first.NextBeforeId);
+        var second = await client.GetFromJsonAsync<AiEventsPage>(query + $"&beforeId={first.NextBeforeId}");
+        Assert.Equal(from, Assert.Single(second!.Items).CreatedAt);
+        Assert.Null(second.NextBeforeId);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync("/api/admin/ai/events?kind=UNKNOWN")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync(
+            "/api/admin/ai/events?from=2026-11-01T00:00:00Z&to=2026-10-01T00:00:00Z")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync("/api/admin/ai/events?from=invalid")).StatusCode);
+    }
+
     private const string WorkerKey = "test-only-ai-worker-key-at-least-32-characters";
 
     private sealed class AiFactory : TestApiFactory

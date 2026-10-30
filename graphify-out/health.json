@@ -1,0 +1,285 @@
+{
+  "node_count": 1694,
+  "unverified_node_count": 0,
+  "raw_edge_count": 4715,
+  "non_object_edges": 0,
+  "missing_endpoint_edges": 0,
+  "dangling_endpoint_edges": 283,
+  "external_reference_edges": 13,
+  "self_loop_edges": 23,
+  "valid_candidate_edges": 4419,
+  "exact_duplicate_edges": 0,
+  "directed_unique_endpoint_pairs": 4171,
+  "directed_same_endpoint_collapsed_edges": 248,
+  "undirected_unique_endpoint_pairs": 4159,
+  "undirected_same_endpoint_collapsed_edges": 260,
+  "same_endpoint_group_count": 76,
+  "relation_variant_groups": 11,
+  "source_file_variant_groups": 0,
+  "source_location_variant_groups": 63,
+  "context_variant_groups": 8,
+  "post_build_graph_type": "Graph",
+  "post_build_node_count": 1745,
+  "post_build_edge_count": 4432,
+  "post_build_error": "",
+  "producer_suppression": {
+    "path": "C:\\Users\\mytaa\\AppData\\Roaming\\uv\\tools\\graphifyy\\Lib\\site-packages\\graphify\\extract.py",
+    "total_sites": 12,
+    "sites": [
+      {
+        "line": 1829,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2393,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2395,
+        "name": "seen_doc_refs",
+        "tuple_arity": 0,
+        "sample": "seen_doc_refs: set[str] = set()"
+      },
+      {
+        "line": 3062,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 3209,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n.get(\"id\") for n in nodes}"
+      },
+      {
+        "line": 4350,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 4536,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 7947,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8055,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8134,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8659,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8660,
+        "name": "seen_edges",
+        "tuple_arity": 4,
+        "sample": "seen_edges: set[tuple[str, str, str, str | None]] = set()"
+      }
+    ],
+    "error": ""
+  },
+  "examples": [
+    {
+      "source": "backend_kbs_dal_data_kbsdbcontext_kbs_dal_data_kbsdbcontext",
+      "target": "dbset",
+      "edge_count": 20,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "backend/KBS.DAL/Data/KbsDbContext.cs"
+      ],
+      "source_locations": [
+        "L10",
+        "L11",
+        "L12",
+        "L13",
+        "L14",
+        "L15",
+        "L16",
+        "L17",
+        "L18",
+        "L19",
+        "L20",
+        "L21",
+        "L22",
+        "L23",
+        "L24",
+        "L25",
+        "L26",
+        "L27",
+        "L28",
+        "L29"
+      ],
+      "contexts": [
+        "field"
+      ]
+    },
+    {
+      "source": "backend_kbs_dal_migrations_20261029133528_addshopsettings_designer_kbs_dal_migrations_addshopsettings_buildtargetmodel",
+      "target": "datetimeoffset",
+      "edge_count": 20,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "backend/KBS.DAL/Migrations/20261029133528_AddShopSettings.Designer.cs"
+      ],
+      "source_locations": [
+        "L108",
+        "L182",
+        "L214",
+        "L238",
+        "L314",
+        "L349",
+        "L352",
+        "L386",
+        "L39",
+        "L413",
+        "L458",
+        "L485",
+        "L573",
+        "L611",
+        "L697",
+        "L814",
+        "L837",
+        "L843",
+        "L863",
+        "L95"
+      ],
+      "contexts": [
+        "generic_arg"
+      ]
+    },
+    {
+      "source": "backend_kbs_dal_migrations_20261030022228_addhomecontentandavailability_designer_kbs_dal_migrations_addhomecontentandavailability_buildtargetmodel",
+      "target": "datetimeoffset",
+      "edge_count": 20,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "backend/KBS.DAL/Migrations/20261030022228_AddHomeContentAndAvailability.Designer.cs"
+      ],
+      "source_locations": [
+        "L108",
+        "L182",
+        "L214",
+        "L238",
+        "L314",
+        "L349",
+        "L352",
+        "L386",
+        "L39",
+        "L413",
+        "L458",
+        "L485",
+        "L573",
+        "L611",
+        "L697",
+        "L821",
+        "L844",
+        "L850",
+        "L870",
+        "L95"
+      ],
+      "contexts": [
+        "generic_arg"
+      ]
+    },
+    {
+      "source": "backend_kbs_dal_migrations_kbsdbcontextmodelsnapshot_kbs_dal_migrations_kbsdbcontextmodelsnapshot_buildmodel",
+      "target": "datetimeoffset",
+      "edge_count": 20,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "backend/KBS.DAL/Migrations/KbsDbContextModelSnapshot.cs"
+      ],
+      "source_locations": [
+        "L105",
+        "L179",
+        "L211",
+        "L235",
+        "L311",
+        "L346",
+        "L349",
+        "L36",
+        "L383",
+        "L410",
+        "L455",
+        "L482",
+        "L570",
+        "L608",
+        "L694",
+        "L818",
+        "L841",
+        "L847",
+        "L867",
+        "L92"
+      ],
+      "contexts": [
+        "generic_arg"
+      ]
+    },
+    {
+      "source": "backend_kbs_dal_migrations_20261029043203_addaimanagement_designer_kbs_dal_migrations_addaimanagement_buildtargetmodel",
+      "target": "datetimeoffset",
+      "edge_count": 19,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "backend/KBS.DAL/Migrations/20261029043203_AddAiManagement.Designer.cs"
+      ],
+      "source_locations": [
+        "L108",
+        "L182",
+        "L214",
+        "L238",
+        "L314",
+        "L349",
+        "L352",
+        "L386",
+        "L39",
+        "L413",
+        "L458",
+        "L485",
+        "L573",
+        "L611",
+        "L697",
+        "L767",
+        "L773",
+        "L793",
+        "L95"
+      ],
+      "contexts": [
+        "generic_arg"
+      ]
+    }
+  ]
+}

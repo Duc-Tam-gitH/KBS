@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:session": "node scripts/test-session.mjs",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint src",

@@ -8,8 +8,17 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using KBS.API.Data;
+using KBS.API.Services;
+using System.Net;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
+if (builder.Configuration.GetValue("Ai:ManageProcesses", true))
+{
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Ai:WorkerKey"]))
+        builder.Configuration["Ai:WorkerKey"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+    builder.Services.AddHostedService<AiWorkerSupervisor>();
+}
 
 // Đăng ký các dịch vụ cho ứng dụng.
 builder.Services.AddControllers();
@@ -128,7 +137,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Local Python workers authenticate with X-AI-Key over loopback; other requests retain HTTPS redirection.
+app.UseWhen(context => !(context.Request.Path.StartsWithSegments("/api/ai-worker")
+        && context.Connection.RemoteIpAddress is { } address && IPAddress.IsLoopback(address)),
+    branch => branch.UseHttpsRedirection());
 
 app.UseCors("Frontend");
 app.UseAuthentication();

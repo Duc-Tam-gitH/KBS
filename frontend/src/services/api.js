@@ -1,9 +1,22 @@
 const API_URL = (import.meta.env.VITE_API_URL || 'https://localhost:7013').replace(/\/$/, '')
 
-// Access token chỉ nằm trong bộ nhớ của tab. Không dùng localStorage để tránh
-// token tồn tại lâu và bị đọc bởi script nếu trang gặp XSS.
-let accessToken = null
-let currentUser = null
+// Keep the session across reloads in this tab; do not persist it in localStorage.
+const SESSION_KEY = 'kbs.auth.session'
+function restoreSession() {
+  try {
+    const session = JSON.parse(sessionStorage.getItem(SESSION_KEY))
+    const payload = session?.accessToken?.split('.')[1]
+    const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
+    if (!session.user || !Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now()) throw new Error('Expired session')
+    return session
+  } catch {
+    try { sessionStorage.removeItem(SESSION_KEY) } catch { /* Storage unavailable. */ }
+    return null
+  }
+}
+const restored = restoreSession()
+let accessToken = restored?.accessToken ?? null
+let currentUser = restored?.user ?? null
 const listeners = new Set()
 const notify = () => listeners.forEach(listener => listener())
 
@@ -11,8 +24,16 @@ export const authStore = {
   subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener) },
   get token() { return accessToken },
   get user() { return currentUser },
-  setSession(session) { accessToken = session.accessToken; currentUser = session.user; notify() },
-  clear() { accessToken = null; currentUser = null; notify() },
+  setSession(session) {
+    accessToken = session.accessToken; currentUser = session.user
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)) } catch { /* Keep in-memory login. */ }
+    notify()
+  },
+  clear() {
+    accessToken = null; currentUser = null
+    try { sessionStorage.removeItem(SESSION_KEY) } catch { /* Storage unavailable. */ }
+    notify()
+  },
   hasRole(role) { return currentUser?.roleName === role },
 }
 
@@ -128,8 +149,11 @@ export const api = {
     aiEnabled: (id, isEnabled) => request(`/api/admin/ai/modules/${encodeURIComponent(id)}/enabled`, {
       method: 'PUT', body: { isEnabled },
     }),
-    aiEvents: (moduleId, beforeId, signal) => request(`/api/admin/ai/events?${new URLSearchParams({
+    aiEvents: (moduleId, beforeId, signal, filters = {}) => request(`/api/admin/ai/events?${new URLSearchParams({
       ...(moduleId ? { moduleId } : {}), ...(beforeId ? { beforeId } : {}), limit: 50,
+      ...(filters.kind ? { kind: filters.kind } : {}),
+      ...(filters.from ? { from: new Date(filters.from).toISOString() } : {}),
+      ...(filters.to ? { to: new Date(filters.to).toISOString() } : {}),
     })}`, { signal }),
     products: (signal) => request('/api/products/management', { signal }),
     categories: (signal) => request('/api/categories', { signal }),

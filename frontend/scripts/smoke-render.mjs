@@ -113,14 +113,17 @@ try {
   const { default: AIManagement } = await server.ssrLoadModule('/src/pages/admin/AIManagement.jsx')
   const aiMarkup = renderToString(createElement(AIManagement))
   assert.match(aiMarkup, /Đang tải danh sách AI/)
-  assert.match(aiMarkup, /ALL AI/)
+  assert.match(aiMarkup, /Tất cả AI/)
+  assert.match(aiMarkup, /Tất cả trạng thái/)
+  assert.match(aiMarkup, /type="submit"[^>]*>Áp dụng lọc/)
+  assert.equal((aiMarkup.match(/type="datetime-local"/g) || []).length, 2)
   assert.match(aiMarkup, /Thông tin AI được chọn/)
   assert.match(aiMarkup, /Chọn một AI/)
   assert.doesNotMatch(aiMarkup, /chưa được triển khai/)
   const staffAiMarkup = renderToString(createElement(AIManagement, { readOnly: true }))
   assert.match(staffAiMarkup, /Theo dõi AI/)
   assert.match(staffAiMarkup, /Chế độ chỉ đọc/)
-  assert.match(staffAiMarkup, /ALL AI/)
+  assert.match(staffAiMarkup, /Tất cả AI/)
   assert.match(staffAiMarkup, /Thông tin AI được chọn/)
   assert.doesNotMatch(staffAiMarkup, /role="switch"/)
   assert.doesNotMatch(readFileSync(new URL('../src/pages/admin/AIManagement.css', import.meta.url), 'utf8'),
@@ -185,6 +188,36 @@ try {
   assert.match(adminApp, /Khu vực quản trị/)
   assert.match(adminApp, /Đang tổng hợp/)
   assert.doesNotMatch(adminApp, /Feel Every|Keystroke|Giỏ hàng|Về cửa hàng|Chức năng nhân viên|<footer/)
+  const previousStorage = globalThis.sessionStorage
+  const savedViews = new Map([
+    ['kbs.view.admin.admin.page', JSON.stringify('ai')],
+    ['kbs.view.admin.ai.filters', JSON.stringify({ filter: '', kind: 'ERROR', from: '', to: '' })],
+    ['kbs.view.staff.route', JSON.stringify('staff')],
+    ['kbs.view.staff.staff.view', JSON.stringify({ page: 'ai' })],
+    ['kbs.view.customer.route', JSON.stringify('orders')],
+  ])
+  globalThis.sessionStorage = {
+    getItem: key => savedViews.get(key) ?? null,
+    setItem: (key, value) => savedViews.set(key, value),
+    removeItem: key => savedViews.delete(key),
+  }
+  try {
+    const restoredAdmin = renderToString(createElement(App))
+    assert.match(restoredAdmin, /aria-current="page">Quản lý AI/)
+    assert.match(restoredAdmin, /value="ERROR" selected=""/)
+    authStore.setSession({ accessToken: 'test', user: { username: 'staff', roleName: 'Staff' } })
+    const restoredStaff = renderToString(createElement(App))
+    assert.match(restoredStaff, /aria-current="page">AI/)
+    assert.match(restoredStaff, /Theo dõi AI/)
+    authStore.setSession({ accessToken: 'test', user: { username: 'customer', roleName: 'Customer' } })
+    assert.match(renderToString(createElement(App)), /store-pages/)
+    authStore.setSession({ accessToken: 'test', user: { username: 'other-admin', roleName: 'Admin' } })
+    assert.match(renderToString(createElement(App)), /Đang tổng hợp/)
+    savedViews.set('kbs.view.other-admin.admin.page', '"invalid-page"')
+    assert.match(renderToString(createElement(App)), /Đang tổng hợp/)
+  } finally {
+    globalThis.sessionStorage = previousStorage
+  }
   authStore.clear()
   assert.doesNotMatch(renderToString(createElement(App)), /Quản trị/)
   const originalFetch = globalThis.fetch

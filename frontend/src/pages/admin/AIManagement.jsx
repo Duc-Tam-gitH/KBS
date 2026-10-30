@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Bot, Activity, Bell, ChevronRight } from 'lucide-react'
 import { api } from '../../services/api'
+import { useSessionView } from '../../services/useSessionView'
 import { dateTime, money, useStaffAction } from '../Staff/staffHooks'
 import './AIManagement.css'
 
@@ -13,14 +14,24 @@ const kinds = {
 
 export default function AIManagement({ readOnly = false }) {
   const [modules, setModules] = useState(null)
-  const [selectedId, setSelectedId] = useState(null)
-  const [filter, setFilter] = useState('')
-  const [beforeId, setBeforeId] = useState(null)
+  const [selectedId, setSelectedId] = useSessionView('ai.selected', null, value => typeof value === 'string')
+  const [applied, setApplied] = useSessionView('ai.filters', { filter: '', kind: '', from: '', to: '' },
+    value => value && ['filter', 'kind', 'from', 'to'].every(key => typeof value[key] === 'string')
+      && (!value.from || Number.isFinite(Date.parse(value.from)))
+      && (!value.to || Number.isFinite(Date.parse(value.to)))
+      && !(value.from && value.to && value.from > value.to))
+  const [filter, setFilter] = useState(applied.filter)
+  const [kind, setKind] = useState(applied.kind)
+  const [from, setFrom] = useState(applied.from)
+  const [to, setTo] = useState(applied.to)
+  const [beforeId, setBeforeId] = useSessionView('ai.beforeId', null,
+    value => Number.isSafeInteger(value) && value > 0)
   const [events, setEvents] = useState(null)
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
   const action = useStaffAction()
-  const eventKey = `${filter}:${beforeId}`
+  const eventKey = JSON.stringify([applied, beforeId])
+  const invalidRange = Boolean(from && to && from > to)
   const page = events?.key === eventKey ? events.data : null
   const selected = modules?.find(item => item.id === selectedId)
 
@@ -30,7 +41,8 @@ export default function AIManagement({ readOnly = false }) {
     const refresh = async () => {
       try {
         const [items, activity] = await Promise.all([
-          api.admin.aiModules(controller.signal), api.admin.aiEvents(filter, beforeId, controller.signal),
+          api.admin.aiModules(controller.signal),
+          api.admin.aiEvents(applied.filter, beforeId, controller.signal, applied),
         ])
         if (controller.signal.aborted) return
         setModules(items)
@@ -44,13 +56,13 @@ export default function AIManagement({ readOnly = false }) {
     }
     refresh()
     return () => { controller.abort(); clearTimeout(timer) }
-  }, [filter, beforeId, eventKey, retry])
+  }, [applied, beforeId, eventKey, retry])
 
-  const select = (id) => { setSelectedId(id); setFilter(id); setBeforeId(null) }
+  const select = (id) => { setSelectedId(id); setFilter(id) }
   const toggle = async (item) => {
     if (readOnly) return
     const message = item.isEnabled ? 'Đã tắt xử lý tự động.'
-      : 'Đã bật cấu hình AI. Đơn hàng chỉ được xác nhận sau khi worker xử lý thành công.'
+      : 'Đã bật AI. Backend sẽ khởi động worker; trạng thái kết nối sẽ tự cập nhật.'
     if (await action.run(() => api.admin.aiEnabled(item.id, !item.isEnabled), message)) {
       setRetry(value => value + 1)
     }
@@ -80,11 +92,13 @@ export default function AIManagement({ readOnly = false }) {
               </button>
               <p>{item.description}</p>
               {item.isEnabled && item.connectionStatus !== 'ONLINE' && <p role="alert">
-                Worker chưa kết nối hoặc đã dừng. Đơn hàng vẫn chờ xác nhận; cần khởi động worker AI.
+                Đang chờ worker kết nối. Backend tự khởi động worker khi bật AI.
+                Nếu chờ lâu, kiểm tra mục Thông báo hoạt động và log backend.
               </p>}
               <div className="ai-module-bottom">
                 <span className="ai-connection"><Activity size={14} aria-hidden="true" />
-                  {connections[item.connectionStatus] || item.connectionStatus}</span>
+                  {!item.isEnabled && item.isIntegrated ? 'Đã tắt'
+                    : connections[item.connectionStatus] || item.connectionStatus}</span>
                 {readOnly ? <span>{item.isEnabled ? 'Đang bật' : 'Đang tắt'}</span>
                   : <button type="button" role="switch" aria-checked={item.isEnabled}
                   aria-label={`Bật/tắt ${item.name}`} className="ai-switch"
@@ -100,16 +114,33 @@ export default function AIManagement({ readOnly = false }) {
       <section className="ai-events" aria-label="Thông báo AI">
         <header className="ad-heading"><h2><Bell size={19} aria-hidden="true" /> Thông báo hoạt động</h2>
           <span className="ad-muted">Tự cập nhật mỗi 5 giây</span></header>
-        <div className="ai-filters">
-          <button type="button" aria-pressed={!filter} onClick={() => { setFilter(''); setBeforeId(null) }}>
-            ALL AI
-          </button>
-          {selected && <button type="button" aria-pressed={filter === selected.id}
-            onClick={() => { setFilter(selected.id); setBeforeId(null) }}>{selected.name}</button>}
-        </div>
+        <form className="ai-filters ai-event-filters" onSubmit={e => {
+          e.preventDefault()
+          if (invalidRange) return
+          setApplied({ filter, kind, from, to }); setBeforeId(null)
+        }}>
+          <label>Tên AI<select value={filter} onChange={e => setFilter(e.target.value)}>
+            <option value="">Tất cả AI</option>
+            {modules?.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select></label>
+          <label>Trạng thái<select value={kind} onChange={e => setKind(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {Object.entries(kinds).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select></label>
+          <label>Từ lúc<input type="datetime-local" value={from} max={to || undefined}
+            onChange={e => setFrom(e.target.value)} /></label>
+          <label>Đến lúc<input type="datetime-local" value={to} min={from || undefined}
+            onChange={e => setTo(e.target.value)} /></label>
+          <button type="submit" disabled={invalidRange}>Áp dụng lọc</button>
+          <button type="button" onClick={() => {
+            setFilter(''); setKind(''); setFrom(''); setTo('')
+          }}>Xóa bộ lọc</button>
+        </form>
+        <p className="ad-muted">Chọn điều kiện rồi bấm Áp dụng lọc. Thông báo tự cập nhật theo bộ lọc đã áp dụng.</p>
+        {invalidRange && <p role="alert">Thời gian bắt đầu phải trước hoặc bằng thời gian kết thúc.</p>}
         {!page ? <p role="status">Đang tải thông báo…</p>
           : !page.items.length ? <div className="ai-empty"><Bell size={28} aria-hidden="true" />
-            <p>Chưa có thông báo.</p><span className="ad-muted">Kết quả hoạt động sẽ xuất hiện tại đây.</span></div>
+            <p>Không có thông báo phù hợp.</p><span className="ad-muted">Thử thay đổi hoặc xóa bộ lọc.</span></div>
             : <div className="ai-event-table"><table>
               <thead><tr><th>Thời gian</th><th>AI</th><th>Nội dung</th><th>Kết quả</th></tr></thead>
               <tbody>{page.items.map(event => <tr key={event.id}>

@@ -28,5 +28,8 @@ public class AiManagementController(AiManagementService service) : ControllerBas
         CancellationToken ct,
         string? moduleId = null,
         long? beforeId = null,
-        int limit = 50) => service.EventsAsync(moduleId, beforeId, limit, ct);
+        int limit = 50,
+        string? kind = null,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null) => service.EventsAsync(moduleId, beforeId, limit, ct, kind, from, to);
 }

@@ -22,4 +22,8 @@
     <ProjectReference Include="..\KBS.DAL\KBS.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="../../ai/ai_*.py" Link="ai/%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

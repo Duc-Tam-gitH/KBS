@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useSessionView } from '../../services/useSessionView'
 import StaffDashboard from './StaffDashboard'
 import OrderManager from './OrderManager'
 import Inventory from './Inventory'
@@ -13,7 +13,8 @@ const menus = [
 ]
 
 export default function StaffWorkspace({ user, onNavigate, onLogout }) {
-  const [view, setView] = useState({ page: 'dashboard' })
+  const [view, setView] = useSessionView('staff.view', { page: 'dashboard' },
+    value => value && menus.some(([id]) => id === value.page))
   if (!['Admin', 'Staff'].includes(user?.roleName)) return <p role="alert">Không có quyền truy cập.</p>
   const open = (page, params = {}) => setView({ page, ...params })
   return <section className="staff-workspace">

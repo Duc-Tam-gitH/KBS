@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { api, authStore } from './services/api'
+import { useSessionView } from './services/useSessionView'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import Navbar from './components/Navbar'
@@ -38,7 +39,9 @@ function App() {
   const [notice, setNotice] = useState('')
   const pendingRoute = useRef('home')
   const pendingProduct = useRef(null)
-  const [route, setRoute] = useState(() => linkedProduct() ? 'detail' : 'home')
+  const [route, setRoute] = useSessionView('route', () => linkedProduct() ? 'detail' : 'home',
+    value => !linkedProduct() && ['home', 'shop', 'search', 'auth', 'register', 'cart', 'checkout',
+      'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(value))
   const [selected, setSelected] = useState(linkedProduct)
   const [cart, setCart] = useState([])
   const [cartError, setCartError] = useState('')

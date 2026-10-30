@@ -39,6 +39,16 @@ Mặc định chọn giải pháp ngắn gọn, đơn giản và trực diện n
 - Không áp dụng các mẫu kiến trúc phức tạp nếu không thực sự cần thiết.
 - Áp dụng triệt để khi refactor hoặc review code.
 
+### 8. Project Context Keeper (Quản lý Ngữ cảnh KBS)
+- **Mục tiêu dự án:** Trí tuệ nhân tạo luôn ghi nhớ bối cảnh dự án KeyBoardShop88 (ASP.NET Core Web API/MVC, React.js, PostgreSQL, MoMo, VietQR).
+- **Duy trì kiến trúc:** Tự động suy luận vai trò của các service, controller, hoặc frontend component khi được nhắc đến mà không cần người dùng giải thích lại từ đầu.
+- **Cập nhật lũy tiến:** Xem mỗi yêu cầu mới của người dùng như một bản vá (incremental patch) đắp thêm vào bộ khung kiến trúc hiện tại.
+
+### 9. Compact Code Advisor (Tối ưu Token & Code Ngắn gọn)
+- **Tuyệt đối không lặp lại code cũ:** Khi sửa file, chỉ xuất ra chính xác những dòng, phương thức, hoặc component thay đổi (sử dụng chuẩn diff hoặc snippet). Không in lại toàn bộ file trừ khi được yêu cầu.
+- **Zero fluff (Không lan man):** Bỏ qua các câu chào hỏi, đệm từ, và các giải thích dài dòng không cần thiết. Đi thẳng vào code và giải pháp.
+- **Bỏ qua Base Concept:** Mặc định người dùng đã nắm vững các kiến thức nền tảng về C#, React, PostgreSQL. Không giải thích các cú pháp cơ bản hay tính năng mặc định của framework.
+
 ---
 
 ## B. QUY TẮC FORMAT CODE C#

@@ -367,12 +367,7 @@ function ProductReviews({ productId, user, onNavigate }) {
       {!user ? <button type="button" onClick={() => onNavigate?.('auth')}>Đăng nhập để đánh giá</button>
         : !submitted && <form className="pd-review-form" onSubmit={submit}>
           <h3>Chia sẻ trải nghiệm của bạn</h3>
-          <p className="pd-muted">Mỗi khách được đánh giá một lần sau khi đơn hàng đã hoàn tất.</p>
-          <label htmlFor="pd-review-rating">Điểm đánh giá</label>
-          <select id="pd-review-rating" name="rating" defaultValue="5" disabled={submitting}>
-            {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} sao</option>)}
-          </select>
-          <label htmlFor="pd-review-comment">Nhận xét</label>
+          <p className="pd-muted">Đóng góp của bạn là sự phát triển của chúng tôi.</p>
           <textarea id="pd-review-comment" name="comment" required maxLength={2000} rows={4}
             disabled={submitting} placeholder="Cảm nhận của bạn về sản phẩm" />
           <button className="pd-primary" disabled={submitting} type="submit">

@@ -42,13 +42,23 @@ public class AiManagementService(KbsDbContext db)
         string? moduleId,
         long? beforeId,
         int limit,
-        CancellationToken ct)
+        CancellationToken ct,
+        string? kind = null,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null)
     {
         if (limit is < 1 or > 100 || beforeId <= 0) throw new ArgumentException("Phân trang không hợp lệ.");
+        if (kind != null && kind is not ("ENABLED" or "DISABLED" or "CONFIRMED" or "MANUAL_REVIEW" or "ERROR"))
+            throw new ArgumentException("Trạng thái thông báo không hợp lệ.");
+        if (from > to) throw new ArgumentException("Thời gian bắt đầu phải trước hoặc bằng thời gian kết thúc.");
+        from = from?.ToUniversalTime();
+        to = to?.ToUniversalTime();
         if (moduleId != null && !await db.AiModules.AnyAsync(x => x.Id == moduleId, ct))
             throw new KeyNotFoundException("Không tìm thấy AI.");
         var items = await db.AiEvents.AsNoTracking()
             .Where(x => (moduleId == null || x.ModuleId == moduleId) && (beforeId == null || x.Id < beforeId))
+            .Where(x => (kind == null || x.Kind == kind) && (from == null || x.CreatedAt >= from)
+                && (to == null || x.CreatedAt <= to))
             .OrderByDescending(x => x.Id).Take(limit + 1)
             .Select(x => new AiEventResponseDto(
                 x.Id, x.ModuleId, x.Module.Name, x.OrderId, x.Kind, x.Message, x.CreatedAt)).ToListAsync(ct);

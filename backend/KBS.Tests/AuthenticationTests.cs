@@ -230,6 +230,7 @@ public class TestApiFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting("Ai:ManageProcesses", "false");
         builder.ConfigureLogging(logging => logging.ClearProviders().AddConsole());
         builder.UseSetting("Cors:AllowedOrigins:0", "http://localhost:5173");
         builder.UseSetting("Jwt:Issuer", "test");

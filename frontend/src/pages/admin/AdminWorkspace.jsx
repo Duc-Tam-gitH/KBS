@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useSessionView } from '../../services/useSessionView'
 import Dashboard from './Dashboard'
 import AccountManagement from './AccountManagement'
 import ProductManagement from './ProductManagement'
@@ -19,7 +19,8 @@ const adminPages = [
 ]
 
 export default function AdminWorkspace({ user, onLogout }) {
-  const [pageId, setPageId] = useState('dashboard')
+  const [pageId, setPageId] = useSessionView('admin.page', 'dashboard',
+    value => adminPages.some(item => item.id === value))
   if (user?.roleName !== 'Admin') return <p role="alert">Không có quyền truy cập.</p>
   const page = adminPages.find(item => item.id === pageId)
   const Page = page.Component
