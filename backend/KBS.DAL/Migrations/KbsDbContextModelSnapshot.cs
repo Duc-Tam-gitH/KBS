@@ -789,9 +789,16 @@ namespace KBS.DAL.Migrations
                         .HasMaxLength(254)
                         .HasColumnType("character varying(254)");
 
+                    b.Property<string>("HomeContentJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Hotline")
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LogoContentType")
                         .HasMaxLength(20)

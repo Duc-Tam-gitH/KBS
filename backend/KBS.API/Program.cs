@@ -132,6 +132,30 @@ app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.TrimEnd('/');
+    var publicEntry = string.Equals(path, "/api/auth/login", StringComparison.OrdinalIgnoreCase)
+        || context.Request.Path.StartsWithSegments("/api/shop");
+    if (context.Request.Path.StartsWithSegments("/api") && !publicEntry
+        && !HttpMethods.IsOptions(context.Request.Method) && !context.User.IsInRole("Admin"))
+    {
+        var db = context.RequestServices.GetRequiredService<KbsDbContext>();
+        var isOpen = await db.ShopSettings.AsNoTracking().Select(x => (bool?)x.IsOpen)
+            .SingleOrDefaultAsync(context.RequestAborted) ?? true;
+        if (!isOpen)
+        {
+            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            context.Response.Headers.RetryAfter = "60";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                code = "SITE_CLOSED", message = "Website đang tạm đóng để bảo trì. Vui lòng quay lại sau."
+            });
+            return;
+        }
+    }
+    await next();
+});
 app.UseAuthorization();
 app.MapControllers();
 

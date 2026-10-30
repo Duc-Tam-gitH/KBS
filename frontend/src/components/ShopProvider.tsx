@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { api, API_URL } from '../services/api'
 
 export type PublicShop = {
+  isOpen: boolean; homeContent: Record<string, string>
   name: string | null; slogan: string | null; description: string | null
   hotline: string | null; email: string | null; warehouseAddress: string | null
   logoUrl: string | null; bannerUrl: string | null; updatedAt: string | null

@@ -38,7 +38,7 @@ export default function AdminWorkspace({ user, onLogout }) {
         {onLogout && <button type="button" onClick={onLogout}>Đăng xuất</button>}
       </div>
     </aside>
-    {['dashboard', 'categories', 'products', 'accounts', 'inventory', 'ai'].includes(pageId) ? <Page key={pageId} user={user} /> : <>
+    {['dashboard', 'categories', 'products', 'accounts', 'inventory', 'shop', 'ai'].includes(pageId) ? <Page key={pageId} user={user} /> : <>
       <div className="ad-main">
         <header className="ad-heading"><h1>{page.label}</h1></header>
         <Page key={pageId} />

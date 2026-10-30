@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useHomeContent } from './useHomeContent'
 import { ShoppingBag, Heart, Menu, X, UserRound, LogOut } from 'lucide-react'
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function Navbar({ route, onNavigate, cartCount, user, role, onLogout }: Props) {
+  const get = useHomeContent()
   const [menuOpen, setMenuOpen] = useState(false)
   const links = [
     { route: 'home', label: 'Trang chủ' },
@@ -32,8 +34,8 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
         </button>)}
       </div>}
       <nav aria-label="Điều hướng chính" className="glass-dark flex items-center gap-1 md:gap-2 rounded-full px-3 py-3 border border-border shadow-xl shadow-deep">
-        <button onClick={() => navigate('home')} aria-label="KBS — Trang chủ"
-          className="px-2 md:px-4 font-display font-bold text-xl tracking-tight text-light hover:text-accent transition-colors">KBS</button>
+        <button onClick={() => navigate('home')} aria-label="Trang chủ"
+          className="px-2 md:px-4 font-display font-bold text-xl tracking-tight text-light hover:text-accent transition-colors">{get('hero.text2')}</button>
         <div className="hidden md:flex items-center gap-1">
           {links.map(link => <button key={link.route}
             className={navButton + (route === link.route ? ' bg-primary text-deep font-semibold hover:text-deep' : '')}

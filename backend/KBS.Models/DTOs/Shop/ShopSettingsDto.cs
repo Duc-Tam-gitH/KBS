@@ -4,6 +4,7 @@ namespace KBS.Models.DTOs.Shop;
 
 public class SaveShopSettingsDto : IValidatableObject
 {
+    public Dictionary<string, string>? HomeContent { get; set; }
     [Required]
     [StringLength(150)]
     public string Name { get; set; } = string.Empty;
@@ -45,7 +46,17 @@ public record PublicShopDto(
     string? WarehouseAddress,
     string? LogoUrl,
     string? BannerUrl,
-    DateTimeOffset? UpdatedAt);
+    DateTimeOffset? UpdatedAt)
+{
+    public bool IsOpen { get; init; } = true;
+    public Dictionary<string, string> HomeContent { get; init; } = new();
+}
+
+public class ShopAvailabilityDto
+{
+    [Required]
+    public bool? IsOpen { get; set; }
+}
 
 public record AdminShopDto(
     PublicShopDto Shop,

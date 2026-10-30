@@ -21,6 +21,14 @@ public class ShopSettingsController(ShopSettingsService service) : ControllerBas
     [HttpPut("api/admin/shop")]
     public Task<AdminShopDto> Save(SaveShopSettingsDto dto, CancellationToken ct) => service.SaveAsync(dto, ct);
 
+    [Authorize(Roles = "Admin")]
+    [HttpPut("api/admin/shop/availability")]
+    public async Task<IActionResult> Availability(ShopAvailabilityDto dto, CancellationToken ct)
+    {
+        await service.SetAvailabilityAsync(dto.IsOpen!.Value, ct);
+        return NoContent();
+    }
+
     [AllowAnonymous]
     [HttpGet("api/shop/media/{kind}")]
     public async Task<IActionResult> Media(string kind, CancellationToken ct)

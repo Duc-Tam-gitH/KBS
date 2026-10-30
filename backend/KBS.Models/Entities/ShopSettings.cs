@@ -5,6 +5,8 @@ namespace KBS.Models.Entities;
 public class ShopSettings
 {
     public int Id { get; set; } = 1;
+    public bool IsOpen { get; set; } = true;
+    public string HomeContentJson { get; set; } = "{}";
     [MaxLength(150)]
     public string? Name { get; set; }
     [MaxLength(100)]

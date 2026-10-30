@@ -3,17 +3,35 @@ using KBS.DAL.Data;
 using KBS.Models.DTOs.Shop;
 using KBS.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace KBS.BLL.Services;
 
 public class ShopSettingsService(KbsDbContext db)
 {
-    public async Task<PublicShopDto> PublicAsync(CancellationToken ct) =>
-        await db.ShopSettings.AsNoTracking().Select(x => new PublicShopDto(
+    public async Task<PublicShopDto> PublicAsync(CancellationToken ct)
+    {
+        var row = await db.ShopSettings.AsNoTracking().Select(x => new
+        {
+            x.IsOpen, x.HomeContentJson,
+            Shop = new PublicShopDto(
             x.Name, x.Slogan, x.Description, x.Hotline, x.Email, x.WarehouseAddress,
             x.LogoData != null ? "/api/shop/media/logo" : null,
-            x.BannerData != null ? "/api/shop/media/banner" : null, x.UpdatedAt)).SingleOrDefaultAsync(ct)
-        ?? new PublicShopDto(null, null, null, null, null, null, null, null, null);
+            x.BannerData != null ? "/api/shop/media/banner" : null, x.UpdatedAt)
+        }).SingleOrDefaultAsync(ct);
+        return row == null ? new PublicShopDto(null, null, null, null, null, null, null, null, null)
+            : row.Shop with { IsOpen = row.IsOpen,
+                HomeContent = JsonSerializer.Deserialize<Dictionary<string, string>>(row.HomeContentJson) ?? new() };
+    }
+
+    public async Task SetAvailabilityAsync(bool isOpen, CancellationToken ct)
+    {
+        var entity = await EditableAsync(ct);
+        entity.IsOpen = isOpen;
+        entity.UpdatedAt = DateTimeOffset.UtcNow;
+        await db.SaveChangesAsync(ct);
+    }
 
     public async Task<AdminShopDto> AdminAsync(CancellationToken ct)
     {
@@ -30,7 +48,17 @@ public class ShopSettingsService(KbsDbContext db)
         var errors = new List<ValidationResult>();
         if (!Validator.TryValidateObject(dto, new ValidationContext(dto), errors, true))
             throw new ArgumentException(string.Join(" ", errors.Select(x => x.ErrorMessage)));
+        if (dto.HomeContent != null)
+        {
+            if (dto.HomeContent.Count > 200 || dto.HomeContent.Any(x =>
+                !Regex.IsMatch(x.Key, @"^[a-zA-Z0-9_.-]{1,100}$") || x.Value == null || x.Value.Length > 5000))
+                throw new ArgumentException("Nội dung Home không hợp lệ hoặc quá dài.");
+            foreach (var field in dto.HomeContent.Where(x => x.Key.EndsWith(".src") || x.Key.EndsWith(".image")))
+                if (!Uri.TryCreate(field.Value, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+                    throw new ArgumentException("Đường dẫn ảnh Home phải dùng HTTPS.");
+        }
         var entity = await EditableAsync(ct);
+        if (dto.HomeContent != null) entity.HomeContentJson = JsonSerializer.Serialize(dto.HomeContent);
         entity.Name = Clean(dto.Name);
         entity.Slogan = Clean(dto.Slogan);
         entity.Description = Clean(dto.Description);

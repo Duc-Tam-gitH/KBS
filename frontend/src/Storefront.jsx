@@ -5,6 +5,7 @@ import Register from './pages/auth/Register'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
+import { useShop } from './components/ShopProvider'
 import Cart from './pages/customer/Cart'
 import Checkout from './pages/customer/Checkout'
 import Likelist from './pages/customer/Likelist'
@@ -31,6 +32,7 @@ const linkedProduct = () => {
 }
 
 function App() {
+  const shopState = useShop()
   const user = useSyncExternalStore(authStore.subscribe, () => authStore.user, () => authStore.user)
   const [retry, setRetry] = useState(0)
   const [notice, setNotice] = useState('')
@@ -141,6 +143,16 @@ function App() {
   // Admin luôn dùng workspace riêng, kể cả khi URL đang trỏ tới sản phẩm hay trang nhân viên.
   if (user?.roleName === 'Admin') return <main className="min-h-screen bg-deep text-light font-body">
     <Admin key={user.id} user={user} onLogout={logout} />
+  </main>
+
+  if (shopState.shop?.isOpen === false) return <main className="store-pages min-h-screen bg-deep text-light">
+    <section className="ad-panel mx-auto max-w-xl p-8">
+      <h1 className="text-3xl font-bold">Website đang tạm đóng</h1>
+      <p className="my-4">Cửa hàng đang bảo trì. Vui lòng quay lại sau.</p>
+      {route === 'auth' ? <Login onLogin={login} onNavigate={() => {}} />
+        : <button type="button" className="back" onClick={() => setRoute('auth')}>Đăng nhập quản trị</button>}
+      {user && <button type="button" className="back" onClick={logout}>Đăng xuất</button>}
+    </section>
   </main>
 
   const privateRoute = ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(route)

@@ -110,6 +110,7 @@ export const api = {
   removeLikeItem: (productId) =>
     request(`/api/likelist/items/${productId}`, { method: 'DELETE' }),
   admin: {
+    shopAvailability: (isOpen) => request('/api/admin/shop/availability', { method: 'PUT', body: { isOpen } }),
     shop: (signal) => request('/api/admin/shop', { signal }),
     saveShop: (body) => request('/api/admin/shop', { method: 'PUT', body }),
     uploadShopImage: (kind, file) => {

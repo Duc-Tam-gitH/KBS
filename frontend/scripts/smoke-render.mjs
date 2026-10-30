@@ -10,11 +10,17 @@ const server = await createServer({ root, server: { middlewareMode: true }, appT
 try {
   const { default: App } = await server.ssrLoadModule('/src/App.tsx')
   const html = renderToString(createElement(App))
+  assert.doesNotMatch(html, /src=""/)
+  assert.match(html, /Speed/)
+  assert.match(html, /Presence/)
   assert.match(html, /Feel Every/)
   assert.match(html, /Keystroke/)
-  assert.match(html, /KBS/)
   assert.match(html, /aria-pressed="true"/)
   assert.doesNotMatch(html, /TCKR|bg-cream|text-ink|bg-white/)
+  const { homeText } = await server.ssrLoadModule('/src/components/useHomeContent.ts')
+  assert.equal(homeText({}, 'hero.text2'), 'KBS')
+  assert.equal(homeText({ 'hero.text2': 'Updated' }, 'hero.text2'), 'Updated')
+  assert.equal(homeText({ 'hero.text2': '' }, 'hero.text2'), '')
   const { Detail, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
   const { default: Checkout } = await server.ssrLoadModule('/src/pages/customer/Checkout.jsx')
   const { default: SearchPage } = await server.ssrLoadModule('/src/pages/customer/Search.jsx')
@@ -102,7 +108,7 @@ try {
   assert.match(renderToString(createElement(InventoryManagement)), /Đang tải tồn kho/)
   for (const filename of ['ShopManagement']) {
     const { default: Page } = await server.ssrLoadModule('/src/pages/admin/' + filename + '.jsx')
-    assert.match(renderToString(createElement(Page)), /chưa được triển khai/)
+    assert.match(renderToString(createElement(Page)), /Đang tải cấu hình cửa hàng/)
   }
   const { default: AIManagement } = await server.ssrLoadModule('/src/pages/admin/AIManagement.jsx')
   const aiMarkup = renderToString(createElement(AIManagement))

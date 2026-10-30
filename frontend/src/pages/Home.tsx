@@ -1,3 +1,4 @@
+import { useHomeContent } from '../components/useHomeContent'
 import Hero from '@/components/Hero';
 import BentoGrid from '@/components/BentoGrid';
 import SwitchShowcase from '@/components/SwitchShowcase';
@@ -15,17 +16,18 @@ const marqueeItems = [
 ];
 
 function Marquee() {
+  const get = useHomeContent()
   return (
     <div className="overflow-hidden border-y border-border bg-elevated py-4">
       <div className="flex whitespace-nowrap animate-marquee">
         {[0, 1].map((dup) => (
           <div key={dup} className="flex items-center shrink-0">
-            {marqueeItems.map((item) => (
+            {marqueeItems.map((item, index) => (
               <span
-                key={`${dup}-${item}`}
+                key={`${dup}-${index}`}
                 className="mx-6 text-sm font-medium tracking-widest uppercase text-light flex items-center gap-6"
               >
-                {item}
+                {get(`marquee.item${index}`)}
                 <span className="text-accent">/</span>
               </span>
             ))}
