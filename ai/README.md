@@ -43,7 +43,7 @@ Các module chưa tích hợp chỉ hiển thị metadata thật; công tắc di
 
 ## Thêm AI khác
 
-Hiện chỉ `ai_auto` đã tích hợp. Các module còn lại chưa có worker/API nghiệp vụ trong repo.
+Hiện `ai_auto` và `ai_recommender` đã tích hợp. Các module còn lại chưa có worker/API nghiệp vụ trong repo.
 Sau khi triển khai worker và API cho module mới:
 
 1. Đặt file `ai_<tên>.py` trong thư mục `ai/`. Build/publish tự sao chép các file `ai_*.py`.
@@ -51,7 +51,7 @@ Sau khi triển khai worker và API cho module mới:
    Ví dụ thêm `"ai_anti": "ai_anti.py"` sau khi đã triển khai AI phát hiện mua gom.
 3. Tích hợp API riêng: xác thực worker, cập nhật heartbeat của module, kiểm tra `IsEnabled`
    phía server trước mỗi thay đổi dữ liệu, ghi sự kiện vào `AiEvents`.
-   Filter/key hiện tại chỉ áp dụng cho endpoint `ai_auto`; AI mới cần được nối vào API phù hợp.
+   Filter/key hiện tại áp dụng cho endpoint `ai_auto` và `ai_recommender`; AI mới cần API phù hợp.
 4. Đánh dấu `AiModules.IsIntegrated = true` bằng migration/luồng tích hợp, build và khởi động lại backend.
 5. Bật ON trên web. Không cần thêm script khởi động riêng.
 
@@ -98,8 +98,50 @@ Thông báo nghiệp vụ/bật tắt/lỗi khởi động lưu trong AiEvents. 
 
 ## Quy tắc
 
-Chỉ đơn `PENDING` có `Orders.TotalPrice < 10000000` mới chuyển `CONFIRMED`.
-Đúng 10 triệu hoặc cao hơn giữ `PENDING`, ghi một thông báo cần staff xác nhận.
+### AI gợi ý sản phẩm
+
+- Quản lý AI → Gợi ý sản phẩm → ON. Backend tự chạy `ai_recommender.py`.
+- Worker nhận sản phẩm đang bán/còn hàng và đặc trưng sản phẩm trong **5 đơn COMPLETED gần nhất của mỗi khách**.
+  Không dùng đơn chờ, đang giao hoặc đã hủy làm lịch sử mua.
+- Xếp hạng tương đồng: cùng danh mục +4, switch +3, âm thanh +3, layout +2, thương hiệu +1;
+  độ gần giá cộng tối đa 1 điểm khi có thuộc tính chung. Ưu tiên sản phẩm mua gần hơn.
+- Gợi ý tối đa 8 sản phẩm, không lặp và không đưa lại sản phẩm đã mua trong nhóm đơn gần nhất.
+  Nếu không có sản phẩm tương đồng thì chọn ngẫu nhiên các sản phẩm còn lại.
+- Khách chưa đăng nhập hoặc chưa có lịch sử hợp lệ nhận tối đa 8 sản phẩm ngẫu nhiên.
+- `GET /api/recommendations` lấy user ID từ JWT đã xác thực; không nhận user ID từ query để chọn lịch sử.
+  Response gồm `status` (DISABLED/WAITING/READY), `mode` (RANDOM/PERSONALIZED), `items`.
+- `POST /api/ai-worker/recommender/poll` cung cấp dữ liệu; `POST .../results` nhận `version`,
+  `random` và `customers: [{userId, productIds}]`. Các endpoint worker yêu cầu X-AI-Key.
+- Backend kiểm tra version, quyền bật/tắt, ID sản phẩm, tồn kho và sản phẩm đã mua trước khi nhận kết quả.
+  Khi trả ra Home, kiểm tra tồn kho/trạng thái và lịch sử hiện tại lần nữa; giữ thứ tự xếp hạng của worker.
+- Kết quả tạm lưu trong bộ nhớ của một backend, làm mới mỗi 5 giây; Home tải lại mỗi 10 giây.
+  Backend khởi động lại sẽ chờ worker tạo kết quả mới. Chưa hỗ trợ chia sẻ cache giữa nhiều instance.
+- Sự kiện RECOMMENDED ghi khi phần gợi ý cá nhân/phiên bản cấu hình thay đổi, không ghi mỗi lần xáo trộn ngẫu nhiên.
+- Đây là thuật toán so khớp đặc trưng; không gọi LLM hoặc huấn luyện mô hình học máy.
+
+| Thành phần UI/thuật toán | Nguồn DB |
+|---|---|
+| Tên, giá | Products.Name/Price |
+| Âm thanh, switch, layout | Products.Sound/SwitchType/Layout |
+| Danh mục, thương hiệu | Products.CategoryId/BrandId |
+| Ảnh | ProductImages.ImageUrl (rỗng: Chưa có ảnh) |
+| Điều kiện còn hàng | Inventories.StockQuantity > 0, Products.IsActive |
+| Lịch sử mua | Orders.UserId/OrderStatus/CreatedAt → OrderDetails.ProductId |
+| Bật/tắt và heartbeat | AiModules.IsEnabled/LastHeartbeatAt |
+### Chỉnh Home từ code
+
+- Bố cục, thứ tự các phần: `frontend/src/pages/Home.tsx`.
+- Text/ảnh dùng qua `get(...)`: sửa `defaultValue` tương ứng trong `frontend/src/components/homeDefaults.ts`.
+- Dòng chữ chạy: sửa `marqueeItems` trong `Home.tsx`.
+- Tiêu đề và mô tả phần gợi ý: `frontend/src/components/Recommendations.jsx`.
+- `HOME_CONTENT_SOURCE = 'code'` trong `useHomeContent.ts` là mặc định: nội dung Admin đã lưu không ghi đè code.
+  Đổi thành `'admin'` để dùng nội dung quản trị; không xóa nội dung database đã lưu.
+- Thông tin nghiệp vụ như tên/giá/số lượng sản phẩm vẫn đến từ database.
+
+### AI xác nhận đơn
+
+Chỉ đơn `PENDING`, phương thức `COD` và `Orders.TotalPrice < 10000000` mới chuyển `CONFIRMED`.
+Mọi đơn `BANKING` (kể cả đã PAID), hoặc từ 10 triệu trở lên đều giữ `PENDING`, ghi MANUAL_REVIEW để nhân viên xác nhận.
 Server kiểm tra lại DB khi nhận quyết định; không thay đổi thanh toán/tồn kho.
 Giao dịch Serializable và khóa module bảo vệ thao tác bật/tắt/worker đồng thời;
 tranh chấp với staff/customer trả 409, worker đọc lại trong lượt tiếp theo.

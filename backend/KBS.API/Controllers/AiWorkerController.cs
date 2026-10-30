@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace KBS.API.Controllers;
 
-// Dedicated worker credential grants only auto-approval endpoints, never administrator APIs.
+// Dedicated worker credential grants only worker endpoints, never administrator APIs.
 public class AiWorkerKeyFilter(IConfiguration configuration) : IAuthorizationFilter
 {
     public void OnAuthorization(AuthorizationFilterContext context)

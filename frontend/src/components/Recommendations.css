@@ -1,0 +1,13 @@
+.home-recommendations { padding: 64px 24px; max-width: 1280px; margin: auto; }
+.home-recommendations header { max-width: 720px; }
+.home-recommendations h2 { font-size: clamp(26px, 4vw, 44px); font-weight: 700; margin: 10px 0; }
+.home-recommendations p { color: var(--color-text-muted); }
+.recommendation-card { border: 1px solid var(--color-border);
+  border-radius: 12px; background: var(--color-bg-elevated); color: var(--color-text-light); padding: 14px; }
+.recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+.recommendation-card { display: grid; gap: 12px; text-align: left; }
+.recommendation-card:hover { border-color: var(--color-accent); }
+.recommendation-card img, .recommendation-image { width: 100%; height: 180px; object-fit: contain; }
+.recommendation-image { display: grid; place-content: center; justify-items: center; color: var(--color-text-muted); }
+.recommendation-card small { color: var(--color-text-muted); }
+.home-recommendations button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }

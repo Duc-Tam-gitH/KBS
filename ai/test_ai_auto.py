@@ -4,6 +4,10 @@ from ai_auto import decision, run_once
 
 
 class AutoTests(unittest.TestCase):
+    def test_bank_transfer_always_requires_staff(self):
+        self.assertEqual("MANUAL_REVIEW", decision(1000, 10000000, "BANKING"))
+        self.assertEqual("MANUAL_REVIEW", decision(10000000, 10000000, "BANKING"))
+        self.assertEqual("MANUAL_REVIEW", decision(1000, 10000000, ""))
     def test_boundary(self):
         self.assertEqual("CONFIRM", decision("9999999.99", "10000000"))
         self.assertEqual("MANUAL_REVIEW", decision("10000000", "10000000"))
@@ -18,7 +22,7 @@ class AutoTests(unittest.TestCase):
     @patch("ai_auto.post")
     def test_enabled_sends_decision(self, post):
         post.side_effect = [
-            {"isEnabled": True, "approvalLimit": 10000000, "orders": [{"id": 1, "totalPrice": 9999999}]},
+            {"isEnabled": True, "approvalLimit": 10000000, "orders": [{"id": 1, "totalPrice": 9999999, "paymentMethod": "COD"}]},
             {"result": "CONFIRMED"},
         ]
         run_once("http://localhost", "test")

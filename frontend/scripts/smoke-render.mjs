@@ -14,6 +14,8 @@ try {
   assert.match(html, /Speed/)
   assert.match(html, /Presence/)
   assert.match(html, /Feel Every/)
+  assert.match(html, /Tìm chất phím dành cho bạn/)
+  assert.match(html, /Gợi ý sẽ phù hợp hơn khi bạn có lịch sử mua hàng/)
   assert.match(html, /Keystroke/)
   assert.match(html, /aria-pressed="true"/)
   assert.doesNotMatch(html, /TCKR|bg-cream|text-ink|bg-white/)

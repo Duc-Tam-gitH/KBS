@@ -119,7 +119,7 @@ namespace KBS.DAL.Migrations
                         {
                             Id = "ai_auto",
                             ApprovalLimit = 10000000m,
-                            Description = "Xác nhận đơn chờ dưới 10 triệu; từ 10 triệu cần staff xác nhận.",
+                            Description = "Tự xác nhận đơn COD dưới 10 triệu; đơn chuyển khoản cần nhân viên xác nhận.",
                             IsEnabled = false,
                             IsIntegrated = true,
                             Name = "Tự động xác nhận đơn",
@@ -159,9 +159,9 @@ namespace KBS.DAL.Migrations
                         new
                         {
                             Id = "ai_recommender",
-                            Description = "Gợi ý sản phẩm theo kịch bản mua hàng.",
+                            Description = "Gợi ý tương đồng với 5 đơn hoàn thành gần nhất; chưa mua sẽ gợi ý ngẫu nhiên.",
                             IsEnabled = false,
-                            IsIntegrated = false,
+                            IsIntegrated = true,
                             Name = "Gợi ý sản phẩm",
                             SourceFile = "ai_recommender.py",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
@@ -637,6 +637,10 @@ namespace KBS.DAL.Migrations
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Sound")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("SwitchType")
                         .HasColumnType("text");

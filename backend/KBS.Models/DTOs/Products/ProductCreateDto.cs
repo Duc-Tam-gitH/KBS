@@ -13,6 +13,8 @@ public class ProductCreateDto
     public long CategoryId { get; set; }
     public long BrandId { get; set; }
     public string? SwitchType { get; set; }
+    [StringLength(50)]
+    public string? Sound { get; set; }
     public string? Layout { get; set; }
     public string? ConnectionType { get; set; }
     public string? Keycap { get; set; }

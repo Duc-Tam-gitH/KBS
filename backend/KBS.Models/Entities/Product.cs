@@ -17,6 +17,7 @@ public class Product
     public long BrandId { get; set; }
 
     public string? SwitchType { get; set; }
+    public string? Sound { get; set; }
 
     public string? Layout { get; set; }
 

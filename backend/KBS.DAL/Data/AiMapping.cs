@@ -21,7 +21,7 @@ internal static class AiMapping
         var created = new DateTimeOffset(2026, 10, 29, 0, 0, 0, TimeSpan.Zero);
         module.HasData(
             new AiModule { Id = "ai_auto", Name = "Tự động xác nhận đơn", SourceFile = "ai_auto.py",
-                Description = "Xác nhận đơn chờ dưới 10 triệu; từ 10 triệu cần staff xác nhận.",
+                Description = "Tự xác nhận đơn COD dưới 10 triệu; đơn chuyển khoản cần nhân viên xác nhận.",
                 IsIntegrated = true, ApprovalLimit = 10000000, UpdatedAt = created },
             new AiModule { Id = "ai_anti", Name = "Phát hiện mua gom", SourceFile = "ai_anti.py",
                 Description = "Phát hiện mua trên 100 sản phẩm trong 24 giờ.", UpdatedAt = created },
@@ -30,7 +30,8 @@ internal static class AiMapping
             new AiModule { Id = "ai_reviewnpl", Name = "Kiểm tra đánh giá", SourceFile = "ai_reviewnpl.py",
                 Description = "Lọc từ khóa và phát hiện spam đánh giá.", UpdatedAt = created },
             new AiModule { Id = "ai_recommender", Name = "Gợi ý sản phẩm", SourceFile = "ai_recommender.py",
-                Description = "Gợi ý sản phẩm theo kịch bản mua hàng.", UpdatedAt = created });
+                Description = "Gợi ý tương đồng với 5 đơn hoàn thành gần nhất; chưa mua sẽ gợi ý ngẫu nhiên.",
+                IsIntegrated = true, UpdatedAt = created });
         var activity = modelBuilder.Entity<AiEvent>();
         activity.Property(x => x.ModuleId).HasMaxLength(50);
         activity.Property(x => x.Kind).HasMaxLength(40);

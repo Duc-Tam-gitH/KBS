@@ -31,6 +31,7 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Product>().Property(x => x.Sound).HasMaxLength(50);
         modelBuilder.Entity<ShopSettings>().Property(x => x.Id).ValueGeneratedNever();
         modelBuilder.Entity<ShopSettings>().ToTable("ShopSettings", table =>
             table.HasCheckConstraint("CK_ShopSettings_Singleton", "\"Id\" = 1"));

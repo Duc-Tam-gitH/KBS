@@ -3,6 +3,7 @@ import { api } from '../../services/api'
 import { dateTime, useStaffAction } from '../Staff/staffHooks'
 import './ShopManagement.css'
 import { homeFields } from '../../components/homeDefaults'
+import { HOME_CONTENT_SOURCE } from '../../components/useHomeContent'
 
 const fields = ['name', 'slogan', 'description', 'hotline', 'email', 'warehouseAddress',
   'bankName', 'bankBin', 'accountNumber', 'accountName']
@@ -39,7 +40,8 @@ export default function ShopManagement() {
       payload.homeContent = homeContent
       const data = await api.admin.saveShop(payload)
       setForm(formFrom(data)); setSaved(data.shop); changed()
-    }, 'Đã lưu cấu hình cửa hàng và cập nhật nội dung Home.')
+    }, HOME_CONTENT_SOURCE === 'admin' ? 'Đã lưu cấu hình cửa hàng và cập nhật nội dung Home.'
+      : 'Đã lưu cấu hình. Home hiện dùng nội dung từ code.')
   }
   const toggleAvailability = () => action.run(async () => {
     await api.admin.shopAvailability(saved?.isOpen === false)
@@ -63,7 +65,9 @@ export default function ShopManagement() {
           : <form className="sm-form" noValidate onSubmit={save}>
             <fieldset disabled={action.busy}>
               <section hidden={tab !== 'general'}><h2>Quản lý trang Home</h2>
-                <p>Giữ nguyên bố cục Home cũ. Các ô bên dưới chứa nội dung gốc; chỉnh sửa rồi lưu để áp dụng.</p>
+                <p>{HOME_CONTENT_SOURCE === 'code'
+                  ? 'Home đang dùng nội dung từ code. Nội dung lưu ở đây chỉ hiển thị khi bật nguồn quản trị.'
+                  : 'Chỉnh sửa nội dung bên dưới rồi lưu để áp dụng lên Home.'}</p>
                 <button type="button" onClick={() => {
                   if (window.confirm('Khôi phục toàn bộ nội dung Home gốc? Bấm Lưu thay đổi để áp dụng.')) setHomeContent({})
                 }}>Khôi phục nội dung Home gốc</button>

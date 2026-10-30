@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
-def decision(total_price, limit):
-    return "CONFIRM" if Decimal(str(total_price)) < Decimal(str(limit)) else "MANUAL_REVIEW"
+def decision(total_price, limit, payment_method="COD"):
+    return "CONFIRM" if payment_method == "COD" and Decimal(str(total_price)) < Decimal(str(limit)) else "MANUAL_REVIEW"
 
 
 def post(base_url, key, path, payload=None):
@@ -28,7 +28,7 @@ def run_once(base_url, key):
     for order in batch["orders"]:
         try:
             result = post(base_url, key, f'/api/ai-worker/auto/orders/{order["id"]}/decision', {
-                "decision": decision(order["totalPrice"], batch["approvalLimit"]),
+                "decision": decision(order["totalPrice"], batch["approvalLimit"], order.get("paymentMethod", "")),
             })
             print(f'Order #{order["id"]}: {result["result"]}', flush=True)
         except HTTPError as error:
@@ -37,7 +37,7 @@ def run_once(base_url, key):
             print(f'Order #{order["id"]}: changed concurrently; retry on next poll.', flush=True)
 
 
-def main():
+def run_worker(run_once):
     base_url = os.environ.get("KBS_API_URL", "http://localhost:5231").rstrip("/")
     key = os.environ.get("KBS_AI_WORKER_KEY", "")
     parsed = urlparse(base_url)
@@ -58,6 +58,6 @@ def main():
 
 if __name__ == "__main__":
     try:
-        main()
+        run_worker(run_once)
     except KeyboardInterrupt:
         pass

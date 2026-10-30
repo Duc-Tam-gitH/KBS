@@ -11,6 +11,7 @@ public class ProductResponseDto
     public long BrandId { get; set; }
     public string BrandName { get; set; } = string.Empty;
     public string? SwitchType { get; set; }
+    public string? Sound { get; set; }
     public string? Layout { get; set; }
     public string? ConnectionType { get; set; }
     public string? Keycap { get; set; }

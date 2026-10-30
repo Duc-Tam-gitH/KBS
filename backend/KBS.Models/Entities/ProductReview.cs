@@ -10,4 +10,7 @@ public class ProductReview
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public Product? Product { get; set; }
     public User? User { get; set; }
+    public string ModerationStatus { get; set; } = "PENDING";
+    public string? ModerationReason { get; set; }
+    public DateTimeOffset? CheckedAt { get; set; }
 }

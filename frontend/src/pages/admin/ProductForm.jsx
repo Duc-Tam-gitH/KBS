@@ -22,7 +22,7 @@ export default function ProductForm({ product, categories, brands, busy, onSave,
       isRGB: values.get('isRGB') === 'on',
       images: product?.images || [],
     }
-    for (const key of ['switchType', 'layout', 'connectionType', 'keycap', 'color']) {
+    for (const key of ['switchType', 'sound', 'layout', 'connectionType', 'keycap', 'color']) {
       payload[key] = values.get(key).trim() || null
     }
     setError('')
@@ -63,6 +63,10 @@ export default function ProductForm({ product, categories, brands, busy, onSave,
           <strong>{product ? product.stockQuantity.toLocaleString('vi-VN') : 'Khởi tạo khi lưu'}</strong>
           <p>Số lượng được cập nhật qua nghiệp vụ nhập / xuất kho.</p></div>
         <label>Mô tả<textarea name="description" rows={3} defaultValue={product?.description || ''} /></label>
+        <label>Âm thanh<input name="sound" maxLength={50} defaultValue={product?.sound || ''}
+          list="product-sounds" /></label>
+        <datalist id="product-sounds"><option value="Thocky" /><option value="Clacky" /></datalist>
+        <p className="pm-help">Nhập Thocky cho âm trầm; để trống nếu chưa xác định. Gợi ý Linear dùng trường Switch.</p>
         <details className="pm-specs"><summary>Thông số kỹ thuật</summary>
           <div className="pm-form-grid">
             {[['switchType', 'Switch'], ['layout', 'Layout'], ['connectionType', 'Kết nối'],

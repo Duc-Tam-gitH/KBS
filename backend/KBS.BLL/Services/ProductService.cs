@@ -68,6 +68,7 @@ public class ProductService(KbsDbContext db) : IProductService
             CategoryId = dto.CategoryId,
             BrandId = dto.BrandId,
             SwitchType = dto.SwitchType?.Trim(),
+            Sound = dto.Sound?.Trim(),
             Layout = dto.Layout?.Trim(),
             ConnectionType = dto.ConnectionType?.Trim(),
             Keycap = dto.Keycap?.Trim(),
@@ -97,6 +98,7 @@ public class ProductService(KbsDbContext db) : IProductService
         product.CategoryId = dto.CategoryId;
         product.BrandId = dto.BrandId;
         product.SwitchType = dto.SwitchType?.Trim();
+        product.Sound = dto.Sound?.Trim();
         product.Layout = dto.Layout?.Trim();
         product.ConnectionType = dto.ConnectionType?.Trim();
         product.Keycap = dto.Keycap?.Trim();
@@ -148,7 +150,7 @@ public class ProductService(KbsDbContext db) : IProductService
         }
     }
 
-    private static ProductResponseDto ToDto(Product product) => new()
+    internal static ProductResponseDto ToDto(Product product) => new()
     {
         Id = product.Id,
         Name = product.Name,
@@ -160,6 +162,7 @@ public class ProductService(KbsDbContext db) : IProductService
         BrandId = product.BrandId,
         BrandName = product.Brand?.Name ?? string.Empty,
         SwitchType = product.SwitchType,
+        Sound = product.Sound,
         Layout = product.Layout,
         ConnectionType = product.ConnectionType,
         Keycap = product.Keycap,

@@ -1,4 +1,4 @@
-// Original Home content restored from commit 12628fd; used until Admin saves overrides.
+// Edit defaultValue here to change Home text. useHomeContent.ts selects code or Admin content.
 export const homeFields: { key: string; defaultValue: string; label: string; group: string; kind: string }[] = [
   {
     "key": "hero.text2",

@@ -56,6 +56,8 @@ builder.Services.AddScoped<ILikelistService, LikelistService>();
 builder.Services.AddScoped<ProductReviewService>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<AiManagementService>();
+builder.Services.AddSingleton<RecommendationCache>();
+builder.Services.AddScoped<RecommendationService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<PaymentService>();

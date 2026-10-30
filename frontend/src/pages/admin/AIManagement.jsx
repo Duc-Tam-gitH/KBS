@@ -9,6 +9,7 @@ const connections = {
   NOT_INTEGRATED: 'Chưa tích hợp', NEVER_CONNECTED: 'Chưa kết nối', ONLINE: 'Đã kết nối', OFFLINE: 'Mất kết nối',
 }
 const kinds = {
+  RECOMMENDED: 'Đã cập nhật gợi ý',
   ENABLED: 'Đã bật', DISABLED: 'Đã tắt', CONFIRMED: 'Đã xác nhận', MANUAL_REVIEW: 'Cần staff xác nhận', ERROR: 'Lỗi',
 }
 
@@ -170,12 +171,12 @@ export default function AIManagement({ readOnly = false }) {
             <dt>Cập nhật cấu hình</dt><dd>{dateTime(selected.updatedAt)}</dd>
           </dl>
           {selected.approvalLimit != null && <div className="ai-rule">
-            <h3>Quy tắc xác nhận</h3><p>Đơn chờ dưới <strong>{money(selected.approvalLimit)}</strong>: tự xác nhận.</p>
-            <p>Từ mức này trở lên: chờ staff xác nhận.</p>
+            <h3>Quy tắc xác nhận</h3><p>Đơn COD dưới <strong>{money(selected.approvalLimit)}</strong>: tự xác nhận.</p>
+            <p>Đơn chuyển khoản hoặc từ mức này trở lên: chờ nhân viên xác nhận.</p>
           </div>}
           {!selected.isIntegrated && <p className="ad-muted">Module chưa được tích hợp.</p>}
           {selected.isIntegrated && <p className="ad-muted">
-            Bật module cho phép worker xử lý đơn đang chờ. Khi worker mất kết nối, staff vẫn xử lý thủ công được.
+            Bật module để backend khởi động worker tương ứng. Kết quả và lỗi hiển thị trong Thông báo hoạt động.
           </p>}
         </>}
     </aside>

@@ -14,6 +14,33 @@ namespace KBS.Tests;
 
 public class AiManagementTests
 {
+    [Theory]
+    [InlineData("PENDING")]
+    [InlineData("PAID")]
+    public async Task Bank_orders_require_staff_even_below_limit(string paymentStatus)
+    {
+        using var app = new AiFactory();
+        using var client = app.CreateClient();
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
+        var module = await db.AiModules.SingleAsync(x => x.Id == "ai_auto");
+        module.IsEnabled = true;
+        var order = new Order
+        {
+            UserId = await db.Users.Select(x => x.Id).FirstAsync(), PaymentMethod = "BANKING",
+            PaymentStatus = paymentStatus, TotalPrice = 1000
+        };
+        db.Orders.Add(order);
+        await db.SaveChangesAsync();
+        var service = new AiManagementService(db);
+        Assert.Equal("BANKING", Assert.Single((await service.PollAsync(default)).Orders).PaymentMethod);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.DecideAsync(order.Id, "CONFIRM", default));
+        Assert.Equal("MANUAL_REVIEW", (await service.DecideAsync(order.Id, "MANUAL_REVIEW", default)).Result);
+        Assert.Equal("PENDING", order.OrderStatus);
+        Assert.Equal(paymentStatus, order.PaymentStatus);
+        Assert.Contains("chuyển khoản", (await db.AiEvents.SingleAsync()).Message);
+    }
+
     [Fact]
     public async Task Event_filters_combine_module_kind_time_and_pagination()
     {
@@ -69,7 +96,7 @@ public class AiManagementTests
         {
             var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
             var customerId = await db.Users.Where(x => x.Username == "customer").Select(x => x.Id).SingleAsync();
-            var order = new Order { UserId = customerId, TotalPrice = 4690000 };
+            var order = new Order { PaymentMethod = "COD", UserId = customerId, TotalPrice = 4690000 };
             db.Orders.Add(order);
             await db.SaveChangesAsync();
             orderId = order.Id;
@@ -113,7 +140,7 @@ public class AiManagementTests
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
         var service = new AiManagementService(db);
         var userId = await db.Users.Select(x => x.Id).FirstAsync();
-        var order = new Order { UserId = userId, TotalPrice = total, PaymentStatus = "PAID" };
+        var order = new Order { PaymentMethod = "COD", UserId = userId, TotalPrice = total, PaymentStatus = "PAID" };
         db.Orders.Add(order);
         await db.SaveChangesAsync();
         await service.EnableAsync("ai_auto", true, userId, default);
@@ -142,7 +169,7 @@ public class AiManagementTests
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
         var id = await db.Users.Select(x => x.Id).FirstAsync();
-        var order = new Order { UserId = id, OrderStatus = status, TotalPrice = 100 };
+        var order = new Order { PaymentMethod = "COD", UserId = id, OrderStatus = status, TotalPrice = 100 };
         db.Orders.Add(order);
         await db.SaveChangesAsync();
         var service = new AiManagementService(db);
@@ -203,7 +230,7 @@ public class AiManagementTests
 
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
-        var order = new Order { UserId = await db.Users.Select(x => x.Id).FirstAsync(), TotalPrice = 100 };
+        var order = new Order { PaymentMethod = "COD", UserId = await db.Users.Select(x => x.Id).FirstAsync(), TotalPrice = 100 };
         db.Orders.Add(order);
         var module = await db.AiModules.SingleAsync(x => x.Id == "ai_auto");
         module.LastHeartbeatAt = DateTimeOffset.UtcNow.AddMinutes(-1);

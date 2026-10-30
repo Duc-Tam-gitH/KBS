@@ -1,7 +1,8 @@
-import { useHomeContent } from '../components/useHomeContent'
+import { HOME_CONTENT_SOURCE, useHomeContent } from '../components/useHomeContent'
 import Hero from '@/components/Hero';
 import BentoGrid from '@/components/BentoGrid';
 import SwitchShowcase from '@/components/SwitchShowcase';
+import Recommendations from '../components/Recommendations';
 import './Home.css';
 
 const marqueeItems = [
@@ -27,7 +28,7 @@ function Marquee() {
                 key={`${dup}-${index}`}
                 className="mx-6 text-sm font-medium tracking-widest uppercase text-light flex items-center gap-6"
               >
-                {get(`marquee.item${index}`)}
+                {HOME_CONTENT_SOURCE === 'code' ? item : get(`marquee.item${index}`)}
                 <span className="text-accent">/</span>
               </span>
             ))}
@@ -38,12 +39,13 @@ function Marquee() {
   );
 }
 
-function Home({ onNavigate }: { onNavigate: (route: string) => void }) {
+function Home({ onNavigate }: { onNavigate: (route: string, product?: { id: number }) => void }) {
   return (
     <div className="home-page min-h-screen bg-deep font-body text-light overflow-x-hidden">
 
       <div>
         <Hero onNavigate={onNavigate} />
+        <Recommendations onSelect={(product: { id: number }) => onNavigate('detail', product)} />
         <Marquee />
         <BentoGrid onNavigate={onNavigate} />
         <SwitchShowcase />

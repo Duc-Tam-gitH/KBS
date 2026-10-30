@@ -24,11 +24,15 @@ public class AiWorkerSupervisorTests
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Ai:WorkerKey"] = "test-real-worker-key-at-least-32-characters",
-            ["Ai:Workers:ai_auto"] = "ai_auto.py"
+            ["Ai:Workers:ai_auto"] = "ai_auto.py",
+            ["Ai:Workers:ai_recommender"] = "ai_recommender.py"
         });
         builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
         builder.Services.AddControllers().AddApplicationPart(typeof(AiWorkerController).Assembly);
         builder.Services.AddScoped<AiManagementService>();
+        builder.Services.AddScoped<RecommendationService>();
+        builder.Services.AddSingleton<RecommendationCache>();
         builder.Services.AddHostedService<AiWorkerSupervisor>();
         var databaseName = "ai-network-test-" + Guid.NewGuid();
         builder.Services.AddDbContext<KbsDbContext>(options => options
@@ -43,7 +47,29 @@ public class AiWorkerSupervisorTests
             await db.Database.EnsureCreatedAsync();
             var module = await db.AiModules.SingleAsync(x => x.Id == "ai_auto");
             module.IsEnabled = true;
-            db.Orders.AddRange(new Order { TotalPrice = 1000 }, new Order { TotalPrice = 10000000 });
+            var recommender = await db.AiModules.SingleAsync(x => x.Id == "ai_recommender");
+            recommender.IsEnabled = true;
+            var product = new Product
+            {
+                Name = "Worker recommendation test", Sound = "Thocky", SwitchType = "Linear",
+                Category = new Category { Name = "Worker category" },
+                Brand = new Brand { Name = "Worker brand", IsActive = true },
+                Inventory = new Inventory { StockQuantity = 2 }
+            };
+            db.Products.Add(product);
+            var purchased = new Product
+            {
+                Name = "Previously purchased", Sound = "Thocky", SwitchType = "Linear",
+                Category = product.Category, Brand = product.Brand, IsActive = false,
+                Inventory = new Inventory { StockQuantity = 0 }
+            };
+            db.Orders.Add(new Order
+            {
+                UserId = 77, PaymentMethod = "COD", OrderStatus = "COMPLETED", TotalPrice = 3000,
+                OrderDetails = [new OrderDetail { Product = purchased, Quantity = 1, UnitPrice = 3000 }]
+            });
+            db.Orders.AddRange(new Order { PaymentMethod = "COD", TotalPrice = 1000 },
+                new Order { PaymentMethod = "COD", TotalPrice = 10000000 });
             await db.SaveChangesAsync();
         }
         await app.StartAsync();
@@ -53,7 +79,8 @@ public class AiWorkerSupervisorTests
             {
                 using var scope = app.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
-                return await db.AiEvents.CountAsync(x => x.OrderId != null) == 2;
+                return await db.AiEvents.CountAsync(x => x.OrderId != null) == 2
+                    && await db.AiEvents.AnyAsync(x => x.Kind == "RECOMMENDED");
             });
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
@@ -61,6 +88,11 @@ public class AiWorkerSupervisorTests
             Assert.Equal("PENDING", (await db.Orders.SingleAsync(x => x.TotalPrice == 10000000)).OrderStatus);
             Assert.Contains(await db.AiEvents.ToListAsync(), x => x.Kind == "MANUAL_REVIEW");
             Assert.NotNull((await db.AiModules.SingleAsync(x => x.Id == "ai_auto")).LastHeartbeatAt);
+            var recommendations = scope.ServiceProvider.GetRequiredService<RecommendationService>();
+            Assert.Single((await recommendations.GetAsync(null, CancellationToken.None)).Items);
+            var personal = await recommendations.GetAsync(77, CancellationToken.None);
+            Assert.Equal("PERSONALIZED", personal.Mode);
+            Assert.Equal("Worker recommendation test", Assert.Single(personal.Items).Name);
         }
         finally { await app.StopAsync(); }
     }

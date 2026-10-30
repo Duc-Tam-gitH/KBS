@@ -208,7 +208,8 @@ export default function ProductDetail({
                     <dl>
                       {[
                         ['Layout', product.layout], ['Kết nối', product.connectionType],
-                        ['Switch', product.switchType], ['Keycap', product.keycap], ['Màu sắc', product.color],
+                        ['Switch', product.switchType], ['Âm thanh', product.sound],
+                        ['Keycap', product.keycap], ['Màu sắc', product.color],
                         ['Hot-swap', product.isHotSwap ? 'Có' : 'Không'],
                         ['RGB', product.isRGB ? 'Có' : 'Không'],
                       ].map(([label, value]) => <div key={label}>

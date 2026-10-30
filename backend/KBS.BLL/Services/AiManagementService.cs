@@ -48,7 +48,8 @@ public class AiManagementService(KbsDbContext db)
         DateTimeOffset? to = null)
     {
         if (limit is < 1 or > 100 || beforeId <= 0) throw new ArgumentException("Phân trang không hợp lệ.");
-        if (kind != null && kind is not ("ENABLED" or "DISABLED" or "CONFIRMED" or "MANUAL_REVIEW" or "ERROR"))
+        if (kind != null && kind is not ("ENABLED" or "DISABLED" or "CONFIRMED"
+            or "MANUAL_REVIEW" or "ERROR" or "RECOMMENDED"))
             throw new ArgumentException("Trạng thái thông báo không hợp lệ.");
         if (from > to) throw new ArgumentException("Thời gian bắt đầu phải trước hoặc bằng thời gian kết thúc.");
         from = from?.ToUniversalTime();
@@ -75,7 +76,8 @@ public class AiManagementService(KbsDbContext db)
             ? await db.Orders.AsNoTracking().Where(x => x.OrderStatus == "PENDING"
                 && !db.AiEvents.Any(e => e.ModuleId == module.Id && e.OrderId == x.Id
                     && (e.Kind == "CONFIRMED" || e.Kind == "MANUAL_REVIEW")))
-                .OrderBy(x => x.Id).Take(50).Select(x => new AiOrderDto(x.Id, x.TotalPrice)).ToListAsync(ct)
+                .OrderBy(x => x.Id).Take(50)
+                .Select(x => new AiOrderDto(x.Id, x.TotalPrice, x.PaymentMethod)).ToListAsync(ct)
             : [];
         return new AiPollDto(module.IsEnabled, module.ApprovalLimit!.Value, orders);
     }
@@ -95,9 +97,9 @@ public class AiManagementService(KbsDbContext db)
         var previous = await db.AiEvents.FirstOrDefaultAsync(x => x.ModuleId == module.Id
             && x.OrderId == orderId && (x.Kind == "CONFIRMED" || x.Kind == "MANUAL_REVIEW"), ct);
         if (previous != null) return new AiDecisionResponseDto(orderId, previous.Kind);
-        var confirm = order.TotalPrice < module.ApprovalLimit;
+        var confirm = order.PaymentMethod == "COD" && order.TotalPrice < module.ApprovalLimit;
         if ((decision == "CONFIRM") != confirm)
-            throw new InvalidOperationException("Quyết định không khớp tổng tiền hiện tại. Vui lòng đọc lại đơn hàng.");
+            throw new InvalidOperationException("Quyết định không khớp điều kiện duyệt hiện tại. Vui lòng đọc lại đơn hàng.");
         var result = confirm ? "CONFIRMED" : "MANUAL_REVIEW";
         if (confirm)
         {
@@ -108,7 +110,9 @@ public class AiManagementService(KbsDbContext db)
         {
             ModuleId = module.Id, OrderId = orderId, Kind = result,
             Message = confirm ? $"Đã tự động xác nhận đơn #{orderId}."
-                : $"Đơn #{orderId} đạt ngưỡng duyệt thủ công, đang chờ staff xác nhận."
+                : order.PaymentMethod == "BANKING"
+                    ? $"Đơn chuyển khoản #{orderId} cần nhân viên xác nhận."
+                    : $"Đơn #{orderId} cần nhân viên xác nhận theo điều kiện duyệt thủ công."
         });
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);

@@ -63,6 +63,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  recommendations: (signal) => request('/api/recommendations', { signal }),
   shop: (signal) => request('/api/shop', { signal }),
   login: async (credentials) => { const session = await request('/api/auth/login', { method: 'POST', body: credentials }); authStore.setSession(session); return session },
   register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
