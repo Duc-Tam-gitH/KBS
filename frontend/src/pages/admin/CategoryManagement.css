@@ -26,7 +26,7 @@
 .cm-form textarea { resize: vertical; }
 .cm-form .cm-checkbox { display: flex; align-items: center; }
 .admin-dashboard .cm-checkbox input { width: 18px; min-height: 18px; accent-color: var(--color-accent); }
-.cm-form [role='alert'] { color: var(--color-primary); }
+.cm-form [role='alert'] { color: var(--color-accent); }
 .cm-page td { overflow-wrap: anywhere; }
 .cm-status { font-size: 12px; white-space: nowrap; }
 .cm-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; margin-top: 20px; }

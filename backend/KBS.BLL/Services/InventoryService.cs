@@ -33,7 +33,7 @@ public class InventoryService(KbsDbContext db, StaffService staff) : IInventoryS
             Delta = dto.StockQuantity - inventory.StockQuantity,
             ExpectedQuantity = inventory.StockQuantity,
             Reason = dto.Reason
-        }, ct);
+        }, staffImportOnly: false, ct);
         return await GetByProductIdAsync(productId, ct);
     }
 }

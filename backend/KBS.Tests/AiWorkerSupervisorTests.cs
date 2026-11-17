@@ -25,13 +25,15 @@ public class AiWorkerSupervisorTests
         {
             ["Ai:WorkerKey"] = "test-real-worker-key-at-least-32-characters",
             ["Ai:Workers:ai_auto"] = "ai_auto.py",
-            ["Ai:Workers:ai_recommender"] = "ai_recommender.py"
+            ["Ai:Workers:ai_recommender"] = "ai_recommender.py",
+            ["Ai:Workers:ai_reviewnpl"] = "ai_reviewnpl.py"
         });
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Services.AddControllers().AddApplicationPart(typeof(AiWorkerController).Assembly);
         builder.Services.AddScoped<AiManagementService>();
         builder.Services.AddScoped<RecommendationService>();
+        builder.Services.AddScoped<ReviewModerationService>();
         builder.Services.AddSingleton<RecommendationCache>();
         builder.Services.AddHostedService<AiWorkerSupervisor>();
         var databaseName = "ai-network-test-" + Guid.NewGuid();
@@ -49,6 +51,7 @@ public class AiWorkerSupervisorTests
             module.IsEnabled = true;
             var recommender = await db.AiModules.SingleAsync(x => x.Id == "ai_recommender");
             recommender.IsEnabled = true;
+            (await db.AiModules.SingleAsync(x => x.Id == "ai_reviewnpl")).IsEnabled = true;
             var product = new Product
             {
                 Name = "Worker recommendation test", Sound = "Thocky", SwitchType = "Linear",
@@ -57,6 +60,10 @@ public class AiWorkerSupervisorTests
                 Inventory = new Inventory { StockQuantity = 2 }
             };
             db.Products.Add(product);
+            db.ProductReviews.Add(new ProductReview
+            {
+                Product = product, UserId = 77, Rating = 1, Comment = "KIẾM TIỀN ONLINE"
+            });
             var purchased = new Product
             {
                 Name = "Previously purchased", Sound = "Thocky", SwitchType = "Linear",
@@ -80,7 +87,8 @@ public class AiWorkerSupervisorTests
                 using var scope = app.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
                 return await db.AiEvents.CountAsync(x => x.OrderId != null) == 2
-                    && await db.AiEvents.AnyAsync(x => x.Kind == "RECOMMENDED");
+                    && await db.AiEvents.AnyAsync(x => x.Kind == "RECOMMENDED")
+                    && await db.AiEvents.AnyAsync(x => x.Kind == "REVIEW_FLAGGED");
             });
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
@@ -93,6 +101,9 @@ public class AiWorkerSupervisorTests
             var personal = await recommendations.GetAsync(77, CancellationToken.None);
             Assert.Equal("PERSONALIZED", personal.Mode);
             Assert.Equal("Worker recommendation test", Assert.Single(personal.Items).Name);
+            var flaggedReview = await db.ProductReviews.SingleAsync();
+            Assert.Equal("FLAGGED", flaggedReview.ModerationStatus);
+            Assert.Equal("KIẾM TIỀN ONLINE", flaggedReview.Comment);
         }
         finally { await app.StopAsync(); }
     }

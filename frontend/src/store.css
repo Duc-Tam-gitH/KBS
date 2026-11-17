@@ -11,7 +11,7 @@
   .store-pages .subtle { @apply text-muted text-sm; }
   .store-pages .glass-card { @apply bg-elevated border border-border rounded-3xl; }
   .store-pages .ink-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary text-deep font-semibold px-7 py-3.5 transition-colors shadow-lg shadow-deep;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary text-light font-semibold px-7 py-3.5 transition-colors shadow-lg shadow-deep;
   }
   .store-pages .ink-button:hover:not(:disabled) {
     @apply bg-accent text-deep;
@@ -38,7 +38,7 @@
   .store-pages .glass-toolbar { @apply bg-elevated rounded-3xl border border-border p-4 md:p-6 mb-8 space-y-4; }
   .store-pages .chips { @apply flex flex-wrap gap-2; }
   .store-pages .chips button { @apply px-4 py-2 rounded-full border border-border text-sm text-light hover:bg-border transition-colors; }
-  .store-pages .chips .selected { @apply bg-primary text-deep border-primary font-semibold; }
+  .store-pages .chips .selected { @apply bg-primary text-light border-primary font-semibold; }
   .store-pages .product-grid { @apply grid sm:grid-cols-2 lg:grid-cols-3 gap-5; }
   .store-pages .product-card { @apply overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-accent; }
   .store-pages .product-image { @apply w-full aspect-[4/3] bg-deep flex items-center justify-center overflow-hidden; }
@@ -46,7 +46,7 @@
   .store-pages .product-card > div { @apply p-6; }
   .store-pages .product-card h3 { @apply mb-2; }
   .store-pages .card-foot { @apply flex items-center justify-between mt-6; }
-  .store-pages .plus { @apply w-11 h-11 rounded-full bg-primary text-deep font-bold text-2xl hover:bg-accent hover:text-deep transition-colors; }
+  .store-pages .plus { @apply w-11 h-11 rounded-full bg-primary text-light font-bold text-2xl hover:bg-accent hover:text-deep transition-colors; }
   .store-pages .product-skeleton { @apply rounded-3xl bg-elevated border border-border h-96 animate-pulse; }
   .store-pages .empty, .store-pages .loading-panel { @apply text-center p-10 md:p-16 my-6; }
   .store-pages .empty p { @apply text-muted mt-3 mb-6; }

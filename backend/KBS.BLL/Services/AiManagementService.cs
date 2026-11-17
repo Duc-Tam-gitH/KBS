@@ -49,7 +49,8 @@ public class AiManagementService(KbsDbContext db)
     {
         if (limit is < 1 or > 100 || beforeId <= 0) throw new ArgumentException("Phân trang không hợp lệ.");
         if (kind != null && kind is not ("ENABLED" or "DISABLED" or "CONFIRMED"
-            or "MANUAL_REVIEW" or "ERROR" or "RECOMMENDED"))
+            or "MANUAL_REVIEW" or "ERROR" or "RECOMMENDED"
+            or "REVIEW_APPROVED" or "REVIEW_FLAGGED" or "REVIEW_HIDDEN"))
             throw new ArgumentException("Trạng thái thông báo không hợp lệ.");
         if (from > to) throw new ArgumentException("Thời gian bắt đầu phải trước hoặc bằng thời gian kết thúc.");
         from = from?.ToUniversalTime();

@@ -54,6 +54,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ILikelistService, LikelistService>();
 builder.Services.AddScoped<ProductReviewService>();
+builder.Services.AddScoped<ReviewModerationService>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<AiManagementService>();
 builder.Services.AddSingleton<RecommendationCache>();

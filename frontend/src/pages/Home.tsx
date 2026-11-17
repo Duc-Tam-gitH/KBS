@@ -6,14 +6,14 @@ import Recommendations from '../components/Recommendations';
 import './Home.css';
 
 const marqueeItems = [
-  'Hot-Swappable',
-  'Gasket-Mounted',
-  'CNC Aluminum',
-  'Per-Key RGB',
-  'Triple-Mode Wireless',
-  'PBT Keycaps',
-  'Sound Dampened',
-  'QMK/VIA Compatible',
+  'Thay switch không cần hàn',
+  'Cấu trúc gasket mount',
+  'Nhôm CNC',
+  'RGB từng phím',
+  'Không dây 3 chế độ',
+  'Keycap PBT',
+  'Giảm âm',
+  'Hỗ trợ QMK/VIA',
 ];
 
 function Marquee() {

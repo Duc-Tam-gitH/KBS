@@ -28,7 +28,7 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
   return (
     <div className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl">
       {menuOpen && <div className="md:hidden glass-dark rounded-3xl p-3 mb-2 grid grid-cols-2 gap-2 border border-border">
-        {links.map(link => <button key={link.route} className={navButton + (route === link.route ? ' bg-primary text-deep font-semibold hover:text-deep' : '')}
+        {links.map(link => <button key={link.route} className={navButton + (route === link.route ? ' bg-primary text-light font-semibold hover:text-accent' : '')}
           aria-current={route === link.route ? 'page' : undefined} onClick={() => navigate(link.route)}>
           {link.label}
         </button>)}
@@ -38,23 +38,23 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
           className="px-2 md:px-4 font-display font-bold text-xl tracking-tight text-light hover:text-accent transition-colors">{get('hero.text2')}</button>
         <div className="hidden md:flex items-center gap-1">
           {links.map(link => <button key={link.route}
-            className={navButton + (route === link.route ? ' bg-primary text-deep font-semibold hover:text-deep' : '')}
+            className={navButton + (route === link.route ? ' bg-primary text-light font-semibold hover:text-accent' : '')}
             aria-current={route === link.route ? 'page' : undefined} onClick={() => navigate(link.route)}>
             {link.label}
           </button>)}
         </div>
         <div className="flex-1" />
-        {role !== 'staff' && <button className={iconButton + (route === 'likes' ? ' bg-primary text-deep hover:text-deep' : '')}
+        {role !== 'staff' && <button className={iconButton + (route === 'likes' ? ' bg-primary text-light hover:text-accent' : '')}
           aria-label="Sản phẩm yêu thích"
           title="Sản phẩm yêu thích"
           onClick={() => navigate('likes')}>
-          <Heart size={18} className={route === 'likes' ? 'fill-deep stroke-deep' : ''} />
+          <Heart size={18} className={route === 'likes' ? 'fill-current stroke-current' : ''} />
         </button>}
-        {role !== 'staff' && <button className={iconButton + ' relative' + (route === 'cart' ? ' bg-primary text-deep hover:text-deep' : '')}
+        {role !== 'staff' && <button className={iconButton + ' relative' + (route === 'cart' ? ' bg-primary text-light hover:text-accent' : '')}
           aria-label={'Giỏ hàng: ' + cartCount + ' sản phẩm'}
           onClick={() => navigate('cart')}>
           <ShoppingBag size={18} />
-          {cartCount > 0 && <span className="absolute -top-1 -right-1 rounded-full bg-primary text-deep font-bold text-xs px-1.5 shadow">
+          {cartCount > 0 && <span className="absolute -top-1 -right-1 rounded-full bg-primary text-light font-bold text-xs px-1.5 shadow">
             {cartCount}
           </span>}
         </button>}

@@ -30,7 +30,7 @@ export default function Recommendations({ onSelect }) {
   return <section className="home-recommendations" aria-labelledby="recommendations-title">
     <header><p>GỢI Ý THEO SỞ THÍCH</p><h2 id="recommendations-title">Tìm chất phím dành cho bạn</h2>
       <p>{data?.mode === 'PERSONALIZED' ? 'Sản phẩm tương đồng với những món bạn đã mua gần đây.'
-        : 'Khám phá sản phẩm dành cho bạn. Gợi ý sẽ phù hợp hơn khi bạn có lịch sử mua hàng.'}</p></header>
+        : 'Khám phá sản phẩm dành cho bạn.'}</p></header>
     {error ? <p role="alert">{error} <button type="button" onClick={() => setRetry(x => x + 1)}>Thử lại</button></p>
       : !data ? <p role="status">Đang tải gợi ý…</p>
         : data.status === 'DISABLED' ? <p>Gợi ý sản phẩm hiện chưa được bật.</p>

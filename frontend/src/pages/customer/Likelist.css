@@ -28,7 +28,7 @@
   padding: .75rem 1rem;
   border-radius: 2rem;
   background: var(--color-primary);
-  color: var(--color-bg-deep);
+  color: var(--color-text-light);
   font-weight: 600;
   border: none;
   transition: background-color 0.2s, color 0.2s;
@@ -55,7 +55,7 @@
 .likelist-search input { width: 100%; }
 .likelist-filters button { padding: .75rem; border-radius: .75rem; border: 1px solid var(--color-border); color: var(--color-text-light); background: var(--color-bg-elevated); }
 .likelist-filters button:hover { border-color: var(--color-accent); color: var(--color-accent); }
-.likelist-filters [aria-pressed='true'] { background: var(--color-primary); color: var(--color-bg-deep); border-color: var(--color-primary); font-weight: 600; }
+.likelist-filters [aria-pressed='true'] { background: var(--color-primary); color: var(--color-text-light); border-color: var(--color-primary); font-weight: 600; }
 .likelist-count { margin: 1.5rem 0; color: var(--color-text-muted); font-size: .875rem; }
 .likelist-products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
 .likelist-card { min-width: 0; border: 1px solid var(--color-border); border-radius: 1.5rem; overflow: hidden; background: var(--color-bg-elevated); transition: transform 0.2s, border-color 0.2s; }
@@ -112,7 +112,7 @@
   padding: 0.75rem 1.5rem;
   border-radius: 2rem;
   background: var(--color-primary);
-  color: var(--color-bg-deep);
+  color: var(--color-text-light);
   font-weight: 600;
   border: none;
   transition: background-color 0.2s, color 0.2s;

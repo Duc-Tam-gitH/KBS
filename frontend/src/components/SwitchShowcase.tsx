@@ -14,9 +14,9 @@ type Switch = {
 
 const switches: Switch[] = [
   {
-    type: 'Linear',
-    name: 'Speed',
-    desc: 'Smooth, frictionless travel from top to bottom. No bump, no click — just pure glide.',
+    type: 'Tuyến tính',
+    name: 'Tốc độ',
+    desc: 'Hành trình phím mượt mà từ trên xuống dưới. Không khấc, không tiếng click — chỉ có cảm giác lướt êm.',
     force: '45g',
     travel: '4mm',
     image:
@@ -24,9 +24,9 @@ const switches: Switch[] = [
     icon: Zap,
   },
   {
-    type: 'Tactile',
-    name: 'Feedback',
-    desc: 'A pronounced tactile bump lets you feel exactly when the switch actuates.',
+    type: 'Có khấc',
+    name: 'Cảm nhận',
+    desc: 'Khấc xúc giác rõ ràng giúp bạn cảm nhận chính xác thời điểm switch được kích hoạt.',
     force: '55g',
     travel: '4mm',
     image:
@@ -34,9 +34,9 @@ const switches: Switch[] = [
     icon: Star,
   },
   {
-    type: 'Clicky',
-    name: 'Presence',
-    desc: 'An audible click on every keystroke. For those who want the room to know they are typing.',
+    type: 'Có tiếng click',
+    name: 'Âm thanh',
+    desc: 'Tiếng click vang lên theo từng lần nhấn, dành cho những ai yêu thích âm thanh gõ phím rõ nét.',
     force: '50g',
     travel: '4mm',
     image:
@@ -76,7 +76,7 @@ export default function SwitchShowcase() {
               >
                 <img
                   src={get(`switches.card${i}.image`)}
-                  alt={`${get(`switches.card${i}.type`)} mechanical keyboard switches`}
+                  alt={`Switch ${get(`switches.card${i}.type`)} cho bàn phím cơ`}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-deep via-deep/70 to-deep/70" />

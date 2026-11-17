@@ -12,23 +12,92 @@ FROM (VALUES ('minh.demo','minh.demo@kbs.local','Nguyễn Minh','0901000001'), (
 JOIN "Roles" r ON r."Name" = 'Customer'
 WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u."Email" = v.email OR u."Username" = v.username OR u."PhoneNumber" = v.phone);
 
+CREATE TEMP TABLE seed_demo_products (
+    name text PRIMARY KEY,
+    price numeric NOT NULL,
+    original_price numeric,
+    description text NOT NULL,
+    category_name text NOT NULL,
+    brand_name text NOT NULL,
+    switch_type text NOT NULL,
+    layout text NOT NULL,
+    connection_type text NOT NULL,
+    color text NOT NULL,
+    stock_quantity integer NOT NULL
+) ON COMMIT DROP;
+
+INSERT INTO seed_demo_products
+    (name, price, original_price, description, category_name, brand_name,
+     switch_type, layout, connection_type, color, stock_quantity)
+VALUES
+ ('Keychron K8 Pro',2490000,2790000,'TKL ba chế độ','Mechanical','Keychron','Gateron Brown','TKL','Ba chế độ','Đen',35),
+ ('Keychron Q1 Max',4690000,NULL,'Bàn phím nhôm 75%','Mechanical','Keychron','Gateron Jupiter','75%','Ba chế độ','Xanh navy',4),
+ ('Akko 5075B Plus',1890000,NULL,'Bàn phím 75%','Mechanical','Akko','Cream Yellow','75%','Ba chế độ','Kem',20),
+ ('Akko MOD 007B HE',3290000,3590000,'Hall Effect 75%','Hall Effect','Akko','Magnetic','75%','Ba chế độ','Đen',3),
+ ('NuPhy Air75 V2',2990000,3190000,'Low-profile 75%','Low-profile','NuPhy','Aloe','75%','Ba chế độ','Xám',12),
+ ('NuPhy Halo75 V2',3490000,NULL,'Bàn phím gasket 75%','Mechanical','NuPhy','Mint','75%','Ba chế độ','Trắng',6),
+ ('Keychron C3 Pro',990000,NULL,'Bàn phím cơ TKL có dây','Mechanical','Keychron','Red','TKL','USB-C','Đen',18),
+ ('Keychron K2 Pro',2290000,NULL,'Bàn phím cơ nhỏ gọn 75%','Mechanical','Keychron','Gateron Brown','75%','Ba chế độ','Xám',14),
+ ('Keychron V1 Max',2590000,NULL,'Bàn phím cơ gasket 75%','Mechanical','Keychron','Gateron Red','75%','Ba chế độ','Đen',11),
+ ('Keychron V2 Max',2590000,NULL,'Bàn phím cơ layout 65%','Mechanical','Keychron','Gateron Brown','65%','Ba chế độ','Trắng',9),
+ ('Keychron K4 Pro',2690000,NULL,'Bàn phím cơ layout 96%','Mechanical','Keychron','Gateron Red','96%','Ba chế độ','Xám',8),
+ ('Keychron K6 Pro',2190000,NULL,'Bàn phím cơ nhỏ gọn 65%','Mechanical','Keychron','Gateron Brown','65%','Ba chế độ','Đen',13),
+ ('Keychron K10 Pro',2790000,NULL,'Bàn phím cơ full-size','Mechanical','Keychron','Gateron Red','Full-size','Ba chế độ','Xám',7),
+ ('Keychron Q2 Max',4590000,NULL,'Bàn phím nhôm gasket 65%','Mechanical','Keychron','Gateron Jupiter','65%','Ba chế độ','Đen',5),
+ ('Keychron Q3 Max',4790000,NULL,'Bàn phím nhôm gasket TKL','Mechanical','Keychron','Gateron Jupiter','TKL','Ba chế độ','Xám',4),
+ ('Keychron Q5 Max',4990000,NULL,'Bàn phím nhôm gasket 96%','Mechanical','Keychron','Gateron Jupiter','96%','Ba chế độ','Xanh navy',4),
+ ('Keychron Q6 Max',5190000,NULL,'Bàn phím nhôm gasket full-size','Mechanical','Keychron','Gateron Jupiter','Full-size','Ba chế độ','Đen',3),
+ ('Keychron Q8 Max',4890000,NULL,'Bàn phím nhôm layout Alice','Mechanical','Keychron','Gateron Jupiter','Alice','Ba chế độ','Xám',3),
+ ('Keychron Q10 Max',5190000,NULL,'Bàn phím nhôm layout Alice 75%','Mechanical','Keychron','Gateron Jupiter','Alice 75%','Ba chế độ','Đỏ burgundy',3),
+ ('Keychron Q1 HE',5290000,NULL,'Bàn phím Hall Effect 75%','Hall Effect','Keychron','Magnetic','75%','Ba chế độ','Đen',5),
+ ('Keychron K1 Pro',2390000,NULL,'Bàn phím cơ low-profile TKL','Low-profile','Keychron','Low-profile Red','TKL','Ba chế độ','Xám',8),
+ ('Keychron K3 Max',2490000,NULL,'Bàn phím cơ low-profile 75%','Low-profile','Keychron','Low-profile Brown','75%','Ba chế độ','Trắng',9),
+ ('Keychron K7 Max',2590000,NULL,'Bàn phím cơ low-profile 65%','Low-profile','Keychron','Low-profile Red','65%','Ba chế độ','Đen',6),
+ ('Akko 3068B Plus',1590000,NULL,'Bàn phím cơ layout 65%','Mechanical','Akko','Cream Blue','65%','Ba chế độ','Trắng',16),
+ ('Akko 3084B Plus',1790000,NULL,'Bàn phím cơ layout 75%','Mechanical','Akko','Cream Yellow','75%','Ba chế độ','Xanh pastel',12),
+ ('Akko 3098B Plus',1990000,NULL,'Bàn phím cơ layout 96%','Mechanical','Akko','Cream Blue','96%','Ba chế độ','Hồng',10),
+ ('Akko 5075S',1490000,NULL,'Bàn phím cơ layout 75% có dây','Mechanical','Akko','Cream Yellow','75%','USB-C','Đen',15),
+ ('Akko 5087S',1590000,NULL,'Bàn phím cơ TKL có dây','Mechanical','Akko','Cream Blue','TKL','USB-C','Trắng',10),
+ ('Akko 5108S',1890000,NULL,'Bàn phím cơ full-size có dây','Mechanical','Akko','Cream Yellow','Full-size','USB-C','Đen',8),
+ ('Akko MOD 007 PC',2790000,NULL,'Bàn phím cơ gasket 75%','Mechanical','Akko','Cream Blue','75%','USB-C','Trong suốt',7),
+ ('Akko MOD 008',2990000,NULL,'Bàn phím cơ nhôm layout 65%','Mechanical','Akko','Cream Yellow','65%','USB-C','Bạc',5),
+ ('Akko MOD 009',3190000,NULL,'Bàn phím cơ nhôm layout TKL','Mechanical','Akko','Cream Blue','TKL','USB-C','Đen',5),
+ ('Akko MOD 007 HE V2',3490000,NULL,'Bàn phím Hall Effect 75%','Hall Effect','Akko','Magnetic','75%','USB-C','Trắng',6),
+ ('Akko SPR 75',3290000,NULL,'Bàn phím cơ gasket 75%','Mechanical','Akko','Cream Yellow','75%','USB-C','Xanh navy',4),
+ ('Akko MU01',2890000,NULL,'Bàn phím cơ layout 65% vỏ gỗ','Mechanical','Akko','Cream Blue','65%','Ba chế độ','Gỗ walnut',4),
+ ('Akko 5075B Plus ISO',1990000,NULL,'Bàn phím cơ 75% chuẩn ISO','Mechanical','Akko','Cream Yellow','75% ISO','Ba chế độ','Kem',7),
+ ('Akko 5075S VIA',1690000,NULL,'Bàn phím cơ 75% hỗ trợ VIA','Mechanical','Akko','Cream Blue','75%','USB-C','Xám',8),
+ ('Akko 3087 RF',1390000,NULL,'Bàn phím cơ TKL không dây','Mechanical','Akko','Cream Red','TKL','2.4G và USB-C','Đen',9),
+ ('Akko 3108 RF',1590000,NULL,'Bàn phím cơ full-size không dây','Mechanical','Akko','Cream Blue','Full-size','2.4G và USB-C','Trắng',6),
+ ('NuPhy Air60 V2',2690000,NULL,'Bàn phím cơ low-profile 60%','Low-profile','NuPhy','Aloe','60%','Ba chế độ','Xám',10),
+ ('NuPhy Air96 V2',3290000,NULL,'Bàn phím cơ low-profile 96%','Low-profile','NuPhy','Wisteria','96%','Ba chế độ','Trắng',7),
+ ('NuPhy Halo65',3190000,NULL,'Bàn phím cơ gasket 65%','Mechanical','NuPhy','Rose Glacier','65%','Ba chế độ','Tím',6),
+ ('NuPhy Halo96',3790000,NULL,'Bàn phím cơ gasket 96%','Mechanical','NuPhy','Mint','96%','Ba chế độ','Trắng',5),
+ ('NuPhy Field75',3490000,NULL,'Bàn phím cơ layout 75%','Mechanical','NuPhy','Ionic White','75%','Ba chế độ','Xanh lá',6),
+ ('NuPhy Gem80',3890000,NULL,'Bàn phím cơ gasket TKL','Mechanical','NuPhy','Mint','TKL','Ba chế độ','Xám',4),
+ ('NuPhy Nos75',3690000,NULL,'Bàn phím cơ gasket 75%','Mechanical','NuPhy','Blush','75%','Ba chế độ','Hồng',5),
+ ('NuPhy Air75 V2 ISO',3090000,NULL,'Bàn phím cơ low-profile 75% chuẩn ISO','Low-profile','NuPhy','Aloe','75% ISO','Ba chế độ','Xám',4),
+ ('NuPhy Air60 V2 ISO',2790000,NULL,'Bàn phím cơ low-profile 60% chuẩn ISO','Low-profile','NuPhy','Wisteria','60% ISO','Ba chế độ','Trắng',3),
+ ('NuPhy Air96 V2 ISO',3390000,NULL,'Bàn phím cơ low-profile 96% chuẩn ISO','Low-profile','NuPhy','Moss','96% ISO','Ba chế độ','Đen',3),
+ ('NuPhy Halo75 V2 ISO',3590000,NULL,'Bàn phím cơ gasket 75% chuẩn ISO','Mechanical','NuPhy','Mint','75% ISO','Ba chế độ','Trắng',4),
+ ('NuPhy Halo96 V2 ISO',3890000,NULL,'Bàn phím cơ gasket 96% chuẩn ISO','Mechanical','NuPhy','Rose Glacier','96% ISO','Ba chế độ','Xám',3),
+ ('NuPhy Field75 HE',3990000,NULL,'Bàn phím Hall Effect 75%','Hall Effect','NuPhy','Magnetic','75%','USB-C','Đen',4),
+ ('NuPhy Gem80 Barebones',2990000,NULL,'Kit bàn phím cơ gasket TKL chưa kèm switch','Mechanical','NuPhy','Barebones','TKL','USB-C','Bạc',3),
+ ('NuPhy Nos75 HE',4190000,NULL,'Bàn phím Hall Effect 75%','Hall Effect','NuPhy','Magnetic','75%','Ba chế độ','Tím',3),
+ ('Keychron K5 Max',2790000,NULL,'Bàn phím cơ low-profile full-size','Low-profile','Keychron','Low-profile Brown','Full-size','Ba chế độ','Xám',5),
+ ('Akko 5075B HE',3190000,NULL,'Bàn phím Hall Effect 75%','Hall Effect','Akko','Magnetic','75%','Ba chế độ','Đen',4);
+
 INSERT INTO "Products" ("Name","Price","OriginalPrice","Description","CategoryId","BrandId","SwitchType","Layout","ConnectionType","Keycap","Color","IsHotSwap","IsRGB","IsActive","CreatedAt")
 SELECT v.name,v.price,v.original_price,v.description,c."Id",b."Id",v.switch_type,v.layout,v.connection_type,'PBT',v.color,true,true,true,NOW()
-FROM (VALUES
- ('Keychron K8 Pro',2490000::numeric,2790000::numeric,'TKL ba chế độ','Mechanical','Keychron','Gateron Brown','TKL','Ba chế độ','Đen'),
- ('Keychron Q1 Max',4690000::numeric,NULL,'Bàn phím nhôm 75%','Mechanical','Keychron','Gateron Jupiter','75%','Ba chế độ','Xanh navy'),
- ('Akko 5075B Plus',1890000::numeric,NULL,'Bàn phím 75%','Mechanical','Akko','Cream Yellow','75%','Ba chế độ','Kem'),
- ('Akko MOD 007B HE',3290000::numeric,3590000::numeric,'Hall Effect 75%','Hall Effect','Akko','Magnetic','75%','Ba chế độ','Đen'),
- ('NuPhy Air75 V2',2990000::numeric,3190000::numeric,'Low-profile 75%','Low-profile','NuPhy','Aloe','75%','Ba chế độ','Xám'),
- ('NuPhy Halo75 V2',3490000::numeric,NULL,'Bàn phím gasket 75%','Mechanical','NuPhy','Mint','75%','Ba chế độ','Trắng')
-) AS v(name,price,original_price,description,category_name,brand_name,switch_type,layout,connection_type,color)
+FROM seed_demo_products v
 JOIN "Categories" c ON c."Name" = v.category_name
 JOIN "Brands" b ON b."Name" = v.brand_name
 WHERE NOT EXISTS (SELECT 1 FROM "Products" p WHERE p."Name" = v.name);
 
 INSERT INTO "Inventories" ("ProductId","StockQuantity","UpdatedAt")
-SELECT p."Id", CASE p."Name" WHEN 'Keychron K8 Pro' THEN 35 WHEN 'Keychron Q1 Max' THEN 4 WHEN 'Akko 5075B Plus' THEN 20 WHEN 'Akko MOD 007B HE' THEN 3 WHEN 'NuPhy Air75 V2' THEN 12 ELSE 6 END, NOW()
-FROM "Products" p WHERE p."Name" IN ('Keychron K8 Pro','Keychron Q1 Max','Akko 5075B Plus','Akko MOD 007B HE','NuPhy Air75 V2','NuPhy Halo75 V2')
+SELECT p."Id", v.stock_quantity, NOW()
+FROM seed_demo_products v
+JOIN "Products" p ON p."Name" = v.name
 ON CONFLICT ("ProductId") DO NOTHING;
 
 -- Tồn kho phía trên là số dư demo hiện tại; đơn lịch sử không trừ tồn lần nữa.
@@ -62,10 +131,13 @@ JOIN "Products" p ON p."Name" = d.product_name;
 -- Acceptance checks: đủ dữ liệu, FK do DB bảo vệ, tổng tiền khớp chi tiết.
 DO $$
 BEGIN
-    IF (SELECT count(*) FROM "Products" WHERE "Name" IN (
-        'Keychron K8 Pro', 'Keychron Q1 Max', 'Akko 5075B Plus',
-        'Akko MOD 007B HE', 'NuPhy Air75 V2', 'NuPhy Halo75 V2')) <> 6 THEN
-        RAISE EXCEPTION 'Seed requires six unique demo products and their categories/brands';
+    IF (SELECT count(*) FROM seed_demo_products v JOIN "Products" p ON p."Name" = v.name) <> 56 THEN
+        RAISE EXCEPTION 'Seed requires 56 unique demo products and their categories/brands';
+    END IF;
+    IF (SELECT count(*) FROM seed_demo_products v
+        JOIN "Products" p ON p."Name" = v.name
+        JOIN "Inventories" i ON i."ProductId" = p."Id") <> 56 THEN
+        RAISE EXCEPTION 'Seed requires inventory for all 56 demo products';
     END IF;
     IF (SELECT count(*) FROM "Users" WHERE "Email" IN ('minh.demo@kbs.local', 'lan.demo@kbs.local')) <> 2 THEN
         RAISE EXCEPTION 'Demo accounts missing or conflict with an existing username/phone';

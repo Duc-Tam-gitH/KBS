@@ -42,7 +42,7 @@
 .pm-product-id { display: block; margin-top: 3px; font-size: 11px; color: var(--color-text-muted); }
 .pm-number { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 .pm-page th:nth-child(3), .pm-page th:nth-child(4) { text-align: right; }
-.pm-page .pm-out-of-stock { color: var(--color-primary); }
+.pm-page .pm-out-of-stock { color: var(--color-accent); }
 .pm-status { display: inline-flex; align-items: center; gap: 7px; color: var(--color-text-muted); white-space: nowrap; }
 .pm-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-muted); }
 .pm-status.is-active { color: var(--color-text-light); }
@@ -88,9 +88,9 @@
 .pm-form .pm-checks label, .pm-form .pm-active-check { flex-direction: row; align-items: center; }
 .pm-form input[type='checkbox'] { width: 18px; height: 18px; min-height: 18px; accent-color: var(--color-accent); }
 .pm-help { color: var(--color-text-muted); font-size: 12px; }
-.pm-dialog [role='alert'] { color: var(--color-primary); font-size: 13px; }
+.pm-dialog [role='alert'] { color: var(--color-accent); font-size: 13px; }
 .pm-confirm { margin: auto; width: min(440px, calc(100% - 32px)); padding: 28px; }
-.pm-confirm-icon { color: var(--color-primary); margin-bottom: 20px; }
+.pm-confirm-icon { color: var(--color-accent); margin-bottom: 20px; }
 .pm-confirm > p { color: var(--color-text-muted); margin: 12px 0 24px; font-size: 14px; overflow-wrap: anywhere; }
 .pm-confirm .pm-form-actions { padding: 20px 0 0; }
 @keyframes pm-slide-in { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: translateX(0); } }

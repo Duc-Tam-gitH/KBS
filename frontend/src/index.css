@@ -7,13 +7,13 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --color-bg-deep: #050512;
-    --color-bg-elevated: #121226;
-    --color-border: #2D2E54;
-    --color-primary: #FF2A6D;
-    --color-accent: #05D9E8;
-    --color-text-muted: #8A9BB3;
-    --color-text-light: #E0F2FE;
+    --color-bg-deep: #050505;
+    --color-bg-elevated: #171717;
+    --color-border: #4D0000;
+    --color-primary: #CC0000;
+    --color-accent: #D4AF37;
+    --color-text-muted: #9CA3AF;
+    --color-text-light: #F3F4F6;
 
     /* Backward compatibility aliases */
     --color-bg-dark: var(--color-bg-elevated);
@@ -21,7 +21,7 @@
   }
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button:active:not(:disabled), a:active { background-color: var(--color-primary); color: var(--color-bg-deep); }
+  button:active:not(:disabled), a:active { background-color: var(--color-primary); color: var(--color-text-light); }
 
   html {
     scroll-behavior: smooth;

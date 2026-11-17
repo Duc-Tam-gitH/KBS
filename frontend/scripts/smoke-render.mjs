@@ -11,18 +11,27 @@ try {
   const { default: App } = await server.ssrLoadModule('/src/App.tsx')
   const html = renderToString(createElement(App))
   assert.doesNotMatch(html, /src=""/)
-  assert.match(html, /Speed/)
-  assert.match(html, /Presence/)
-  assert.match(html, /Feel Every/)
+  assert.match(html, /Tốc độ/)
+  assert.match(html, /Âm thanh/)
+  assert.match(html, /Cảm nhận từng/)
   assert.match(html, /Tìm chất phím dành cho bạn/)
-  assert.match(html, /Gợi ý sẽ phù hợp hơn khi bạn có lịch sử mua hàng/)
-  assert.match(html, /Keystroke/)
+  assert.match(html, /role="status">Đang tải gợi ý…/)
+  assert.match(html, /lần nhấn phím/)
   assert.match(html, /aria-pressed="true"/)
   assert.doesNotMatch(html, /TCKR|bg-cream|text-ink|bg-white/)
   const { homeText } = await server.ssrLoadModule('/src/components/useHomeContent.ts')
   assert.equal(homeText({}, 'hero.text2'), 'KBS')
   assert.equal(homeText({ 'hero.text2': 'Updated' }, 'hero.text2'), 'Updated')
   assert.equal(homeText({ 'hero.text2': '' }, 'hero.text2'), '')
+  const { ProductReviews } = await server.ssrLoadModule('/src/pages/customer/productdetail.jsx')
+  const reviewForm = renderToString(createElement(ProductReviews, { productId: 7, user: { id: 1 } }))
+  const ratings = [...reviewForm.matchAll(/<input[^>]*type="radio"[^>]*>/g)].map(([input]) => {
+    assert.match(input, /name="rating"/)
+    assert.match(input, /required=""/)
+    return Number(input.match(/value="(\d)"/)[1])
+  })
+  assert.deepEqual(ratings, [1, 2, 3, 4, 5])
+  assert.doesNotMatch(renderToString(createElement(ProductReviews, { productId: 7 })), /name="rating"/)
   const { Detail, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
   const { default: Checkout } = await server.ssrLoadModule('/src/pages/customer/Checkout.jsx')
   const { default: SearchPage } = await server.ssrLoadModule('/src/pages/customer/Search.jsx')
@@ -113,6 +122,10 @@ try {
     assert.match(renderToString(createElement(Page)), /Đang tải cấu hình cửa hàng/)
   }
   const { default: AIManagement } = await server.ssrLoadModule('/src/pages/admin/AIManagement.jsx')
+  const { default: ReviewModeration } = await server.ssrLoadModule('/src/pages/admin/ReviewModeration.jsx')
+  const reviewsMarkup = renderToString(createElement(ReviewModeration))
+  assert.match(reviewsMarkup, /Duyệt đánh giá/)
+  assert.match(reviewsMarkup, /Đang tải đánh giá/)
   const aiMarkup = renderToString(createElement(AIManagement))
   assert.match(aiMarkup, /Đang tải danh sách AI/)
   assert.match(aiMarkup, /Tất cả AI/)
@@ -329,24 +342,24 @@ try {
     authStore.clear()
   }
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
-  const palette = ['#050512', '#121226', '#2D2E54', '#FF2A6D', '#05D9E8', '#8A9BB3', '#E0F2FE']
+  const palette = ['#050505', '#171717', '#4D0000', '#CC0000', '#D4AF37', '#9CA3AF', '#F3F4F6']
   assert.deepEqual([...css.matchAll(/#[0-9a-f]{6}/gi)].map(m => m[0].toUpperCase()), palette)
   const luminance = hex => {
     const rgb = hex.slice(1).match(/../g).map(x => parseInt(x, 16) / 255)
       .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
     return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
   }
-  // Tech White (#E0F2FE) on dark backgrounds (#050512, #121226, #2D2E54)
+  // Bone White (#F3F4F6) on dark backgrounds (#050505, #171717, #4D0000)
   for (const background of palette.slice(0, 3)) {
-    assert.ok((luminance('#E0F2FE') + 0.05) / (luminance(background) + 0.05) >= 4.5)
+    assert.ok((luminance('#F3F4F6') + 0.05) / (luminance(background) + 0.05) >= 4.5)
   }
-  // Steel Gray (#8A9BB3) on Void Black and Cyber Metal
+  // Ash Gray (#9CA3AF) on Void Black and Velvet Dark
   for (const background of palette.slice(0, 2)) {
-    assert.ok((luminance('#8A9BB3') + 0.05) / (luminance(background) + 0.05) >= 4.5)
+    assert.ok((luminance('#9CA3AF') + 0.05) / (luminance(background) + 0.05) >= 4.5)
   }
-  // Void Black (#050512) on neon buttons (#FF2A6D, #05D9E8)
-  for (const neon of ['#FF2A6D', '#05D9E8']) {
-    assert.ok((luminance(neon) + 0.05) / (luminance('#050512') + 0.05) >= 4.5)
+  // White on red CTAs, dark text on gold hover, gold text on elevated surfaces.
+  for (const [foreground, background] of [['#F3F4F6', '#CC0000'], ['#D4AF37', '#050505'], ['#D4AF37', '#171717']]) {
+    assert.ok((luminance(foreground) + 0.05) / (luminance(background) + 0.05) >= 4.5)
   }
   console.log('PASS: Landing, auth, catalog, cart, checkout, orders and admin render; role navigation and palette checks pass.')
 } finally { await server.close() }

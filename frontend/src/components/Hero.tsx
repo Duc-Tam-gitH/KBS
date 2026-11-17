@@ -9,19 +9,19 @@ const switchOptions: Record<
   { label: string; desc: string; force: string }
 > = {
   linear: {
-    label: 'Linear',
-    desc: 'Smooth, uninterrupted keystrokes. Built for speed — no bump, no click, just glide.',
-    force: '45g actuation',
+    label: 'Tuyến tính',
+    desc: 'Nhấn phím mượt mà, liền mạch. Tối ưu cho tốc độ — không khấc, không tiếng click, chỉ có cảm giác lướt êm.',
+    force: 'Lực nhấn 45g',
   },
   tactile: {
-    label: 'Tactile',
-    desc: 'A pronounced bump at actuation point. Feedback you can feel without bottoming out.',
-    force: '55g actuation',
+    label: 'Có khấc',
+    desc: 'Cảm nhận rõ khấc tại điểm nhận phím, cho phản hồi xúc giác mà không cần nhấn chạm đáy.',
+    force: 'Lực nhấn 55g',
   },
   clicky: {
-    label: 'Clicky',
-    desc: 'An audible click on every press. Sound that satisfies with each keystroke.',
-    force: '50g actuation',
+    label: 'Có tiếng click',
+    desc: 'Mỗi lần nhấn đều phát ra tiếng click rõ ràng, mang lại âm thanh thú vị trong từng nhịp gõ.',
+    force: 'Lực nhấn 50g',
   },
 };
 
@@ -47,7 +47,7 @@ export default function Hero({ onNavigate }: { onNavigate: (route: string) => vo
           {/* Ảnh nền */}
           <img
             src={get('hero.image1.src')}
-            alt="Premium mechanical keyboard with illuminated keys"
+            alt="Bàn phím cơ cao cấp với các phím phát sáng"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
           />
 
@@ -65,7 +65,7 @@ export default function Hero({ onNavigate }: { onNavigate: (route: string) => vo
                   aria-pressed={switchType === type}
                   className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 ${
                     switchType === type
-                      ? 'bg-primary text-deep font-semibold shadow-lg shadow-deep'
+                      ? 'bg-primary text-light font-semibold shadow-lg shadow-deep'
                       : 'text-light hover:text-accent'
                   }`}
                 >
@@ -86,7 +86,7 @@ export default function Hero({ onNavigate }: { onNavigate: (route: string) => vo
                 {get(`hero.${switchType}.desc`)}
               </p>
               <div className="flex flex-wrap items-center gap-3 md:gap-4">
-                <button onClick={() => onNavigate('shop')} className="group/btn flex items-center gap-2 bg-primary text-deep font-semibold rounded-full px-5 md:px-7 py-3 md:py-3.5 text-sm md:text-base hover:bg-accent hover:text-deep transition-all duration-300 shadow-xl shadow-deep">{get('hero.text8')}<span className="text-deep transition-colors">
+                <button onClick={() => onNavigate('shop')} className="group/btn flex items-center gap-2 bg-primary text-light font-semibold rounded-full px-5 md:px-7 py-3 md:py-3.5 text-sm md:text-base hover:bg-accent hover:text-deep transition-all duration-300 shadow-xl shadow-deep">{get('hero.text8')}<span className="transition-colors">
                     →
                   </span>
                   <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />

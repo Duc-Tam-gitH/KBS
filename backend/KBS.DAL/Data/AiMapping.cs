@@ -28,7 +28,7 @@ internal static class AiMapping
             new AiModule { Id = "ai_security", Name = "Giám sát đơn hàng", SourceFile = "ai_security.py",
                 Description = "Phát hiện giá trị đơn hàng bất thường.", UpdatedAt = created },
             new AiModule { Id = "ai_reviewnpl", Name = "Kiểm tra đánh giá", SourceFile = "ai_reviewnpl.py",
-                Description = "Lọc từ khóa và phát hiện spam đánh giá.", UpdatedAt = created },
+                Description = "Lọc từ khóa và phát hiện spam đánh giá.", IsIntegrated = true, UpdatedAt = created },
             new AiModule { Id = "ai_recommender", Name = "Gợi ý sản phẩm", SourceFile = "ai_recommender.py",
                 Description = "Gợi ý tương đồng với 5 đơn hoàn thành gần nhất; chưa mua sẽ gợi ý ngẫu nhiên.",
                 IsIntegrated = true, UpdatedAt = created });

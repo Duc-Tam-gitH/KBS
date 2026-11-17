@@ -125,8 +125,8 @@
 .order-product-page .op-delivery dt { color: var(--color-text-muted); }
 .order-product-page .op-delivery dd { margin: 0; overflow-wrap: anywhere; }
 .order-product-page .op-card-footer { display: grid; justify-items: end; gap: 16px; padding-top: 16px; }
-.order-product-page .op-card-footer strong { margin-left: 8px; font-size: 1.4rem; color: var(--color-primary); }
-.order-product-page .op-primary { background: var(--color-primary); color: var(--color-bg-deep); font-weight: 700; }
+.order-product-page .op-card-footer strong { margin-left: 8px; font-size: 1.4rem; color: var(--color-accent); }
+.order-product-page .op-primary { background: var(--color-primary); color: var(--color-text-light); font-weight: 700; }
 .order-product-page .op-primary:hover:not(:disabled) { background: var(--color-accent); color: var(--color-bg-deep); }
 .order-product-page .op-confirm { display: flex; justify-content: end; flex-wrap: wrap; gap: 12px; }
 .order-product-page .op-confirm p { width: 100%; text-align: right; }

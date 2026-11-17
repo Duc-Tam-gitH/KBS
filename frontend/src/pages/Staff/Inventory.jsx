@@ -51,9 +51,8 @@ function InventoryDetails({ item, reload }) {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const quantity = Number(data.get('quantity'))
-    const delta = data.get('direction') === 'out' ? -quantity : quantity
     const ok = await action.run(() => api.staff.adjustStock(item.productId, {
-      delta, expectedQuantity: item.stockQuantity, reason: String(data.get('reason')).trim(),
+      delta: quantity, expectedQuantity: item.stockQuantity,
     }))
     if (ok) reload()
   }
@@ -67,12 +66,9 @@ function InventoryDetails({ item, reload }) {
     <p>Tồn kho: <strong>{item.stockQuantity}</strong></p><p>Cập nhật: {dateTime(item.updatedAt)}</p>
     <StaffNotice notice={action.notice} />
     <form onSubmit={adjust}>
-      <h3>Nhập / xuất kho</h3>
-      <label>Thao tác<select name="direction"><option value="in">Nhập thêm</option>
-        <option value="out">Xuất bớt</option></select></label>
+      <h3>Nhập kho</h3>
       <label>Số lượng<input name="quantity" type="number" required min="1" max="2147483647" step="1" /></label>
-      <label>Lý do<textarea name="reason" required maxLength={500} rows={3} /></label>
-      <button className="sf-primary" type="submit" disabled={action.busy}>Lưu biến động kho</button>
+      <button className="sf-primary" type="submit" disabled={action.busy}>Nhập kho</button>
     </form>
     <form onSubmit={threshold}><label>Ngưỡng cảnh báo
       <input name="threshold" type="number" min="0" max="2147483647" required defaultValue={item.lowStockThreshold} />

@@ -1,0 +1,14 @@
+.review-moderation { display: grid; gap: 20px; min-width: 0; }
+.admin-dashboard > .review-moderation { grid-column: 2 / -1; }
+.review-moderation p, .review-moderation small { color: var(--color-text-muted); }
+.review-moderation select, .review-moderation button { padding: 9px 12px; border: 1px solid var(--color-border);
+  border-radius: 8px; background: var(--color-bg-elevated); color: var(--color-text-light); }
+.review-moderation button:hover:not(:disabled) { border-color: var(--color-accent); }
+.review-moderation :is(button, select):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.review-moderation button:disabled { opacity: .5; cursor: not-allowed; }
+.review-table { overflow-x: auto; }
+.review-table table { width: 100%; border-collapse: collapse; text-align: left; }
+.review-table th, .review-table td { padding: 12px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+.review-comment { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 180px; max-width: 520px; }
+.review-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 720px) { .admin-dashboard > .review-moderation { grid-column: 1 / -1; } }

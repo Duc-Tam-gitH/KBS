@@ -1,4 +1,4 @@
-// Edit defaultValue here to change Home text. useHomeContent.ts selects code or Admin content.
+// Chỉnh defaultValue tại đây để thay đổi nội dung trang chủ.
 export const homeFields: { key: string; defaultValue: string; label: string; group: string; kind: string }[] = [
   {
     "key": "hero.text2",
@@ -9,36 +9,36 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "hero.text3",
-    "defaultValue": "Premium Mechanical Keyboards",
-    "label": "Premium Mechanical Keyboards",
+    "defaultValue": "Bàn phím cơ cao cấp",
+    "label": "Mô tả thương hiệu",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.text4",
-    "defaultValue": "New Drop — KBS-75",
-    "label": "New Drop — KBS-75",
+    "defaultValue": "Mẫu mới — KBS-75",
+    "label": "Thông báo mẫu mới",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.text5",
-    "defaultValue": "Hot-Swap Edition",
-    "label": "Hot-Swap Edition",
+    "defaultValue": "Phiên bản hỗ trợ hot-swap",
+    "label": "Phiên bản sản phẩm",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.text6",
-    "defaultValue": "Feel Every",
-    "label": "Feel Every",
+    "defaultValue": "Cảm nhận từng",
+    "label": "Tiêu đề chính (dòng 1)",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.text7",
-    "defaultValue": "Keystroke",
-    "label": "Keystroke",
+    "defaultValue": "lần nhấn phím",
+    "label": "Tiêu đề chính (dòng 2)",
     "group": "Hero",
     "kind": "text"
   },
@@ -65,225 +65,225 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "hero.linear.label",
-    "defaultValue": "Linear",
-    "label": "linear — label",
+    "defaultValue": "Tuyến tính",
+    "label": "Tuyến tính — tên",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.linear.desc",
-    "defaultValue": "Smooth, uninterrupted keystrokes. Built for speed — no bump, no click, just glide.",
-    "label": "linear — desc",
+    "defaultValue": "Nhấn phím mượt mà, liền mạch. Tối ưu cho tốc độ — không khấc, không tiếng click, chỉ có cảm giác lướt êm.",
+    "label": "Tuyến tính — mô tả",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.linear.force",
-    "defaultValue": "45g actuation",
-    "label": "linear — force",
+    "defaultValue": "Lực nhấn 45g",
+    "label": "Tuyến tính — lực nhấn",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.tactile.label",
-    "defaultValue": "Tactile",
-    "label": "tactile — label",
+    "defaultValue": "Có khấc",
+    "label": "Có khấc — tên",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.tactile.desc",
-    "defaultValue": "A pronounced bump at actuation point. Feedback you can feel without bottoming out.",
-    "label": "tactile — desc",
+    "defaultValue": "Cảm nhận rõ khấc tại điểm nhận phím, cho phản hồi xúc giác mà không cần nhấn chạm đáy.",
+    "label": "Có khấc — mô tả",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.tactile.force",
-    "defaultValue": "55g actuation",
-    "label": "tactile — force",
+    "defaultValue": "Lực nhấn 55g",
+    "label": "Có khấc — lực nhấn",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.clicky.label",
-    "defaultValue": "Clicky",
-    "label": "clicky — label",
+    "defaultValue": "Có tiếng click",
+    "label": "Có tiếng click — tên",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.clicky.desc",
-    "defaultValue": "An audible click on every press. Sound that satisfies with each keystroke.",
-    "label": "clicky — desc",
+    "defaultValue": "Mỗi lần nhấn đều phát ra tiếng click rõ ràng, mang lại âm thanh thú vị trong từng nhịp gõ.",
+    "label": "Có tiếng click — mô tả",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "hero.clicky.force",
-    "defaultValue": "50g actuation",
-    "label": "clicky — force",
+    "defaultValue": "Lực nhấn 50g",
+    "label": "Có tiếng click — lực nhấn",
     "group": "Hero",
     "kind": "text"
   },
   {
     "key": "bento.text2",
-    "defaultValue": "01 — The Collection",
-    "label": "01 — The Collection",
+    "defaultValue": "01 — Bộ sưu tập",
+    "label": "01 — Bộ sưu tập",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text3",
-    "defaultValue": "Built for",
-    "label": "Built for",
+    "defaultValue": "Thiết kế cho",
+    "label": "Tiêu đề bộ sưu tập (dòng 1)",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text4",
-    "defaultValue": "Typers",
-    "label": "Typers",
+    "defaultValue": "người yêu gõ phím",
+    "label": "Tiêu đề bộ sưu tập (dòng 2)",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text5",
-    "defaultValue": "Every board is engineered down to the last spring. Hot-swap sockets, gasket mounts, and per-key RGB come standard.",
-    "label": "Every board is engineered down to the last spring. Hot-swap sockets, g",
+    "defaultValue": "Từng chi tiết trên mỗi bàn phím đều được chăm chút đến từng chiếc lò xo. Trang bị sẵn socket hot-swap, cấu trúc gasket mount và đèn RGB cho từng phím.",
+    "label": "Mô tả bộ sưu tập",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text6",
-    "defaultValue": "Lifestyle",
-    "label": "Lifestyle",
+    "defaultValue": "Phong cách sống",
+    "label": "Phong cách sống",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text7",
-    "defaultValue": "The Daily Driver",
-    "label": "The Daily Driver",
+    "defaultValue": "Người bạn đồng hành mỗi ngày",
+    "label": "Bàn phím dùng mỗi ngày",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text8",
-    "defaultValue": "Work, play, create — one board for everything.",
-    "label": "Work, play, create — one board for everything.",
+    "defaultValue": "Làm việc, giải trí, sáng tạo — một chiếc bàn phím cho mọi nhu cầu.",
+    "label": "Mô tả bàn phím dùng mỗi ngày",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text9",
-    "defaultValue": "PBT Keycaps",
-    "label": "PBT Keycaps",
+    "defaultValue": "Keycap PBT",
+    "label": "Keycap PBT",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text10",
-    "defaultValue": "Dye-Sublimated",
-    "label": "Dye-Sublimated",
+    "defaultValue": "In chuyển nhiệt",
+    "label": "Công nghệ in keycap",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text11",
-    "defaultValue": "Manifesto",
-    "label": "Manifesto",
+    "defaultValue": "Triết lý",
+    "label": "Triết lý",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text12",
-    "defaultValue": "Every Key",
-    "label": "Every Key",
+    "defaultValue": "Mỗi phím",
+    "label": "Thông điệp (dòng 1)",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text13",
-    "defaultValue": "Matters",
-    "label": "Matters",
+    "defaultValue": "đều quan trọng",
+    "label": "Thông điệp (dòng 2)",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text14",
-    "defaultValue": "Hot-Swap Sockets",
-    "label": "Hot-Swap Sockets",
+    "defaultValue": "Socket hot-swap",
+    "label": "Socket hot-swap",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text15",
-    "defaultValue": "Swap in Seconds",
-    "label": "Swap in Seconds",
+    "defaultValue": "Thay switch chỉ trong vài giây",
+    "label": "Tiện ích hot-swap",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text16",
-    "defaultValue": "Change switches without soldering. Try linear, tactile, or clicky — all on the same board.",
-    "label": "Change switches without soldering. Try linear, tactile, or clicky — al",
+    "defaultValue": "Đổi switch không cần hàn. Thử loại tuyến tính, có khấc hoặc có tiếng click — tất cả trên cùng một bàn phím.",
+    "label": "Mô tả tính năng hot-swap",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text17",
-    "defaultValue": "Per-Key RGB",
-    "label": "Per-Key RGB",
+    "defaultValue": "RGB từng phím",
+    "label": "Đèn RGB",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text18",
-    "defaultValue": "16.8M Colors",
-    "label": "16.8M Colors",
+    "defaultValue": "16,8 triệu màu",
+    "label": "Số lượng màu RGB",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text19",
-    "defaultValue": "Sound Tuned",
-    "label": "Sound Tuned",
+    "defaultValue": "Tối ưu âm thanh",
+    "label": "Tối ưu âm thanh",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text20",
-    "defaultValue": "Engineering",
-    "label": "Engineering",
+    "defaultValue": "Kỹ thuật",
+    "label": "Kỹ thuật",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text21",
-    "defaultValue": "Find Your Sound",
-    "label": "Find Your Sound",
+    "defaultValue": "Tìm chất âm của bạn",
+    "label": "Tiêu đề banner",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text22",
-    "defaultValue": "A keyboard that",
-    "label": "A keyboard that",
+    "defaultValue": "Chiếc bàn phím",
+    "label": "Thông điệp banner (dòng 1)",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text23",
-    "defaultValue": "sounds like you",
-    "label": "sounds like you",
+    "defaultValue": "mang chất riêng của bạn",
+    "label": "Thông điệp banner (dòng 2)",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.text24",
-    "defaultValue": "Explore All Boards",
-    "label": "Explore All Boards",
+    "defaultValue": "Khám phá tất cả bàn phím",
+    "label": "Nút xem sản phẩm",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
@@ -331,197 +331,197 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "bento.feature0",
-    "defaultValue": "Gasket-mounted design",
+    "defaultValue": "Cấu trúc gasket mount",
     "label": "Tính năng 1",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.feature1",
-    "defaultValue": "Sound-dampened foam",
+    "defaultValue": "Lớp foam tiêu âm",
     "label": "Tính năng 2",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.feature2",
-    "defaultValue": "CNC aluminum chassis",
+    "defaultValue": "Khung nhôm CNC",
     "label": "Tính năng 3",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "bento.feature3",
-    "defaultValue": "Triple-mode wireless",
+    "defaultValue": "Kết nối không dây 3 chế độ",
     "label": "Tính năng 4",
     "group": "Bộ sưu tập",
     "kind": "text"
   },
   {
     "key": "switches.text2",
-    "defaultValue": "02 — Switches",
-    "label": "02 — Switches",
+    "defaultValue": "02 — Các loại switch",
+    "label": "02 — Các loại switch",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.text3",
-    "defaultValue": "Choose Your",
-    "label": "Choose Your",
+    "defaultValue": "Chọn switch theo",
+    "label": "Tiêu đề switch (dòng 1)",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.text4",
-    "defaultValue": "Character",
-    "label": "Character",
+    "defaultValue": "cá tính của bạn",
+    "label": "Tiêu đề switch (dòng 2)",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.text5",
-    "defaultValue": "Three distinct personalities. Every KBS board ships hot-swappable so you can switch without commitment.",
-    "label": "Three distinct personalities. Every KBS board ships hot-swappable so y",
+    "defaultValue": "Ba cảm giác gõ khác biệt. Bàn phím KBS đều hỗ trợ hot-swap để bạn tự do thay đổi switch.",
+    "label": "Mô tả các loại switch",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.text6",
-    "defaultValue": "Actuation",
-    "label": "Actuation",
+    "defaultValue": "Lực nhấn",
+    "label": "Lực nhấn",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.text7",
-    "defaultValue": "Travel",
-    "label": "Travel",
+    "defaultValue": "Hành trình phím",
+    "label": "Hành trình phím",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card0.type",
-    "defaultValue": "Linear",
-    "label": "Switch 1 — type",
+    "defaultValue": "Tuyến tính",
+    "label": "Switch 1 — loại",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card0.name",
-    "defaultValue": "Speed",
-    "label": "Switch 1 — name",
+    "defaultValue": "Tốc độ",
+    "label": "Switch 1 — tên",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card0.desc",
-    "defaultValue": "Smooth, frictionless travel from top to bottom. No bump, no click — just pure glide.",
-    "label": "Switch 1 — desc",
+    "defaultValue": "Hành trình phím mượt mà từ trên xuống dưới. Không khấc, không tiếng click — chỉ có cảm giác lướt êm.",
+    "label": "Switch 1 — mô tả",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card0.force",
     "defaultValue": "45g",
-    "label": "Switch 1 — force",
+    "label": "Switch 1 — lực nhấn",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card0.travel",
     "defaultValue": "4mm",
-    "label": "Switch 1 — travel",
+    "label": "Switch 1 — hành trình",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card0.image",
     "defaultValue": "https://images.pexels.com/photos/6460801/pexels-photo-6460801.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "label": "Switch 1 — image",
+    "label": "Switch 1 — ảnh",
     "group": "Các loại switch",
     "kind": "image"
   },
   {
     "key": "switches.card1.type",
-    "defaultValue": "Tactile",
-    "label": "Switch 2 — type",
+    "defaultValue": "Có khấc",
+    "label": "Switch 2 — loại",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card1.name",
-    "defaultValue": "Feedback",
-    "label": "Switch 2 — name",
+    "defaultValue": "Cảm nhận",
+    "label": "Switch 2 — tên",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card1.desc",
-    "defaultValue": "A pronounced tactile bump lets you feel exactly when the switch actuates.",
-    "label": "Switch 2 — desc",
+    "defaultValue": "Khấc xúc giác rõ ràng giúp bạn cảm nhận chính xác thời điểm switch được kích hoạt.",
+    "label": "Switch 2 — mô tả",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card1.force",
     "defaultValue": "55g",
-    "label": "Switch 2 — force",
+    "label": "Switch 2 — lực nhấn",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card1.travel",
     "defaultValue": "4mm",
-    "label": "Switch 2 — travel",
+    "label": "Switch 2 — hành trình",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card1.image",
     "defaultValue": "https://images.pexels.com/photos/1320916/pexels-photo-1320916.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "label": "Switch 2 — image",
+    "label": "Switch 2 — ảnh",
     "group": "Các loại switch",
     "kind": "image"
   },
   {
     "key": "switches.card2.type",
-    "defaultValue": "Clicky",
-    "label": "Switch 3 — type",
+    "defaultValue": "Có tiếng click",
+    "label": "Switch 3 — loại",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card2.name",
-    "defaultValue": "Presence",
-    "label": "Switch 3 — name",
+    "defaultValue": "Âm thanh",
+    "label": "Switch 3 — tên",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card2.desc",
-    "defaultValue": "An audible click on every keystroke. For those who want the room to know they are typing.",
-    "label": "Switch 3 — desc",
+    "defaultValue": "Tiếng click vang lên theo từng lần nhấn, dành cho những ai yêu thích âm thanh gõ phím rõ nét.",
+    "label": "Switch 3 — mô tả",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card2.force",
     "defaultValue": "50g",
-    "label": "Switch 3 — force",
+    "label": "Switch 3 — lực nhấn",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card2.travel",
     "defaultValue": "4mm",
-    "label": "Switch 3 — travel",
+    "label": "Switch 3 — hành trình",
     "group": "Các loại switch",
     "kind": "text"
   },
   {
     "key": "switches.card2.image",
     "defaultValue": "https://images.pexels.com/photos/18337017/pexels-photo-18337017.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "label": "Switch 3 — image",
+    "label": "Switch 3 — ảnh",
     "group": "Các loại switch",
     "kind": "image"
   },
@@ -541,15 +541,15 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "footer.text3",
-    "defaultValue": "Keyboard Beyond Standard — Chúng tôi kiến tạo những trải nghiệm gõ phím đỉnh cao, kết hợp công nghệ hiện đại và phong cách độc bản.",
-    "label": "Keyboard Beyond Standard — Chúng tôi kiến tạo những trải nghiệm gõ phí",
+    "defaultValue": "Chúng tôi kiến tạo trải nghiệm gõ phím đỉnh cao, kết hợp công nghệ hiện đại và phong cách độc bản.",
+    "label": "Mô tả thương hiệu",
     "group": "Footer",
     "kind": "text"
   },
   {
     "key": "footer.text4",
-    "defaultValue": "Quick Links",
-    "label": "Quick Links",
+    "defaultValue": "Liên kết nhanh",
+    "label": "Liên kết nhanh",
     "group": "Footer",
     "kind": "text"
   },
@@ -590,8 +590,8 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "footer.text10",
-    "defaultValue": "Support",
-    "label": "Support",
+    "defaultValue": "Hỗ trợ",
+    "label": "Hỗ trợ",
     "group": "Footer",
     "kind": "text"
   },
@@ -632,8 +632,8 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "footer.text16",
-    "defaultValue": "Subscribe",
-    "label": "Subscribe",
+    "defaultValue": "Đăng ký nhận tin",
+    "label": "Đăng ký nhận tin",
     "group": "Footer",
     "kind": "text"
   },
@@ -660,63 +660,63 @@ export const homeFields: { key: string; defaultValue: string; label: string; gro
   },
   {
     "key": "footer.text20",
-    "defaultValue": "Sitemap",
-    "label": "Sitemap",
+    "defaultValue": "Sơ đồ trang",
+    "label": "Sơ đồ trang",
     "group": "Footer",
     "kind": "text"
   },
   {
     "key": "marquee.item0",
-    "defaultValue": "Hot-Swappable",
+    "defaultValue": "Thay switch không cần hàn",
     "label": "Nội dung 1",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item1",
-    "defaultValue": "Gasket-Mounted",
+    "defaultValue": "Cấu trúc gasket mount",
     "label": "Nội dung 2",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item2",
-    "defaultValue": "CNC Aluminum",
+    "defaultValue": "Nhôm CNC",
     "label": "Nội dung 3",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item3",
-    "defaultValue": "Per-Key RGB",
+    "defaultValue": "RGB từng phím",
     "label": "Nội dung 4",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item4",
-    "defaultValue": "Triple-Mode Wireless",
+    "defaultValue": "Không dây 3 chế độ",
     "label": "Nội dung 5",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item5",
-    "defaultValue": "PBT Keycaps",
+    "defaultValue": "Keycap PBT",
     "label": "Nội dung 6",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item6",
-    "defaultValue": "Sound Dampened",
+    "defaultValue": "Giảm âm",
     "label": "Nội dung 7",
     "group": "Dải chữ chạy",
     "kind": "text"
   },
   {
     "key": "marquee.item7",
-    "defaultValue": "QMK/VIA Compatible",
+    "defaultValue": "Hỗ trợ QMK/VIA",
     "label": "Nội dung 8",
     "group": "Dải chữ chạy",
     "kind": "text"

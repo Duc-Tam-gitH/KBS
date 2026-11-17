@@ -72,7 +72,7 @@
 .product-detail .pd-thumbnails .pd-placeholder svg { width: 24px; height: 24px; }
 .product-detail .pd-social { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 .product-detail .pd-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; }
-.product-detail .pd-price strong { font-size: 1.8rem; color: var(--color-primary); }
+.product-detail .pd-price strong { font-size: 1.8rem; color: var(--color-accent); }
 .product-detail .pd-stock { margin-top: 12px; color: var(--color-accent); }
 .product-detail dl { margin: 24px 0; text-align: left; }
 .product-detail dl > div {
@@ -88,7 +88,7 @@
 .product-detail .pd-quantity output { min-width: 24px; text-align: center; }
 .product-detail .pd-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 12px; }
 .product-detail .pd-actions button { flex: 1; }
-.product-detail .pd-primary { background: var(--color-primary); color: var(--color-bg-deep); font-weight: 700; }
+.product-detail .pd-primary { background: var(--color-primary); color: var(--color-text-light); font-weight: 700; }
 .product-detail .pd-primary:hover:not(:disabled) { background: var(--color-accent); color: var(--color-bg-deep); }
 .product-detail .pd-description p, .product-detail .pd-review-comment {
   white-space: pre-wrap;
@@ -104,6 +104,17 @@
 .product-detail .pd-review-comment { margin-top: 12px; }
 .product-detail .pd-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; }
 .product-detail .pd-review-form { display: grid; gap: 12px; margin: 24px 0; }
+.product-detail .pd-star-picker { border: 0; padding: 0; margin: 0; }
+.product-detail .pd-star-options { display: flex; gap: 4px; margin-top: 8px; }
+.product-detail .pd-star-options label {
+  position: relative; display: grid; place-items: center;
+  width: 44px; height: 44px; color: var(--color-accent); cursor: pointer;
+  border-radius: 8px;
+}
+.product-detail .pd-star-options input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.product-detail .pd-star-options label:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.product-detail .pd-star-picker:disabled { opacity: 0.5; }
+.product-detail .pd-star-picker:disabled input { cursor: not-allowed; }
 .product-detail .pd-review-form select, .product-detail .pd-review-form textarea {
   width: 100%;
   min-height: 44px;
@@ -120,7 +131,7 @@
 .product-detail .pd-related { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .product-detail .pd-related-card { display: flex; flex-direction: column; justify-content: start; text-align: left; }
 .product-detail .pd-related-card > span { width: 100%; overflow-wrap: anywhere; }
-.product-detail .pd-related-card strong { color: var(--color-primary); align-self: start; }
+.product-detail .pd-related-card strong { color: var(--color-accent); align-self: start; }
 .product-detail .pd-related-image { width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
 
 @media (max-width: 1150px) {

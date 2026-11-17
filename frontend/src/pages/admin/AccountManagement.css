@@ -31,7 +31,7 @@
 .um-form .um-check { display: flex; align-items: center; }
 .um-form .um-check input, .um-table input { width: 18px; height: 18px; accent-color: var(--color-accent); }
 .admin-dashboard .um-primary { display: inline-flex; align-items: center; gap: 6px;
-  color: var(--color-bg-deep); background: var(--color-primary); font-weight: 700; }
+  color: var(--color-text-light); background: var(--color-primary); font-weight: 700; }
 .admin-dashboard .um-primary:hover:not(:disabled) { color: var(--color-bg-deep); background: var(--color-accent); }
 .um-layout button, .um-details button { min-height: 44px; }
 .um-layout :focus-visible, .um-details :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }

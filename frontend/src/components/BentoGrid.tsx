@@ -32,7 +32,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
           <div className="reveal group relative lg:col-span-2 lg:row-span-2 rounded-3xl md:rounded-[2rem] overflow-hidden min-h-[320px] lg:min-h-0">
             <img
               src={get('bento.image1.src')}
-              alt="Desk setup with mechanical keyboard"
+              alt="Góc bàn làm việc với bàn phím cơ"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-deep/80 via-deep/70 to-transparent" />
@@ -47,7 +47,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
           <div className="reveal group relative lg:col-span-1 lg:row-span-1 rounded-3xl overflow-hidden min-h-[220px] lg:min-h-0">
             <img
               src={get('bento.image2.src')}
-              alt="Colorful mechanical keyboard keycaps"
+              alt="Keycap bàn phím cơ nhiều màu sắc"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-deep/70 to-transparent" />
@@ -74,7 +74,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
           <div className="reveal group relative lg:col-span-2 lg:row-span-1 rounded-3xl overflow-hidden min-h-[220px] lg:min-h-0">
             <img
               src={get('bento.image3.src')}
-              alt="Mechanical keyboard switches close-up"
+              alt="Cận cảnh switch bàn phím cơ"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-deep/80 to-deep/70" />
@@ -91,7 +91,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
           <div className="reveal group relative md:col-span-2 lg:col-span-2 lg:row-span-1 rounded-3xl overflow-hidden min-h-[220px] lg:min-h-0">
             <img
               src={get('bento.image4.src')}
-              alt="RGB mechanical keyboards with transparent keycaps"
+              alt="Bàn phím cơ RGB với keycap trong suốt"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-deep/70 via-transparent to-transparent" />
@@ -105,7 +105,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
           <div className="reveal group relative lg:col-span-1 lg:row-span-1 rounded-3xl overflow-hidden min-h-[220px] lg:min-h-0">
             <img
               src={get('bento.image5.src')}
-              alt="Thao tác gõ phím on RGB mechanical keyboard"
+              alt="Thao tác gõ phím trên bàn phím cơ RGB"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-deep/70 to-transparent" />
@@ -135,7 +135,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
           <div className="reveal group relative md:col-span-2 lg:col-span-4 lg:row-span-1 rounded-3xl md:rounded-[2rem] overflow-hidden min-h-[260px] lg:min-h-0 border border-border">
             <img
               src={get('bento.image6.src')}
-              alt="Colorful mechanical keyboard on wooden desk"
+              alt="Bàn phím cơ nhiều màu sắc trên bàn gỗ"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-deep/85 via-deep/70 to-transparent" />
@@ -145,7 +145,7 @@ export default function BentoGrid({ onNavigate }: { onNavigate: (route: string) 
                 <h3 className="font-display font-bold text-light text-3xl md:text-5xl leading-[0.95] mb-4">{get('bento.text22')}<br />
                   <span className="font-serif italic font-normal text-accent">{get('bento.text23')}</span>
                 </h3>
-                <button onClick={() => onNavigate('shop')} className="group/btn flex items-center gap-2 bg-primary text-deep font-semibold rounded-full px-6 py-3 text-sm hover:bg-accent hover:text-deep transition-all duration-300 shadow-lg shadow-deep">{get('bento.text24')}<ArrowUpRight className="w-4 h-4 text-deep group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                <button onClick={() => onNavigate('shop')} className="group/btn flex items-center gap-2 bg-primary text-light font-semibold rounded-full px-6 py-3 text-sm hover:bg-accent hover:text-deep transition-all duration-300 shadow-lg shadow-deep">{get('bento.text24')}<ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                 </button>
               </div>
             </div>

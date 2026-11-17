@@ -14,9 +14,8 @@ public class StockAdjustmentRequest
     public int Delta { get; set; }
     [Range(0, int.MaxValue)]
     public int ExpectedQuantity { get; set; }
-    [Required]
     [StringLength(500)]
-    public string Reason { get; set; } = string.Empty;
+    public string? Reason { get; set; }
 }
 
 public class ThresholdRequest

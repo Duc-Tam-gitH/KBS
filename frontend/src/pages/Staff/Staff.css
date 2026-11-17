@@ -23,7 +23,7 @@
 .staff-workspace button:hover:not(:disabled), .staff-workspace button[aria-pressed='true'],
 .staff-workspace button[aria-current='page'] { color: var(--color-accent); border-color: var(--color-accent); }
 .staff-workspace button:disabled { opacity: 0.5; cursor: not-allowed; }
-.staff-workspace .sf-primary { background: var(--color-primary); color: var(--color-bg-deep); font-weight: 700; }
+.staff-workspace .sf-primary { background: var(--color-primary); color: var(--color-text-light); font-weight: 700; }
 .staff-workspace .sf-primary:hover:not(:disabled) { background: var(--color-accent); color: var(--color-bg-deep); }
 .staff-workspace h1 { font-size: clamp(1.6rem, 2.5vw, 2.2rem); font-weight: 700; }
 .staff-workspace h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
@@ -39,7 +39,16 @@
   background: var(--color-bg-elevated);
   min-width: 0;
 }
-.staff-workspace .sf-sidebar nav { display: grid; gap: 10px; }
+.staff-workspace .sf-sidebar nav { display: grid; gap: 18px; }
+.staff-workspace .sf-nav-group { display: grid; gap: 8px; }
+.staff-workspace .sf-nav-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .staff-workspace .sf-sidebar nav button { text-align: left; }
 .staff-workspace .sf-session { margin-top: 28px; overflow-wrap: anywhere; }
 .staff-workspace .sf-session button { display: block; width: 100%; margin-top: 10px; }
@@ -75,7 +84,7 @@
 .staff-workspace .sf-activity { list-style: none; padding: 0; }
 .staff-workspace .sf-activity li { padding: 16px 0; border-bottom: 1px solid var(--color-border); }
 .staff-workspace .sf-prewrap { white-space: pre-wrap; overflow-wrap: anywhere; }
-.staff-workspace .sf-warning { color: var(--color-primary); }
+.staff-workspace .sf-warning { color: var(--color-accent); }
 .staff-workspace dl > div { padding: 10px 0; border-bottom: 1px solid var(--color-border); }
 .staff-workspace dt { color: var(--color-text-muted); }
 .staff-workspace dd { margin: 6px 0 0; overflow-wrap: anywhere; }
@@ -144,7 +153,8 @@
   .staff-workspace:not(.sf-customer-chat) .sf-content { padding: 16px; }
   .staff-workspace { display: block; }
   .staff-workspace .sf-sidebar { position: static; margin-bottom: 24px; }
-  .staff-workspace .sf-sidebar nav { display: flex; flex-wrap: wrap; }
+  .staff-workspace .sf-sidebar nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .staff-workspace .sf-nav-group { align-content: start; }
   .staff-workspace .sf-session { margin-top: 16px; }
   .staff-workspace .sf-session button { display: inline-block; width: auto; margin-right: 8px; }
   .staff-workspace .sf-heading { align-items: start; flex-direction: column; }

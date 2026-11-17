@@ -57,10 +57,15 @@ public class StaffService(KbsDbContext db)
         long productId,
         long actorId,
         StockAdjustmentRequest dto,
+        bool staffImportOnly,
         CancellationToken ct)
     {
-        if (dto.Delta == 0 || string.IsNullOrWhiteSpace(dto.Reason) || dto.Reason.Length > 500)
-            throw new ArgumentException("Nhập số lượng thay đổi khác 0 và lý do tối đa 500 ký tự.");
+        if (dto.Delta == 0 || (staffImportOnly && dto.Delta < 0)
+            || (!staffImportOnly && string.IsNullOrWhiteSpace(dto.Reason))
+            || dto.Reason is { Length: > 500 })
+            throw new ArgumentException(staffImportOnly
+                ? "Nhân viên chỉ được nhập kho với số lượng lớn hơn 0."
+                : "Nhập số lượng thay đổi khác 0 và lý do tối đa 500 ký tự.");
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var inventory = await db.Inventories.SingleOrDefaultAsync(x => x.ProductId == productId, ct)
             ?? throw new KeyNotFoundException("Không tìm thấy tồn kho.");
@@ -71,7 +76,8 @@ public class StaffService(KbsDbContext db)
         db.InventoryMovements.Add(new InventoryMovement
         {
             ProductId = productId, ActorId = actorId, Delta = dto.Delta,
-            QuantityBefore = inventory.StockQuantity, QuantityAfter = (int)after, Reason = dto.Reason.Trim()
+            QuantityBefore = inventory.StockQuantity, QuantityAfter = (int)after,
+            Reason = string.IsNullOrWhiteSpace(dto.Reason) ? "Nhập kho" : dto.Reason.Trim()
         });
         inventory.StockQuantity = (int)after;
         inventory.UpdatedAt = DateTimeOffset.UtcNow;

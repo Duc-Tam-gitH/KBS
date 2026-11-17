@@ -127,6 +127,7 @@ public class StaffWorkflowTests
         Assert.Equal(HttpStatusCode.Conflict, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         dto.ExpectedQuantity = 5;
         Assert.Equal(HttpStatusCode.Forbidden, (await customer.PostAsJsonAsync(path, dto)).StatusCode);
+        dto.Reason = null;
         Assert.Equal(HttpStatusCode.NoContent, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         db.ChangeTracker.Clear();
@@ -136,6 +137,9 @@ public class StaffWorkflowTests
         Assert.Equal(5, log.QuantityBefore);
         Assert.Equal(7, log.QuantityAfter);
         Assert.Equal(2, log.Delta);
+        Assert.Equal("Nhập kho", log.Reason);
+        Assert.Equal(HttpStatusCode.BadRequest, (await staff.PostAsJsonAsync(path,
+            new StockAdjustmentRequest { Delta = -1, ExpectedQuantity = 7 })).StatusCode);
         (await staff.PutAsJsonAsync($"/api/staff/inventory/{product.Id}/threshold",
             new { lowStockThreshold = 8 })).EnsureSuccessStatusCode();
         var staffSummary = await staff.GetFromJsonAsync<JsonElement>("/api/staff/summary");

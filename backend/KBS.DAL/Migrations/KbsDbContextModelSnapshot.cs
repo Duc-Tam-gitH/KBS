@@ -151,7 +151,7 @@ namespace KBS.DAL.Migrations
                             Id = "ai_reviewnpl",
                             Description = "Lọc từ khóa và phát hiện spam đánh giá.",
                             IsEnabled = false,
-                            IsIntegrated = false,
+                            IsIntegrated = true,
                             Name = "Kiểm tra đánh giá",
                             SourceFile = "ai_reviewnpl.py",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
@@ -690,6 +690,9 @@ namespace KBS.DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTimeOffset?>("CheckedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasMaxLength(2000)
@@ -697,6 +700,17 @@ namespace KBS.DAL.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModerationReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("PENDING");
 
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint");
@@ -708,6 +722,8 @@ namespace KBS.DAL.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ModerationStatus", "Id");
 
                     b.HasIndex("ProductId", "CreatedAt");
 

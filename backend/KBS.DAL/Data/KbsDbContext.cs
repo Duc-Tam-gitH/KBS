@@ -31,6 +31,10 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<ProductReview>().Property(x => x.ModerationStatus)
+            .HasMaxLength(20).HasDefaultValue("PENDING");
+        modelBuilder.Entity<ProductReview>().Property(x => x.ModerationReason).HasMaxLength(1000);
+        modelBuilder.Entity<ProductReview>().HasIndex(x => new { x.ModerationStatus, x.Id });
         modelBuilder.Entity<Product>().Property(x => x.Sound).HasMaxLength(50);
         modelBuilder.Entity<ShopSettings>().Property(x => x.Id).ValueGeneratedNever();
         modelBuilder.Entity<ShopSettings>().ToTable("ShopSettings", table =>

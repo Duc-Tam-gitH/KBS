@@ -9,6 +9,7 @@ const connections = {
   NOT_INTEGRATED: 'Chưa tích hợp', NEVER_CONNECTED: 'Chưa kết nối', ONLINE: 'Đã kết nối', OFFLINE: 'Mất kết nối',
 }
 const kinds = {
+  REVIEW_APPROVED: 'Đánh giá được duyệt', REVIEW_FLAGGED: 'Đánh giá cần kiểm tra', REVIEW_HIDDEN: 'Đã ẩn đánh giá',
   RECOMMENDED: 'Đã cập nhật gợi ý',
   ENABLED: 'Đã bật', DISABLED: 'Đã tắt', CONFIRMED: 'Đã xác nhận', MANUAL_REVIEW: 'Cần staff xác nhận', ERROR: 'Lỗi',
 }

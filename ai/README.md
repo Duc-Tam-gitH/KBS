@@ -43,7 +43,8 @@ Các module chưa tích hợp chỉ hiển thị metadata thật; công tắc di
 
 ## Thêm AI khác
 
-Hiện `ai_auto` và `ai_recommender` đã tích hợp. Các module còn lại chưa có worker/API nghiệp vụ trong repo.
+Hiện `ai_auto`, `ai_recommender` và `ai_reviewnpl` đã tích hợp.
+Các module còn lại chưa có worker/API nghiệp vụ trong repo.
 Sau khi triển khai worker và API cho module mới:
 
 1. Đặt file `ai_<tên>.py` trong thư mục `ai/`. Build/publish tự sao chép các file `ai_*.py`.
@@ -97,6 +98,33 @@ Mất heartbeat trên 30 giây hiển thị mất kết nối khi module đang b
 Thông báo nghiệp vụ/bật tắt/lỗi khởi động lưu trong AiEvents. Lỗi mạng phía worker ghi vào log backend.
 
 ## Quy tắc
+
+### AI kiểm tra đánh giá
+
+- Worker trong dự án: `ai/ai_reviewnpl.py`; không chạy bản ngoài `T:/KeyBoardShop88_AI`.
+- Quản lý AI → Kiểm tra đánh giá → ON; sau đó mở **Duyệt đánh giá** ở Admin hoặc Staff.
+- Mỗi lượt lấy tối đa 50 đánh giá PENDING, chuẩn hóa dấu tiếng Việt/chữ hoa/khoảng trắng,
+  kiểm tra cụm từ trong SPAM_KEYWORDS. Khớp → FLAGGED; không khớp → APPROVED.
+- AI chỉ gắn cờ. PENDING/FLAGGED vẫn hiển thị công khai. Nhân viên bấm Giữ đánh giá hoặc Ẩn đánh giá.
+- HIDDEN không xuất hiện trong danh sách, tổng số đánh giá, trung bình sao hay số lượng theo sao.
+  Nội dung gốc và từ khóa nghi vấn vẫn được giữ cho nhân viên xem.
+- Worker không ghi đè đánh giá đã được xử lý; gửi lặp không tạo thêm sự kiện.
+  Giao dịch Serializable và khóa module đồng bộ ON/OFF, worker và nhân viên trên PostgreSQL.
+- Nhân viên vẫn duyệt được khi AI OFF. Không tự khóa tài khoản; KBS đã giới hạn một đánh giá/khách/sản phẩm.
+- Worker: POST `/api/ai-worker/reviewnpl/poll`, POST `/api/ai-worker/reviewnpl/reviews/{id}/decision`.
+  Admin/Staff: GET `/api/admin/reviews?status=FLAGGED&page=1`, PUT `/api/admin/reviews/{id}/moderation`.
+- Migration `20261031054727_AddReviewModeration` thêm trạng thái/lý do/thời gian kiểm tra và index.
+  Đánh giá cũ mặc định PENDING để quét lần đầu; module được tích hợp nhưng không tự bật.
+
+| Trường trang Duyệt đánh giá | Nguồn DB |
+|---|---|
+| Nội dung, sao, ngày tạo | ProductReviews.Comment/Rating/CreatedAt |
+| Trạng thái, từ khóa, ngày kiểm tra | ProductReviews.ModerationStatus/ModerationReason/CheckedAt |
+| Sản phẩm | Products.Name qua ProductId |
+| Khách hàng | Users.FullName hoặc Username qua UserId |
+
+Kiểm tra: `python -m unittest discover -s ai`; test backend `ReviewModerationTests`
+và `AiWorkerSupervisorTests` (có chạy worker Python thật).
 
 ### AI gợi ý sản phẩm
 

@@ -5,12 +5,16 @@ import Inventory from './Inventory'
 import CustomerManager from './CustomerManager'
 import SupportChat from './SupportChat'
 import AIManagement from '../admin/AIManagement'
+import ReviewModeration from '../admin/ReviewModeration'
 import './Staff.css'
 
-const menus = [
-  ['dashboard', 'Tổng quan'], ['orders', 'Quản lý đơn hàng'], ['inventory', 'Kho hàng'],
-  ['customers', 'Khách hàng'], ['chat', 'Hỗ trợ & Chat'], ['ai', 'AI'],
+const menuGroups = [
+  { label: 'Tổng quan', items: [['dashboard', 'Tổng quan']] },
+  { label: 'Đơn hàng & kho', items: [['orders', 'Quản lý đơn hàng'], ['inventory', 'Kho hàng']] },
+  { label: 'Khách hàng', items: [['customers', 'Khách hàng'], ['chat', 'Hỗ trợ & Chat']] },
+  { label: 'Nội dung & AI', items: [['reviews', 'Duyệt đánh giá'], ['ai', 'AI']] },
 ]
+const menus = menuGroups.flatMap(group => group.items)
 
 export default function StaffWorkspace({ user, onNavigate, onLogout }) {
   const [view, setView] = useSessionView('staff.view', { page: 'dashboard' },
@@ -21,8 +25,11 @@ export default function StaffWorkspace({ user, onNavigate, onLogout }) {
     <aside className="sf-sidebar">
       <h2>KBS · Nhân viên</h2>
       <nav aria-label="Chức năng nhân viên">
-        {menus.map(([key, label]) => <button type="button" key={key}
-          aria-current={view.page === key ? 'page' : undefined} onClick={() => open(key)}>{label}</button>)}
+        {menuGroups.map(group => <div className="sf-nav-group" key={group.label}>
+          <h3 className="sf-nav-label">{group.label}</h3>
+          {group.items.map(([key, label]) => <button type="button" key={key}
+            aria-current={view.page === key ? 'page' : undefined} onClick={() => open(key)}>{label}</button>)}
+        </div>)}
       </nav>
       <div className="sf-session"><strong>{user.fullName || user.username}</strong><p>{user.roleName}</p>
         <button type="button" onClick={() => onNavigate('home')}>Về cửa hàng</button>
@@ -33,6 +40,7 @@ export default function StaffWorkspace({ user, onNavigate, onLogout }) {
       {view.page === 'dashboard' && <StaffDashboard onOpen={open} />}
       {view.page === 'orders' && <OrderManager initialOrderId={view.orderId} initialStatus={view.status} />}
       {view.page === 'inventory' && <Inventory />}
+      {view.page === 'reviews' && <ReviewModeration />}
       {view.page === 'ai' && <div className="sf-ai"><AIManagement readOnly /></div>}
       {view.page === 'customers' && <CustomerManager onOpen={open} />}
       {view.page === 'chat' && <SupportChat key={view.conversationId || 'inbox'}

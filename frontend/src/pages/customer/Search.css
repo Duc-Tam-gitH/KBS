@@ -100,14 +100,14 @@
 
 .search-page button:active:not(:disabled) {
   background: var(--color-primary);
-  color: var(--color-bg-deep);
+  color: var(--color-text-light);
 }
 
 .search-page .search-primary {
   padding: .8rem 1rem;
   border-radius: .65rem;
   background: var(--color-primary);
-  color: var(--color-bg-deep);
+  color: var(--color-text-light);
 }
 
 .search-page .search-primary:hover:hover {
@@ -318,5 +318,5 @@
 .search-page .search-primary:active:not(:disabled),
 .search-page .plus:active:not(:disabled) {
   background: var(--color-primary);
-  color: var(--color-bg-deep);
+  color: var(--color-text-light);
 }

@@ -270,7 +270,7 @@ export default function ProductDetail({
   )
 }
 
-function ProductReviews({ productId, user, onNavigate }) {
+export function ProductReviews({ productId, user, onNavigate }) {
   const [result, setResult] = useState(null)
   const [rating, setRating] = useState('')
   const [page, setPage] = useState(1)
@@ -280,6 +280,7 @@ function ProductReviews({ productId, user, onNavigate }) {
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [reviewRating, setReviewRating] = useState(0)
   const lock = useRef(false)
 
   useEffect(() => {
@@ -369,6 +370,19 @@ function ProductReviews({ productId, user, onNavigate }) {
         : !submitted && <form className="pd-review-form" onSubmit={submit}>
           <h3>Chia sẻ trải nghiệm của bạn</h3>
           <p className="pd-muted">Đóng góp của bạn là sự phát triển của chúng tôi.</p>
+          <fieldset className="pd-star-picker" disabled={submitting}>
+            <legend>Đánh giá của bạn (bắt buộc)</legend>
+            <div className="pd-star-options">
+              {[1, 2, 3, 4, 5].map((value) => <label key={value}>
+                <input type="radio" name="rating" value={value} required
+                  checked={reviewRating === value} onChange={() => setReviewRating(value)} />
+                <Star size={28} aria-hidden="true" fill={value <= reviewRating ? 'currentColor' : 'none'} />
+                <span className="sr-only">{value} sao</span>
+              </label>)}
+            </div>
+            <p className="pd-muted">{reviewRating ? `${reviewRating} / 5 sao` : 'Chọn từ 1 đến 5 sao'}</p>
+          </fieldset>
+          <label htmlFor="pd-review-comment">Nhận xét của bạn</label>
           <textarea id="pd-review-comment" name="comment" required maxLength={2000} rows={4}
             disabled={submitting} placeholder="Cảm nhận của bạn về sản phẩm" />
           <button className="pd-primary" disabled={submitting} type="submit">

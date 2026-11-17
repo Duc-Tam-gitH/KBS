@@ -68,7 +68,7 @@ psql -d KBS_DB -f .\database\seed_demo.sql
 psql -d KBS_DB -f .\database\reporting.sql
 ```
 
-`seed_demo.sql` tạo thương hiệu, 6 sản phẩm, tồn kho, 2 khách và 3 đơn demo. Mật khẩu hai khách demo là `Demo@123`; chỉ dùng cho môi trường phát triển. Script không ghi đè dữ liệu đã có cùng username/email hoặc tên sản phẩm.
+`seed_demo.sql` tạo thương hiệu, 56 sản phẩm (6 sản phẩm ban đầu và 50 sản phẩm bổ sung), tồn kho, 2 khách và 3 đơn demo. Mật khẩu hai khách demo là `Demo@123`; chỉ dùng cho môi trường phát triển. Script không ghi đè dữ liệu đã có cùng username/email hoặc tên sản phẩm.
 
 ## Backup, restore và quyền DB
 

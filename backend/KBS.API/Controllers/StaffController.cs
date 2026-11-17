@@ -29,7 +29,8 @@ public class StaffController(StaffService service, IOrderService orders) : Contr
         StockAdjustmentRequest dto,
         CancellationToken ct)
     {
-        await service.AdjustStockAsync(id, UserId(), dto, ct);
+        var staffImportOnly = User.IsInRole("Staff") && !User.IsInRole("Admin");
+        await service.AdjustStockAsync(id, UserId(), dto, staffImportOnly, ct);
         return NoContent();
     }
 

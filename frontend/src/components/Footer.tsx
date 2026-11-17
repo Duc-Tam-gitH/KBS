@@ -14,7 +14,7 @@ export default function Footer({ onNavigate }: { onNavigate: (route: string) => 
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-2 text-light">
               {/* Icon Logo giả lập (bạn có thể thay bằng SVG logo của bạn) */}
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-bold text-deep">{get('footer.text1')}</div>
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-bold text-light">{get('footer.text1')}</div>
               <span className="font-display font-bold text-2xl tracking-tight">{get('footer.text2')}</span>
             </div>
             <p className="text-muted text-sm leading-relaxed max-w-xs">{get('footer.text3')}</p>
@@ -24,7 +24,7 @@ export default function Footer({ onNavigate }: { onNavigate: (route: string) => 
                   key={index}
                   href="#"
                   className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted hover:text-accent hover:border-accent transition-colors duration-300"
-                  aria-label="Social Link"
+                  aria-label="Liên kết mạng xã hội"
                 >
                   <Icon size={16} />
                 </a>
@@ -71,7 +71,7 @@ export default function Footer({ onNavigate }: { onNavigate: (route: string) => 
                 />
                 <button 
                   type="submit"
-                  className="bg-primary text-deep px-4 py-2.5 rounded-r-lg hover:bg-accent transition-colors flex items-center justify-center"
+                  className="bg-primary text-light px-4 py-2.5 rounded-r-lg hover:bg-accent hover:text-deep transition-colors flex items-center justify-center"
                   aria-label="Đăng ký"
                 >
                   <ArrowRight size={18} />
@@ -85,7 +85,7 @@ export default function Footer({ onNavigate }: { onNavigate: (route: string) => 
         {/* Thanh ngang phân cách */}
         <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-muted text-xs">
-            © {new Date().getFullYear()} KBS — Keyboard Beyond Standard. All rights reserved.
+            © {new Date().getFullYear()} KBS — Bàn phím vượt chuẩn. Đã đăng ký bản quyền.
           </p>
           <div className="flex gap-6 text-xs text-muted">
             <a href="#" className="hover:text-accent transition-colors">{get('footer.text18')}</a>

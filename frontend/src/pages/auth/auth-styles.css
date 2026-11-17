@@ -367,7 +367,7 @@
     padding: 14px;
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--color-bg-deep);
+    color: var(--color-text-light);
     background: var(--color-primary);
     border: none;
     border-radius: var(--radius-sm);
@@ -403,7 +403,7 @@
 
   .store-pages .auth-button:active:not(:disabled) {
     background: var(--color-primary);
-    color: var(--color-bg-deep);
+    color: var(--color-text-light);
     transform: scale(0.98);
   }
 

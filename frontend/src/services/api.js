@@ -132,6 +132,12 @@ export const api = {
   removeLikeItem: (productId) =>
     request(`/api/likelist/items/${productId}`, { method: 'DELETE' }),
   admin: {
+    reviews: (status, page, signal) => request(`/api/admin/reviews?${new URLSearchParams({
+      ...(status ? { status } : {}), page,
+    })}`, { signal }),
+    moderateReview: (id, status) => request(`/api/admin/reviews/${id}/moderation`, {
+      method: 'PUT', body: { status },
+    }),
     shopAvailability: (isOpen) => request('/api/admin/shop/availability', { method: 'PUT', body: { isOpen } }),
     shop: (signal) => request('/api/admin/shop', { signal }),
     saveShop: (body) => request('/api/admin/shop', { method: 'PUT', body }),

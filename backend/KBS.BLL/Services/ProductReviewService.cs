@@ -15,7 +15,8 @@ public class ProductReviewService(KbsDbContext db)
         CancellationToken ct = default)
     {
         if (!await db.Products.AnyAsync(x => x.Id == productId && x.IsActive, ct)) return null;
-        var query = db.ProductReviews.AsNoTracking().Where(x => x.ProductId == productId);
+        var query = db.ProductReviews.AsNoTracking()
+            .Where(x => x.ProductId == productId && x.ModerationStatus != "HIDDEN");
         var counts = await query.GroupBy(x => x.Rating)
             .Select(group => new { Rating = group.Key, Count = group.Count() }).ToListAsync(ct);
         var total = counts.Sum(x => x.Count);
