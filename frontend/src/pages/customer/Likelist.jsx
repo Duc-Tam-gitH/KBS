@@ -64,19 +64,24 @@ export default function Likelist({
   }, [likes, search, category, sort])
 
   useEffect(() => {
-    let active = true
+    const controller = new AbortController()
     updateLikes([])
     setToast(null)
     setRecentlyRemoved(null)
     setLoadError('')
     setLoading(!!user)
-    if (user) {
-      api.likelist()
-        .then((items) => { if (active) updateLikes(items.map(normalizeItem)) })
-        .catch((err) => { if (active) setLoadError(err.message || 'Không thể tải danh sách yêu thích.') })
-        .finally(() => { if (active) setLoading(false) })
+    const load = async () => {
+      try {
+        const items = await api.likelist(controller.signal)
+        if (!controller.signal.aborted) updateLikes(items.map(normalizeItem))
+      } catch (err) {
+        if (!controller.signal.aborted) setLoadError(err.message || 'Không thể tải danh sách yêu thích.')
+      } finally {
+        if (!controller.signal.aborted) setLoading(false)
+      }
     }
-    return () => { active = false }
+    if (user) void load()
+    return () => controller.abort()
   }, [user, retry])
 
   const runAction = async (action) => {

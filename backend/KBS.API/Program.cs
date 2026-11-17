@@ -13,6 +13,12 @@ using System.Net;
 using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
+if (builder.Environment.IsDevelopment())
+    builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables();
+builder.Services.Configure<KBS.Models.DTOs.Payments.SePayGatewayOptions>(
+    builder.Configuration.GetSection("Payments:Gateway"));
+builder.Services.AddScoped<SePayGatewayService>();
 if (builder.Configuration.GetValue("Ai:ManageProcesses", true))
 {
     if (string.IsNullOrWhiteSpace(builder.Configuration["Ai:WorkerKey"]))
@@ -62,6 +68,13 @@ builder.Services.AddScoped<RecommendationService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<BankReconciliationService>();
+builder.Services.AddHttpClient("SePay", client =>
+{
+    client.BaseAddress = new Uri("https://userapi.sepay.vn/v2/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddHostedService<BankPaymentPoller>();
 builder.Services.AddScoped<ShopSettingsService>();
 
 builder.Services.AddOpenApi();
@@ -133,6 +146,22 @@ builder.Services
 
 
 var app = builder.Build();
+// Port 5232 is dedicated to the public IPN tunnel, never to the store/admin API.
+app.Use(async (context, next) =>
+{
+    if (context.Connection.LocalPort == 5232)
+    {
+        var path = context.Request.Path.Value;
+        if (path is not ("/api/payments/sepay/ipn" or "/api/payments/sepay/return"))
+        {
+            context.Response.StatusCode = 404;
+            return;
+        }
+        var limit = context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
+        if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = 32768;
+    }
+    await next(context);
+});
 
 // Cấu hình pipeline xử lý request.
 if (app.Environment.IsDevelopment())
@@ -141,7 +170,8 @@ if (app.Environment.IsDevelopment())
 }
 
 // Local Python workers authenticate with X-AI-Key over loopback; other requests retain HTTPS redirection.
-app.UseWhen(context => !(context.Request.Path.StartsWithSegments("/api/ai-worker")
+app.UseWhen(context => context.Connection.LocalPort != 5232
+    && !(context.Request.Path.StartsWithSegments("/api/ai-worker")
         && context.Connection.RemoteIpAddress is { } address && IPAddress.IsLoopback(address)),
     branch => branch.UseHttpsRedirection());
 
@@ -173,6 +203,8 @@ app.Use(async (context, next) =>
 });
 app.UseAuthorization();
 app.MapControllers();
+app.MapBankPayments();
+app.MapSePayGateway();
 
 app.MapGet("/health/database", async (KbsDbContext db) =>
 {

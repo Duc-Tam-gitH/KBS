@@ -65,6 +65,10 @@ public class PaymentServiceTests
         Assert.Contains("amount=125000", payment.QrImageUrl);
         Assert.Contains($"addInfo=KBS{order.Id}", payment.QrImageUrl);
         Assert.Contains("970422-1234567890", payment.QrImageUrl);
+        var bank = await db.ShopSettings.SingleAsync();
+        bank.AccountNumber = "9999999999";
+        await db.SaveChangesAsync();
+        Assert.Equal("1234567890", (await service.CreateAsync(1, order.Id, default)).AccountNumber);
         Assert.Equal("PENDING", order.PaymentStatus);
         await service.ConfirmBankAsync(9, order.Id, default);
         await service.ConfirmBankAsync(9, order.Id, default);

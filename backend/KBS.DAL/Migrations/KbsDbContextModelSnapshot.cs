@@ -119,7 +119,7 @@ namespace KBS.DAL.Migrations
                         {
                             Id = "ai_auto",
                             ApprovalLimit = 10000000m,
-                            Description = "Tự xác nhận đơn COD dưới 10 triệu; đơn chuyển khoản cần nhân viên xác nhận.",
+                            Description = "Tự xác nhận COD hoặc chuyển khoản đã thanh toán dưới 10 triệu; từ 10 triệu cần người duyệt.",
                             IsEnabled = false,
                             IsIntegrated = true,
                             Name = "Tự động xác nhận đơn",
@@ -166,6 +166,51 @@ namespace KBS.DAL.Migrations
                             SourceFile = "ai_recommender.py",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         });
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.BankPayment", b =>
+                {
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("BankBin")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SePayBankAccountId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.ToTable("BankPayments");
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.Brand", b =>
@@ -359,6 +404,51 @@ namespace KBS.DAL.Migrations
                     b.HasIndex("ConversationId", "Id");
 
                     b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.GatewayPayment", b =>
+                {
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Environment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Invoice")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MerchantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("Invoice")
+                        .IsUnique();
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.ToTable("GatewayPayments");
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.Inventory", b =>
@@ -831,6 +921,9 @@ namespace KBS.DAL.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<string>("SePayBankAccountId")
+                        .HasColumnType("text");
+
                     b.Property<string>("Slogan")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -949,6 +1042,15 @@ namespace KBS.DAL.Migrations
                     b.Navigation("Module");
                 });
 
+            modelBuilder.Entity("KBS.Models.Entities.BankPayment", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.Order", null)
+                        .WithOne()
+                        .HasForeignKey("KBS.Models.Entities.BankPayment", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("KBS.Models.Entities.CartItem", b =>
                 {
                     b.HasOne("KBS.Models.Entities.Product", "Product")
@@ -1003,6 +1105,15 @@ namespace KBS.DAL.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("KBS.Models.Entities.GatewayPayment", b =>
+                {
+                    b.HasOne("KBS.Models.Entities.Order", null)
+                        .WithOne()
+                        .HasForeignKey("KBS.Models.Entities.GatewayPayment", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("KBS.Models.Entities.Inventory", b =>

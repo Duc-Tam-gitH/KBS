@@ -7,6 +7,8 @@ namespace KBS.DAL.Data;
 public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     : DbContext(options)
 {
+    public DbSet<BankPayment> BankPayments => Set<BankPayment>();
+    public DbSet<GatewayPayment> GatewayPayments => Set<GatewayPayment>();
     public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();
     public DbSet<AiModule> AiModules => Set<AiModule>();
     public DbSet<AiEvent> AiEvents => Set<AiEvent>();
@@ -31,6 +33,17 @@ public class KbsDbContext(DbContextOptions<KbsDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<GatewayPayment>().HasKey(x => x.OrderId);
+        modelBuilder.Entity<GatewayPayment>().HasOne<Order>().WithOne()
+            .HasForeignKey<GatewayPayment>(x => x.OrderId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<GatewayPayment>().HasIndex(x => x.Invoice).IsUnique();
+        modelBuilder.Entity<GatewayPayment>().HasIndex(x => x.TransactionId).IsUnique();
+        modelBuilder.Entity<GatewayPayment>().Property(x => x.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<BankPayment>().HasKey(x => x.OrderId);
+        modelBuilder.Entity<BankPayment>().HasOne<Order>().WithOne()
+            .HasForeignKey<BankPayment>(x => x.OrderId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<BankPayment>().HasIndex(x => x.TransactionId).IsUnique();
+        modelBuilder.Entity<BankPayment>().Property(x => x.Amount).HasPrecision(18, 2);
         modelBuilder.Entity<ProductReview>().Property(x => x.ModerationStatus)
             .HasMaxLength(20).HasDefaultValue("PENDING");
         modelBuilder.Entity<ProductReview>().Property(x => x.ModerationReason).HasMaxLength(1000);

@@ -43,6 +43,13 @@ function App() {
     value => !linkedProduct() && ['home', 'shop', 'search', 'auth', 'register', 'cart', 'checkout',
       'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(value))
   const [selected, setSelected] = useState(linkedProduct)
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (url.searchParams.get('payment') !== 'return') return
+    setRoute('orders')
+    url.searchParams.delete('payment')
+    window.history.replaceState(null, '', url)
+  }, [setRoute])
   const [cart, setCart] = useState([])
   const [cartError, setCartError] = useState('')
   const [cartBusy, setCartBusy] = useState(true)

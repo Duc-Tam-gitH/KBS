@@ -2,6 +2,7 @@ namespace KBS.Models.DTOs.Payments;
 
 public class PaymentResponseDto
 {
+    public GatewayCheckoutDto? Checkout { get; set; }
     public long OrderId { get; set; }
     public decimal Amount { get; set; }
     public string PaymentMethod { get; set; } = string.Empty;

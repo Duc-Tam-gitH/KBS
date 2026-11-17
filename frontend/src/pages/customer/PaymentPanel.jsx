@@ -14,17 +14,27 @@ export default function PaymentPanel({ orderId, method }) {
   useEffect(() => {
     mounted.current = true
     const controller = new AbortController()
-    api.paymentStatus(orderId, controller.signal)
-      .then(async status => {
-        if (controller.signal.aborted) return
-        setPayment(status)
-        if (method === 'BANKING' && status.paymentStatus === 'PENDING' && status.orderStatus !== 'CANCELLED') {
-          const details = await api.createPayment(orderId)
-          if (!controller.signal.aborted) setPayment(details)
+    let timer
+    setPayment(null); setError(''); setImageFailed(false)
+    const refresh = async (initial = false) => {
+      let pending = true
+      try {
+        let status = await api.paymentStatus(orderId, controller.signal)
+        pending = status.paymentStatus === 'PENDING' && status.orderStatus !== 'CANCELLED'
+        if (initial && method === 'BANKING' && pending) status = await api.createPayment(orderId, controller.signal)
+        if (!controller.signal.aborted) {
+          setPayment(previous => initial ? status : { ...previous,
+            paymentStatus: status.paymentStatus, orderStatus: status.orderStatus, amount: status.amount })
+          setError('')
         }
-      })
-      .catch(err => { if (!controller.signal.aborted) setError(err.message) })
-    return () => { mounted.current = false; controller.abort() }
+      } catch (err) {
+        if (!controller.signal.aborted) setError(err.message)
+      } finally {
+        if (!controller.signal.aborted && pending) timer = setTimeout(() => void refresh(), 5000)
+      }
+    }
+    void refresh(true)
+    return () => { mounted.current = false; controller.abort(); clearTimeout(timer) }
   }, [orderId, method])
 
   const run = async create => {
@@ -33,10 +43,8 @@ export default function PaymentPanel({ orderId, method }) {
     try {
       const next = create ? await api.createPayment(orderId) : await api.paymentStatus(orderId)
       if (mounted.current) {
-        setPayment(previous => ({ ...previous, ...next,
-          ...(create ? {} : { qrImageUrl: previous?.qrImageUrl,
-            bankName: previous?.bankName, accountName: previous?.accountName,
-            accountNumber: previous?.accountNumber, transferContent: previous?.transferContent }) }))
+        setPayment(previous => create ? next : { ...previous,
+          paymentStatus: next.paymentStatus, orderStatus: next.orderStatus, amount: next.amount })
         if (create) setImageFailed(false)
       }
     } catch (err) { if (mounted.current) setError(err.message) }
@@ -44,13 +52,22 @@ export default function PaymentPanel({ orderId, method }) {
   }
 
   return <section className="co-payment-panel" aria-label={`Thanh toán đơn ${orderId}`}>
-    <h3>Chuyển khoản VietQR</h3>
+    <h3>Thanh toán chuyển khoản</h3>
     {error && <p role="alert" className="co-error">{error}</p>}
     {!payment && !error && <p role="status">Đang tải thông tin thanh toán…</p>}
     {payment?.paymentStatus === 'PAID' ? <p role="status">Đã xác nhận thanh toán {money(payment.amount)}.</p>
+      : payment?.paymentStatus === 'REVIEW' ? <p role="status">Giao dịch cần nhân viên kiểm tra. Vui lòng không thanh toán lại.</p>
       : payment?.orderStatus === 'CANCELLED' ? <p>Đơn đã hủy. Vui lòng không chuyển tiền cho đơn này.</p>
         : payment && <>
           <p>Chờ thanh toán: <strong>{money(payment.amount)}</strong></p>
+          {payment.checkout && <>
+            <p>SePay Sandbox — thanh toán mô phỏng, không chuyển tiền thật.</p>
+            <form action={payment.checkout.url} method="POST">
+              {Object.entries(payment.checkout.fields).map(([name, value]) =>
+                <input key={name} type="hidden" name={name} value={value} />)}
+              <button type="submit" className="co-primary">Thanh toán thử qua SePay</button>
+            </form>
+          </>}
           {method === 'BANKING' && payment.qrImageUrl && <>
             {!imageFailed ? <img className="co-bank-qr" src={payment.qrImageUrl} alt={`QR chuyển khoản đơn ${orderId}`}
               referrerPolicy="no-referrer" onError={() => setImageFailed(true)} />
@@ -59,12 +76,12 @@ export default function PaymentPanel({ orderId, method }) {
               <div><dt>Số tài khoản</dt><dd>{payment.accountNumber}</dd></div>
               <div><dt>Chủ tài khoản</dt><dd>{payment.accountName}</dd></div>
               <div><dt>Nội dung</dt><dd>{payment.transferContent}</dd></div></dl>
-            <p>Chuyển đúng số tiền và nội dung. Nhân viên sẽ xác nhận sau khi đối chiếu tài khoản ngân hàng.</p>
+            <p>Chuyển đúng số tiền và nội dung. Trạng thái tự cập nhật sau khi đối soát ngân hàng hoặc nhân viên xác nhận.</p>
           </>}
         </>}
-    {payment?.paymentStatus !== 'PAID' && payment?.orderStatus !== 'CANCELLED' && <div className="co-payment-actions">
+    {payment?.paymentStatus === 'PENDING' && payment?.orderStatus !== 'CANCELLED' && <div className="co-payment-actions">
       <button type="button" className="co-primary" disabled={busy} onClick={() => run(true)}>
-        {busy ? 'Đang xử lý…' : 'Tải lại mã QR'}</button>
+        {busy ? 'Đang xử lý…' : 'Tải lại thanh toán'}</button>
       <button type="button" className="co-text-button" disabled={busy} onClick={() => run(false)}>
         Kiểm tra trạng thái</button>
     </div>}

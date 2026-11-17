@@ -113,7 +113,7 @@ export const api = {
   createOrder: (payload) => request('/api/orders', { method: 'POST', body: payload }),
   cancelOrder: (id) => request(`/api/orders/${id}/cancel`, { method: 'PUT' }),
   paymentOptions: (signal) => request('/api/payments/options', { signal }),
-  createPayment: (id) => request(`/api/payments/orders/${id}`, { method: 'POST' }),
+  createPayment: (id, signal) => request(`/api/payments/orders/${id}`, { method: 'POST', signal }),
   paymentStatus: (id, signal) => request(`/api/payments/orders/${id}`, { signal }),
   confirmBankPayment: (id) => request(`/api/payments/orders/${id}/bank-confirmation`, { method: 'PUT' }),
   cart: () => request('/api/cart'),
@@ -126,12 +126,14 @@ export const api = {
     }),
   removeCartItem: (productId) =>
     request(`/api/cart/items/${productId}`, { method: 'DELETE' }),
-  likelist: () => request('/api/likelist'),
+  likelist: (signal) => request('/api/likelist', { signal }),
   addLikeItem: (productId) =>
     request(`/api/likelist/items/${productId}`, { method: 'PUT' }),
   removeLikeItem: (productId) =>
     request(`/api/likelist/items/${productId}`, { method: 'DELETE' }),
   admin: {
+    payments: (signal) => request('/api/admin/payments', { signal }),
+    saveBank: (data) => request('/api/admin/payments/bank', { method: 'PUT', body: data }),
     reviews: (status, page, signal) => request(`/api/admin/reviews?${new URLSearchParams({
       ...(status ? { status } : {}), page,
     })}`, { signal }),

@@ -24,7 +24,7 @@ public record AiEventResponseDto(
     DateTimeOffset CreatedAt);
 
 public record AiEventsPage(List<AiEventResponseDto> Items, long? NextBeforeId);
-public record AiOrderDto(long Id, decimal TotalPrice, string PaymentMethod);
+public record AiOrderDto(long Id, decimal TotalPrice, string PaymentMethod, string PaymentStatus = "PENDING");
 public record AiPollDto(bool IsEnabled, decimal ApprovalLimit, List<AiOrderDto> Orders);
 public record AiDecisionResponseDto(long OrderId, string Result);
 public class AiEnabledRequest

@@ -2,37 +2,37 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KBS.Models.DTOs.Staff;
 
-public class TextRequest
+public record TextRequest
 {
     [Required]
     [StringLength(2000)]
-    public string Content { get; set; } = string.Empty;
+    public string Content { get; init; } = string.Empty;
 }
 
-public class StockAdjustmentRequest
+public record StockAdjustmentRequest
 {
-    public int Delta { get; set; }
+    public int Delta { get; init; }
     [Range(0, int.MaxValue)]
-    public int ExpectedQuantity { get; set; }
+    public int ExpectedQuantity { get; init; }
     [StringLength(500)]
-    public string? Reason { get; set; }
+    public string? Reason { get; init; }
 }
 
-public class ThresholdRequest
+public record ThresholdRequest
 {
     [Range(0, int.MaxValue)]
-    public int LowStockThreshold { get; set; }
+    public int LowStockThreshold { get; init; }
 }
 
-public class ChatSendRequest
+public record ChatSendRequest
 {
     [Required]
     [StringLength(4000)]
-    public string Content { get; set; } = string.Empty;
+    public string Content { get; init; } = string.Empty;
 }
 
-public class ChatReadRequest
+public record ChatReadRequest
 {
     [Range(1, long.MaxValue)]
-    public long ThroughMessageId { get; set; }
+    public long ThroughMessageId { get; init; }
 }

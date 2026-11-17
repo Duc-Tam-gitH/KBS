@@ -17,7 +17,7 @@ public class AiManagementTests
     [Theory]
     [InlineData("PENDING")]
     [InlineData("PAID")]
-    public async Task Bank_orders_require_staff_even_below_limit(string paymentStatus)
+    public async Task Bank_orders_below_limit_wait_for_payment_before_auto_confirmation(string paymentStatus)
     {
         using var app = new AiFactory();
         using var client = app.CreateClient();
@@ -33,12 +33,20 @@ public class AiManagementTests
         db.Orders.Add(order);
         await db.SaveChangesAsync();
         var service = new AiManagementService(db);
-        Assert.Equal("BANKING", Assert.Single((await service.PollAsync(default)).Orders).PaymentMethod);
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.DecideAsync(order.Id, "CONFIRM", default));
-        Assert.Equal("MANUAL_REVIEW", (await service.DecideAsync(order.Id, "MANUAL_REVIEW", default)).Result);
-        Assert.Equal("PENDING", order.OrderStatus);
+        if (paymentStatus == "PAID")
+        {
+            Assert.Equal("PAID", Assert.Single((await service.PollAsync(default)).Orders).PaymentStatus);
+            Assert.Equal("CONFIRMED", (await service.DecideAsync(order.Id, "CONFIRM", default)).Result);
+            Assert.Equal("CONFIRMED", order.OrderStatus);
+        }
+        else
+        {
+            Assert.Empty((await service.PollAsync(default)).Orders);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.DecideAsync(order.Id, "CONFIRM", default));
+            Assert.Equal("PENDING", order.OrderStatus);
+            Assert.Empty(await db.AiEvents.ToListAsync());
+        }
         Assert.Equal(paymentStatus, order.PaymentStatus);
-        Assert.Contains("chuyển khoản", (await db.AiEvents.SingleAsync()).Message);
     }
 
     [Fact]

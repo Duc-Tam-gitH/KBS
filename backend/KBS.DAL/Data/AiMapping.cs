@@ -21,7 +21,7 @@ internal static class AiMapping
         var created = new DateTimeOffset(2026, 10, 29, 0, 0, 0, TimeSpan.Zero);
         module.HasData(
             new AiModule { Id = "ai_auto", Name = "Tự động xác nhận đơn", SourceFile = "ai_auto.py",
-                Description = "Tự xác nhận đơn COD dưới 10 triệu; đơn chuyển khoản cần nhân viên xác nhận.",
+                Description = "Tự xác nhận COD hoặc chuyển khoản đã thanh toán dưới 10 triệu; từ 10 triệu cần người duyệt.",
                 IsIntegrated = true, ApprovalLimit = 10000000, UpdatedAt = created },
             new AiModule { Id = "ai_anti", Name = "Phát hiện mua gom", SourceFile = "ai_anti.py",
                 Description = "Phát hiện mua trên 100 sản phẩm trong 24 giờ.", UpdatedAt = created },

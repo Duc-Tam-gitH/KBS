@@ -23,6 +23,7 @@ public class ShopSettings
     public string? BankName { get; set; }
     [MaxLength(6)]
     public string? BankBin { get; set; }
+    public string? SePayBankAccountId { get; set; }
     [MaxLength(19)]
     public string? AccountNumber { get; set; }
     [MaxLength(150)]

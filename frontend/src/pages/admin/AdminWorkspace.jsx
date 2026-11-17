@@ -5,11 +5,13 @@ import ProductManagement from './ProductManagement'
 import CategoryManagement from './CategoryManagement'
 import InventoryManagement from './InventoryManagement'
 import ShopManagement from './ShopManagement'
+import PaymentManagement from './PaymentManagement'
 import AIManagement from './AIManagement'
 import ReviewModeration from './ReviewModeration'
 import './Dashboard.css'
 
 const adminPages = [
+  { id: 'payments', label: 'Thanh toán', group: 'Cửa hàng', Component: PaymentManagement },
   { id: 'reviews', label: 'Duyệt đánh giá', group: 'Nội dung & AI', Component: ReviewModeration },
   { id: 'dashboard', label: 'Dashboard', group: 'Tổng quan', Component: Dashboard },
   { id: 'accounts', label: 'Quản lý tài khoản', group: 'Cửa hàng', Component: AccountManagement },
@@ -45,7 +47,7 @@ export default function AdminWorkspace({ user, onLogout }) {
         {onLogout && <button type="button" onClick={onLogout}>Đăng xuất</button>}
       </div>
     </aside>
-    {['dashboard', 'categories', 'products', 'accounts', 'inventory', 'shop', 'ai', 'reviews'].includes(pageId) ? <Page key={pageId} user={user} /> : <>
+    {['payments', 'dashboard', 'categories', 'products', 'accounts', 'inventory', 'shop', 'ai', 'reviews'].includes(pageId) ? <Page key={pageId} user={user} /> : <>
       <div className="ad-main">
         <header className="ad-heading"><h1>{page.label}</h1></header>
         <Page key={pageId} />

@@ -51,11 +51,10 @@ public class StaffWorkflowTests
         var path = $"/api/staff/inventory/{product.Id}/adjustments";
         var request = new StockAdjustmentRequest { Delta = -11, ExpectedQuantity = 10, Reason = "Count check" };
         Assert.Equal(HttpStatusCode.BadRequest, (await admin.PostAsJsonAsync(path, request)).StatusCode);
-        request.Delta = 3;
+        request = request with { Delta = 3 };
         Assert.Equal(HttpStatusCode.NoContent, (await admin.PostAsJsonAsync(path, request)).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await admin.PostAsJsonAsync(path, request)).StatusCode);
-        request.ExpectedQuantity = 13;
-        request.Delta = -4;
+        request = request with { ExpectedQuantity = 13, Delta = -4 };
         Assert.Equal(HttpStatusCode.NoContent, (await admin.PostAsJsonAsync(path, request)).StatusCode);
         var history = await admin.GetFromJsonAsync<List<InventoryMovementDto>>(
             $"/api/staff/inventory/{product.Id}/movements");
@@ -122,12 +121,11 @@ public class StaffWorkflowTests
         var path = $"/api/staff/inventory/{product.Id}/adjustments";
         var dto = new StockAdjustmentRequest { Delta = -6, ExpectedQuantity = 5, Reason = "Inventory check" };
         Assert.Equal(HttpStatusCode.BadRequest, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
-        dto.Delta = 2;
-        dto.ExpectedQuantity = 4;
+        dto = dto with { Delta = 2, ExpectedQuantity = 4 };
         Assert.Equal(HttpStatusCode.Conflict, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
-        dto.ExpectedQuantity = 5;
+        dto = dto with { ExpectedQuantity = 5 };
         Assert.Equal(HttpStatusCode.Forbidden, (await customer.PostAsJsonAsync(path, dto)).StatusCode);
-        dto.Reason = null;
+        dto = dto with { Reason = null };
         Assert.Equal(HttpStatusCode.NoContent, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         db.ChangeTracker.Clear();

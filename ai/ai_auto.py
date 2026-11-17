@@ -8,8 +8,10 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
-def decision(total_price, limit, payment_method="COD"):
-    return "CONFIRM" if payment_method == "COD" and Decimal(str(total_price)) < Decimal(str(limit)) else "MANUAL_REVIEW"
+def decision(total_price, limit, payment_method="COD", payment_status="PENDING"):
+    eligible = payment_method == "COD" or (payment_method == "BANKING" and payment_status == "PAID")
+    threshold = min(Decimal(str(limit)), Decimal("10000000"))
+    return "CONFIRM" if eligible and Decimal(str(total_price)) < threshold else "MANUAL_REVIEW"
 
 
 def post(base_url, key, path, payload=None):
@@ -28,7 +30,8 @@ def run_once(base_url, key):
     for order in batch["orders"]:
         try:
             result = post(base_url, key, f'/api/ai-worker/auto/orders/{order["id"]}/decision', {
-                "decision": decision(order["totalPrice"], batch["approvalLimit"], order.get("paymentMethod", "")),
+                "decision": decision(order["totalPrice"], batch["approvalLimit"], order.get("paymentMethod", ""),
+                                     order.get("paymentStatus", "PENDING")),
             })
             print(f'Order #{order["id"]}: {result["result"]}', flush=True)
         except HTTPError as error:

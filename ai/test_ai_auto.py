@@ -4,6 +4,10 @@ from ai_auto import decision, run_once
 
 
 class AutoTests(unittest.TestCase):
+    def test_paid_bank_and_hard_limit(self):
+        self.assertEqual("CONFIRM", decision(9999999, 10000000, "BANKING", "PAID"))
+        self.assertEqual("MANUAL_REVIEW", decision(10000000, 20000000, "BANKING", "PAID"))
+        self.assertEqual("MANUAL_REVIEW", decision(10000001, 20000000, "COD"))
     def test_bank_transfer_always_requires_staff(self):
         self.assertEqual("MANUAL_REVIEW", decision(1000, 10000000, "BANKING"))
         self.assertEqual("MANUAL_REVIEW", decision(10000000, 10000000, "BANKING"))

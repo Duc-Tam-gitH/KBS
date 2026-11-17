@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KBS.BLL.Services;
 
-public class PaymentService(KbsDbContext db)
+public class PaymentService(KbsDbContext db, SePayGatewayService? gateway = null)
 {
     private Task<BankOptions?> BankAsync(CancellationToken ct) => db.ShopSettings.AsNoTracking()
         .Select(x => new BankOptions
@@ -22,7 +22,8 @@ public class PaymentService(KbsDbContext db)
         && Regex.IsMatch(bank.AccountNumber, @"^[0-9]{6,19}$")
         && !string.IsNullOrWhiteSpace(bank.AccountName) && !string.IsNullOrWhiteSpace(bank.BankName);
 
-    public async Task<bool> BankAvailableAsync(CancellationToken ct) => Configured(await BankAsync(ct));
+    public async Task<bool> BankAvailableAsync(CancellationToken ct) => gateway?.Options.Enabled == true
+        ? gateway.Options.Ready : Configured(await BankAsync(ct));
 
     public async Task ValidateMethodAsync(string method, CancellationToken ct)
     {
@@ -52,10 +53,31 @@ public class PaymentService(KbsDbContext db)
             throw new ArgumentException("Phương thức thanh toán không hợp lệ.");
         if (order.PaymentMethod == "BANKING")
         {
+            if (gateway?.Options.Enabled == true)
+            {
+                result.Checkout = await gateway.CreateAsync(orderId, ct);
+                return result;
+            }
             if (order.TotalPrice <= 0 || order.TotalPrice != decimal.Truncate(order.TotalPrice))
                 throw new InvalidOperationException("QR chuyển khoản yêu cầu số tiền nguyên dương.");
-            var bank = await BankAsync(ct);
-            if (!Configured(bank)) throw new InvalidOperationException("Chưa cấu hình tài khoản nhận chuyển khoản.");
+            var snapshot = await db.BankPayments.SingleOrDefaultAsync(x => x.OrderId == orderId, ct);
+            if (snapshot == null)
+            {
+                var configured = await BankAsync(ct);
+                if (!Configured(configured))
+                    throw new InvalidOperationException("Chưa cấu hình tài khoản nhận chuyển khoản.");
+                snapshot = new BankPayment
+                {
+                    OrderId = orderId, Amount = order.TotalPrice, BankBin = configured!.BankBin,
+                    BankName = configured.BankName, AccountNumber = configured.AccountNumber,
+                    AccountName = configured.AccountName
+                };
+                db.BankPayments.Add(snapshot);
+                snapshot.SePayBankAccountId = await db.ShopSettings
+                    .Select(x => x.SePayBankAccountId).SingleOrDefaultAsync(ct);
+                await db.SaveChangesAsync(ct);
+            }
+            var bank = snapshot;
             result.TransferContent = $"KBS{order.Id}";
             result.BankName = bank!.BankName;
             result.AccountNumber = bank.AccountNumber;
@@ -78,6 +100,8 @@ public class PaymentService(KbsDbContext db)
             ?? throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
         if (order.PaymentMethod != "BANKING" || order.OrderStatus == "CANCELLED")
             throw new InvalidOperationException("Chỉ xác nhận chuyển khoản cho đơn ngân hàng chưa bị hủy.");
+        if (await db.GatewayPayments.AnyAsync(x => x.OrderId == orderId, ct))
+            throw new InvalidOperationException("Đơn cổng thanh toán phải được xác minh qua IPN SePay.");
         if (order.PaymentStatus == "PAID") return ToDto(order);
         if (order.PaymentStatus != "PENDING")
             throw new InvalidOperationException("Đơn hàng không còn chờ thanh toán.");

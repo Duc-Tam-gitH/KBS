@@ -73,14 +73,17 @@ public class AiManagementService(KbsDbContext db)
         var module = await db.AiModules.SingleAsync(x => x.Id == "ai_auto", ct);
         module.LastHeartbeatAt = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync(ct);
+        var limit = Math.Min(module.ApprovalLimit!.Value, 10000000m);
         var orders = module.IsEnabled
             ? await db.Orders.AsNoTracking().Where(x => x.OrderStatus == "PENDING"
+                && (x.PaymentMethod != "BANKING" || x.PaymentStatus == "PAID" || x.TotalPrice >= limit)
                 && !db.AiEvents.Any(e => e.ModuleId == module.Id && e.OrderId == x.Id
-                    && (e.Kind == "CONFIRMED" || e.Kind == "MANUAL_REVIEW")))
+                    && (e.Kind == "CONFIRMED" || (e.Kind == "MANUAL_REVIEW"
+                        && !(x.PaymentMethod == "BANKING" && x.PaymentStatus == "PAID" && x.TotalPrice < limit)))))
                 .OrderBy(x => x.Id).Take(50)
-                .Select(x => new AiOrderDto(x.Id, x.TotalPrice, x.PaymentMethod)).ToListAsync(ct)
+                .Select(x => new AiOrderDto(x.Id, x.TotalPrice, x.PaymentMethod, x.PaymentStatus)).ToListAsync(ct)
             : [];
-        return new AiPollDto(module.IsEnabled, module.ApprovalLimit!.Value, orders);
+        return new AiPollDto(module.IsEnabled, limit, orders);
     }
 
     public async Task<AiDecisionResponseDto> DecideAsync(
@@ -95,10 +98,15 @@ public class AiManagementService(KbsDbContext db)
             ?? throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
         if (!module.IsEnabled || !module.IsIntegrated || order.OrderStatus != "PENDING")
             return new AiDecisionResponseDto(orderId, "SKIPPED");
+        var limit = Math.Min(module.ApprovalLimit!.Value, 10000000m);
+        var paidBank = order.PaymentMethod == "BANKING" && order.PaymentStatus == "PAID";
+        if (order.PaymentMethod == "BANKING" && !paidBank && order.TotalPrice < limit)
+            throw new InvalidOperationException("Đơn chuyển khoản đang chờ xác minh thanh toán.");
         var previous = await db.AiEvents.FirstOrDefaultAsync(x => x.ModuleId == module.Id
-            && x.OrderId == orderId && (x.Kind == "CONFIRMED" || x.Kind == "MANUAL_REVIEW"), ct);
+            && x.OrderId == orderId && (x.Kind == "CONFIRMED"
+                || (x.Kind == "MANUAL_REVIEW" && !(paidBank && order.TotalPrice < limit))), ct);
         if (previous != null) return new AiDecisionResponseDto(orderId, previous.Kind);
-        var confirm = order.PaymentMethod == "COD" && order.TotalPrice < module.ApprovalLimit;
+        var confirm = (order.PaymentMethod == "COD" || paidBank) && order.TotalPrice < limit;
         if ((decision == "CONFIRM") != confirm)
             throw new InvalidOperationException("Quyết định không khớp điều kiện duyệt hiện tại. Vui lòng đọc lại đơn hàng.");
         var result = confirm ? "CONFIRMED" : "MANUAL_REVIEW";

@@ -23,6 +23,11 @@ globalThis.fetch = async (url, options) => {
   captured = { url: new URL(url), options }
   return Response.json({ items: [], nextBeforeId: null })
 }
+const likesController = new AbortController()
+await api.likelist(likesController.signal)
+assert.equal(captured.options.signal, likesController.signal)
+likesController.abort()
+assert.equal(captured.options.signal.aborted, true)
 await api.admin.aiEvents('ai_auto', 42, undefined, {
   kind: 'CONFIRMED', from: '2026-10-30T08:00', to: '2026-10-30T09:00',
 })
