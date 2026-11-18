@@ -12,15 +12,16 @@ export function filterInventory(items, { query = '', category = '', status = '',
         : (a.stockQuantity - b.stockQuantity) * (sort === 'desc' ? -1 : 1)) || a.productId - b.productId)
 }
 
-export function stockAdjustment(item, mode, quantity, reason) {
+export function stockAdjustment(item, mode, quantity, reason = '') {
   if (!Number.isInteger(quantity) || quantity < (mode === 'adjust' ? 0 : 1) || quantity > 2147483647)
     throw new Error('Số lượng phải là số nguyên hợp lệ.')
-  if (!reason.trim() || reason.trim().length > 500) throw new Error('Nhập lý do từ 1 đến 500 ký tự.')
+  const normalizedReason = reason.trim() || (mode === 'in' ? 'Nhập kho' : '')
+  if (!normalizedReason || normalizedReason.length > 500) throw new Error('Nhập lý do từ 1 đến 500 ký tự.')
   const delta = mode === 'adjust' ? quantity - item.stockQuantity : mode === 'out' ? -quantity : quantity
   if (!delta) throw new Error(`Sản phẩm #${item.productId}: số lượng không thay đổi.`)
   if (item.stockQuantity + delta < 0 || item.stockQuantity + delta > 2147483647)
     throw new Error(`Sản phẩm #${item.productId}: số lượng sau cập nhật không hợp lệ.`)
-  return { delta, expectedQuantity: item.stockQuantity, reason: reason.trim() }
+  return { delta, expectedQuantity: item.stockQuantity, reason: normalizedReason }
 }
 
 export function inventoryCsv(items) {

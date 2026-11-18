@@ -198,7 +198,7 @@ public class AiManagementTests
         foreach (var (name, password) in new[] { ("customer", "Customer1"), ("staff", "Staff123") })
         {
             await Login(client, name, password);
-            var readStatus = name == "staff" ? HttpStatusCode.OK : HttpStatusCode.Forbidden;
+            var readStatus = HttpStatusCode.Forbidden;
             Assert.Equal(readStatus, (await client.GetAsync("/api/admin/ai/modules")).StatusCode);
             Assert.Equal(readStatus, (await client.GetAsync("/api/admin/ai/events")).StatusCode);
             Assert.Equal(HttpStatusCode.Forbidden,

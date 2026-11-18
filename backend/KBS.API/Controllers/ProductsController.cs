@@ -36,7 +36,7 @@ public class ProductsController(IProductService service) : ControllerBase
         return x is null ? NotFound() : Ok(x);
     }
 
-    [Authorize(Roles = "Admin,Staff,Nhân viên")]
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<ProductResponseDto>> Create(ProductCreateDto dto, CancellationToken ct)
     {
@@ -55,7 +55,7 @@ public class ProductsController(IProductService service) : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin,Staff,Nhân viên")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:long}")]
     public async Task<ActionResult<ProductResponseDto>> Update(long id, ProductUpdateDto dto, CancellationToken ct)
     {

@@ -8,9 +8,15 @@ import ShopManagement from './ShopManagement'
 import PaymentManagement from './PaymentManagement'
 import AIManagement from './AIManagement'
 import ReviewModeration from './ReviewModeration'
+import OrderManager from '../Staff/OrderManager'
+import SupportChat from '../Staff/SupportChat'
+import '../Staff/Staff.css'
 import './Dashboard.css'
+import './AdminOperations.css'
 
 const adminPages = [
+  { id: 'orders', label: 'Quản lý đơn hàng', group: 'Cửa hàng', Component: OrderManager },
+  { id: 'chat', label: 'Chat khách hàng', group: 'Cửa hàng', Component: SupportChat },
   { id: 'payments', label: 'Thanh toán', group: 'Cửa hàng', Component: PaymentManagement },
   { id: 'reviews', label: 'Duyệt đánh giá', group: 'Nội dung & AI', Component: ReviewModeration },
   { id: 'dashboard', label: 'Dashboard', group: 'Tổng quan', Component: Dashboard },
@@ -47,15 +53,8 @@ export default function AdminWorkspace({ user, onLogout }) {
         {onLogout && <button type="button" onClick={onLogout}>Đăng xuất</button>}
       </div>
     </aside>
-    {['payments', 'dashboard', 'categories', 'products', 'accounts', 'inventory', 'shop', 'ai', 'reviews'].includes(pageId) ? <Page key={pageId} user={user} /> : <>
-      <div className="ad-main">
-        <header className="ad-heading"><h1>{page.label}</h1></header>
-        <Page key={pageId} />
-      </div>
-      <aside className="ad-details ad-panel" aria-label="Chi tiết dữ liệu">
-        <p className="ad-eyebrow">CHI TIẾT DỮ LIỆU</p>
-        <p className="ad-empty">Chưa có dữ liệu chi tiết.</p>
-      </aside>
-    </>}
+    {['orders', 'chat'].includes(pageId) ? <main className="ad-main staff-workspace ad-operations">
+      <Page key={pageId} user={user} />
+    </main> : <Page key={pageId} user={user} />}
   </section>
 }

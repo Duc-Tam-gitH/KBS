@@ -17,10 +17,9 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
   const links = [
     { route: 'home', label: 'Trang chủ' },
     { route: 'shop', label: 'Khám phá' },
-    ...(user && role !== 'staff' ? [{ route: 'orders', label: 'Đơn hàng' }] : []),
+    ...(user ? [{ route: 'orders', label: 'Đơn hàng' }] : []),
     ...(role === 'admin' ? [{ route: 'admin', label: 'Quản trị' }] : []),
-    ...(['staff', 'admin'].includes(role) ? [{ route: 'staff', label: 'Nhân viên' }]
-      : [{ route: 'support', label: 'Hỗ trợ' }]),
+    { route: 'support', label: 'Hỗ trợ' },
   ]
   const navigate = (next: string) => { setMenuOpen(false); onNavigate(next) }
   const navButton = 'px-3 py-2 rounded-full text-sm transition-colors hover:bg-border hover:text-accent'
@@ -44,13 +43,13 @@ export default function Navbar({ route, onNavigate, cartCount, user, role, onLog
           </button>)}
         </div>
         <div className="flex-1" />
-        {role !== 'staff' && <button className={iconButton + (route === 'likes' ? ' bg-primary text-light hover:text-accent' : '')}
+        {<button className={iconButton + (route === 'likes' ? ' bg-primary text-light hover:text-accent' : '')}
           aria-label="Sản phẩm yêu thích"
           title="Sản phẩm yêu thích"
           onClick={() => navigate('likes')}>
           <Heart size={18} className={route === 'likes' ? 'fill-current stroke-current' : ''} />
         </button>}
-        {role !== 'staff' && <button className={iconButton + ' relative' + (route === 'cart' ? ' bg-primary text-light hover:text-accent' : '')}
+        {<button className={iconButton + ' relative' + (route === 'cart' ? ' bg-primary text-light hover:text-accent' : '')}
           aria-label={'Giỏ hàng: ' + cartCount + ' sản phẩm'}
           onClick={() => navigate('cart')}>
           <ShoppingBag size={18} />

@@ -8,7 +8,7 @@ namespace KBS.API.Controllers;
 
 [ApiController]
 [Route("api/admin/ai")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize(Roles = "Admin")]
 [TypeFilter(typeof(StaffOperationFilter))]
 public class AiManagementController(AiManagementService service) : ControllerBase
 {

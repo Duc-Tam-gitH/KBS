@@ -15,21 +15,21 @@ public partial class BankReconciliationService(KbsDbContext db)
     public async Task<bool> ApplyAsync(BankTransactionDto dto, CancellationToken ct)
     {
         var matches = OrderCode().Matches(dto.Content);
-        if (matches.Count != 1 || !Guid.TryParse(dto.Id, out var transactionId)
-            || !Guid.TryParse(dto.BankAccountId, out var bankId)
+        if (matches.Count != 1 || string.IsNullOrWhiteSpace(dto.Id)
+            || string.IsNullOrWhiteSpace(dto.BankAccountId)
             || !long.TryParse(matches[0].Groups[1].Value, NumberStyles.None,
                 CultureInfo.InvariantCulture, out var orderId)) return false;
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var payment = await db.BankPayments.SingleOrDefaultAsync(x => x.OrderId == orderId, ct);
         if (payment == null || payment.TransactionId != null || payment.Amount != dto.Amount || dto.Amount <= 0
-            || payment.AccountNumber != dto.AccountNumber || payment.SePayBankAccountId != bankId.ToString()
+            || payment.AccountNumber != dto.AccountNumber || payment.SePayBankAccountId != dto.BankAccountId
             || dto.OccurredAt < payment.CreatedAt.AddSeconds(-1) || dto.OccurredAt > DateTimeOffset.UtcNow.AddMinutes(1)
-            || await db.BankPayments.AnyAsync(x => x.TransactionId == transactionId.ToString(), ct)) return false;
+            || await db.BankPayments.AnyAsync(x => x.TransactionId == dto.Id, ct)) return false;
         var order = await db.Orders.SingleAsync(x => x.Id == orderId, ct);
         if (order.PaymentMethod != "BANKING" || order.PaymentStatus != "PENDING"
             || order.OrderStatus == "CANCELLED" || order.TotalPrice != dto.Amount) return false;
         order.PaymentStatus = "PAID";
-        payment.TransactionId = transactionId.ToString();
+        payment.TransactionId = dto.Id;
         payment.PaidAt = dto.OccurredAt;
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);

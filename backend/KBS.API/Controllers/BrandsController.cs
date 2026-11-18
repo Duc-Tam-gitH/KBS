@@ -21,7 +21,7 @@ public class BrandsController(IBrandService service) : ControllerBase
         return brand is null ? NotFound() : Ok(brand);
     }
 
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<BrandResponseDto>> Create(
         BrandCreateDto dto,
@@ -42,7 +42,7 @@ public class BrandsController(IBrandService service) : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:long}")]
     public async Task<ActionResult<BrandResponseDto>> Update(
         long id,

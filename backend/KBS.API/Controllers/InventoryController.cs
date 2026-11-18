@@ -8,7 +8,7 @@ namespace KBS.API.Controllers;
 
 [ApiController]
 [Route("api/inventory")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize(Roles = "Admin")]
 [TypeFilter(typeof(StaffOperationFilter))]
 public class InventoryController(IInventoryService service) : ControllerBase
 {

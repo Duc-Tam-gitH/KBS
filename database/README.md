@@ -69,6 +69,7 @@ psql -d KBS_DB -f .\database\reporting.sql
 ```
 
 `seed_demo.sql` tạo thương hiệu, 56 sản phẩm (6 sản phẩm ban đầu và 50 sản phẩm bổ sung), tồn kho, 2 khách và 3 đơn demo. Mật khẩu hai khách demo là `Demo@123`; chỉ dùng cho môi trường phát triển. Script không ghi đè dữ liệu đã có cùng username/email hoặc tên sản phẩm.
+Sáu ảnh tĩnh trong `frontend/public` được gắn lần lượt cho Keychron K8 Pro (`Ban_Phim_1.webp`), Keychron Q1 Max (`Ban_Phim_2.jpg`), Akko 5075B Plus (`Ban_Phim_3.jpg`), Akko MOD 007B HE (`Ban_Phim_4.jpg`), NuPhy Air75 V2 (`Ban_Phim_5.jpg`) và NuPhy Halo75 V2 (`Ban_Phim_6.jpg`). Đường dẫn gốc được lưu trong `ProductImages`; khi đổi tên hoặc chuyển ảnh, cập nhật script seed tương ứng.
 
 ## Backup, restore và quyền DB
 

@@ -1,0 +1,10 @@
+.admin-dashboard .ad-operations {
+  display: block;
+  grid-column: 2 / -1;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .admin-dashboard .ad-operations { grid-column: 1 / -1; }
+}

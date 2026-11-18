@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KBS.BLL.Services;
 
-public class PaymentService(KbsDbContext db, SePayGatewayService? gateway = null)
+public class PaymentService(KbsDbContext db)
 {
     private Task<BankOptions?> BankAsync(CancellationToken ct) => db.ShopSettings.AsNoTracking()
         .Select(x => new BankOptions
@@ -22,8 +22,7 @@ public class PaymentService(KbsDbContext db, SePayGatewayService? gateway = null
         && Regex.IsMatch(bank.AccountNumber, @"^[0-9]{6,19}$")
         && !string.IsNullOrWhiteSpace(bank.AccountName) && !string.IsNullOrWhiteSpace(bank.BankName);
 
-    public async Task<bool> BankAvailableAsync(CancellationToken ct) => gateway?.Options.Enabled == true
-        ? gateway.Options.Ready : Configured(await BankAsync(ct));
+    public async Task<bool> BankAvailableAsync(CancellationToken ct) => Configured(await BankAsync(ct));
 
     public async Task ValidateMethodAsync(string method, CancellationToken ct)
     {
@@ -53,11 +52,8 @@ public class PaymentService(KbsDbContext db, SePayGatewayService? gateway = null
             throw new ArgumentException("Phương thức thanh toán không hợp lệ.");
         if (order.PaymentMethod == "BANKING")
         {
-            if (gateway?.Options.Enabled == true)
-            {
-                result.Checkout = await gateway.CreateAsync(orderId, ct);
-                return result;
-            }
+            if (await db.GatewayPayments.AnyAsync(x => x.OrderId == orderId, ct))
+                throw new InvalidOperationException("Đơn này thuộc cổng thanh toán cũ. Vui lòng tạo đơn mới để chuyển khoản trực tiếp.");
             if (order.TotalPrice <= 0 || order.TotalPrice != decimal.Truncate(order.TotalPrice))
                 throw new InvalidOperationException("QR chuyển khoản yêu cầu số tiền nguyên dương.");
             var snapshot = await db.BankPayments.SingleOrDefaultAsync(x => x.OrderId == orderId, ct);

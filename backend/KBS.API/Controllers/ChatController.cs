@@ -8,7 +8,7 @@ namespace KBS.API.Controllers;
 
 [ApiController]
 [Route("api/chat")]
-[Authorize(Roles = "Customer,Staff,Admin")]
+[Authorize(Roles = "Customer,Admin")]
 [TypeFilter(typeof(StaffOperationFilter))]
 public class ChatController(ChatService service) : ControllerBase
 {
@@ -22,7 +22,7 @@ public class ChatController(ChatService service) : ControllerBase
         return Ok(new { id });
     }
 
-    [Authorize(Roles = "Staff,Admin")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("conversations/{id:long}/claim")]
     public async Task<IActionResult> Claim(long id, CancellationToken ct)
     {

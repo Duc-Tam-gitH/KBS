@@ -71,11 +71,11 @@ public class OrdersController(IOrderService service, PaymentService payments) : 
         }
     }
 
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public Task<List<OrderResponseDto>> GetAll(CancellationToken ct) => service.GetAllAsync(ct);
 
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:long}/status")]
     public async Task<ActionResult<OrderResponseDto>> Status(
         long id,

@@ -34,6 +34,18 @@ try {
   assert.doesNotMatch(renderToString(createElement(ProductReviews, { productId: 7 })), /name="rating"/)
   const { Detail, Admin, Orders } = await server.ssrLoadModule('/src/Storefront.jsx')
   const { default: Checkout } = await server.ssrLoadModule('/src/pages/customer/Checkout.jsx')
+  const { PaymentSuccess, shouldPollPayment } = await server.ssrLoadModule('/src/pages/customer/PaymentPanel.jsx')
+  const paidOrder = { paymentStatus: 'PAID', orderStatus: 'PENDING', amount: 10000, orderId: 7 }
+  assert.equal(renderToString(createElement(PaymentSuccess, { payment: { ...paidOrder, paymentStatus: 'PENDING' } })), '')
+  const paidMarkup = renderToString(createElement(PaymentSuccess, { payment: paidOrder }))
+  assert.match(paidMarkup, /Thanh toán thành công/)
+  assert.match(paidMarkup, /Đang chờ xác nhận đơn hàng/)
+  assert.match(paidMarkup, /role="status"/)
+  assert.match(renderToString(createElement(PaymentSuccess, { payment: { ...paidOrder, amount: 10000000 } })), /nhân viên duyệt/)
+  assert.match(renderToString(createElement(PaymentSuccess, { payment: { ...paidOrder, orderStatus: 'CONFIRMED' } })), /Đơn hàng đã được xác nhận/)
+  assert.equal(shouldPollPayment(paidOrder), true)
+  assert.equal(shouldPollPayment({ ...paidOrder, orderStatus: 'CONFIRMED' }), false)
+  assert.equal(shouldPollPayment({ ...paidOrder, paymentStatus: 'PENDING', orderStatus: 'CANCELLED' }), false)
   const { default: SearchPage } = await server.ssrLoadModule('/src/pages/customer/Search.jsx')
   const { default: Login } = await server.ssrLoadModule('/src/pages/auth/Login.jsx')
   const { default: Register } = await server.ssrLoadModule('/src/pages/auth/Register.jsx')
@@ -41,15 +53,16 @@ try {
   const { default: Navigation } = await server.ssrLoadModule('/src/components/Navbar.tsx')
   const product = { id: 7, name: 'KBS Test', brand: 'KBS', price: 1200000, category: 'Keyboard' }
   const noop = () => {}
-  const { default: StaffWorkspace } = await server.ssrLoadModule('/src/pages/Staff/StaffWorkspace.jsx')
-  assert.match(renderToString(createElement(StaffWorkspace, { user: null })), /Không có quyền truy cập/)
-  const staffUser = { id: 1, username: 'staff', roleName: 'Staff' }
-  assert.match(renderToString(createElement(StaffWorkspace, {
-    user: staffUser, onNavigate: noop, onLogout: noop,
-  })), /Tổng quan/)
-  assert.match(renderToString(createElement(StaffWorkspace, {
-    user: staffUser, onNavigate: noop, onLogout: noop,
-  })), />AI<\/button>/)
+  const staffUser = { id: 1, username: 'admin', roleName: 'Admin' }
+  const { default: SupportBot } = await server.ssrLoadModule('/src/pages/customer/SupportBot.jsx')
+  const supportBot = renderToString(createElement(SupportBot, {
+    user: { id: 2, fullName: 'Khách hàng', roleName: 'Customer' }, onNavigate: noop,
+  }))
+  assert.match(supportBot, /Trợ lý KBS/)
+  for (const suggestion of ['Xem danh mục sản phẩm', 'Tìm sản phẩm', 'Giỏ hàng \/ thanh toán',
+    'Theo dõi đơn hàng', 'Tài khoản của tôi', 'Yêu cầu chat với shop']) {
+    assert.ok(supportBot.includes(suggestion), `Missing chatbot option: ${suggestion}`)
+  }
   for (const filename of ['StaffDashboard', 'OrderManager', 'Inventory', 'CustomerManager', 'SupportChat']) {
     const { default: Page } = await server.ssrLoadModule(`/src/pages/Staff/${filename}.jsx`)
     const markup = renderToString(createElement(Page, { user: staffUser, onOpen: noop }))
@@ -162,6 +175,12 @@ try {
   const productForm = renderToString(createElement(ProductForm, { categories: [], brands: [], onSave: noop }))
   assert.match(productForm, /name="brandId"/)
   assert.match(productForm, /name="price"/)
+  assert.match(productForm, /type="file"[^>]*accept="image\/jpeg,image\/png,image\/webp"[^>]*multiple/)
+  assert.match(productForm, /Chưa chọn ảnh/)
+  const editImageForm = renderToString(createElement(ProductForm, { categories: [], brands: [], onSave: noop,
+    product: { stockQuantity: 0, images: [{ imageUrl: 'https://example.com/image.png', sortOrder: 0 }] } }))
+  assert.match(editImageForm, /Ảnh đại diện/)
+  assert.match(editImageForm, /aria-label="Bỏ ảnh 1"/)
   assert.match(productForm, /Cần có danh mục và thương hiệu/)
   assert.doesNotMatch(productForm, /SKU|iPhone|placeholder\.com/)
   assert.doesNotMatch(readFileSync(new URL('../src/pages/admin/ProductManagement.css', import.meta.url), 'utf8'),
@@ -188,8 +207,8 @@ try {
   assert.doesNotMatch(customerNav, /Quản trị/)
   assert.match(renderToString(createElement(Navigation, { ...navProps, role: 'admin' })), /Quản trị/)
   const staffNav = renderToString(createElement(Navigation, { ...navProps, role: 'staff' }))
-  assert.doesNotMatch(staffNav, /Giỏ hàng|Sản phẩm yêu thích|Đơn hàng/)
-  assert.match(staffNav, /Nhân viên/)
+  assert.match(staffNav, /Đơn hàng/)
+  assert.doesNotMatch(staffNav, /Nhân viên/)
   assert.match(staffNav, /Tài khoản/)
   for (const role of ['customer', 'admin']) {
     const markup = renderToString(createElement(Navigation, { ...navProps, role }))
@@ -201,6 +220,8 @@ try {
   authStore.setSession({ accessToken: 'test', user: { username: 'admin', roleName: 'Admin' } })
   const adminApp = renderToString(createElement(App))
   assert.match(adminApp, /Khu vực quản trị/)
+  assert.match(adminApp, /Quản lý đơn hàng/)
+  assert.match(adminApp, /Chat khách hàng/)
   assert.match(adminApp, /Đang tổng hợp/)
   assert.doesNotMatch(adminApp, /Feel Every|Keystroke|Giỏ hàng|Về cửa hàng|Chức năng nhân viên|<footer/)
   const previousStorage = globalThis.sessionStorage
@@ -220,10 +241,16 @@ try {
     const restoredAdmin = renderToString(createElement(App))
     assert.match(restoredAdmin, /aria-current="page">Quản lý AI/)
     assert.match(restoredAdmin, /value="ERROR" selected=""/)
+    for (const [page, heading] of [['orders', 'Quản lý đơn hàng'], ['chat', 'Chat khách hàng']]) {
+      savedViews.set('kbs.view.admin.admin.page', JSON.stringify(page))
+      const operationPage = renderToString(createElement(App))
+      assert.match(operationPage, /ad-operations/)
+      assert.ok(operationPage.includes('<h1>' + heading + '</h1>'))
+    }
     authStore.setSession({ accessToken: 'test', user: { username: 'staff', roleName: 'Staff' } })
     const restoredStaff = renderToString(createElement(App))
-    assert.match(restoredStaff, /aria-current="page">AI/)
-    assert.match(restoredStaff, /Theo dõi AI/)
+    assert.doesNotMatch(restoredStaff, /Chức năng nhân viên/)
+    assert.doesNotMatch(restoredStaff, /Theo dõi AI/)
     authStore.setSession({ accessToken: 'test', user: { username: 'customer', roleName: 'Customer' } })
     assert.match(renderToString(createElement(App)), /store-pages/)
     authStore.setSession({ accessToken: 'test', user: { username: 'other-admin', roleName: 'Admin' } })

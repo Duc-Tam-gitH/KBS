@@ -1,4 +1,7 @@
 .sm-tabs { display: flex; flex-wrap: wrap; gap: 10px; }
+.sm-bank-details { display: grid; gap: 20px; }
+.sm-bank-details dt { color: var(--color-text-muted); margin-bottom: 6px; }
+.sm-bank-details dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 .sm-home-group { border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; }
 .sm-home-group summary { cursor: pointer; font-weight: 700; }
 .sm-home-group label { margin-top: 16px; }

@@ -201,14 +201,14 @@ public class AuthorizationHttpTests : IClassFixture<TestApiFactory>
     }
 
     [Fact]
-    public async Task Staff_can_access_operational_endpoints_but_not_administration_endpoints()
+    public async Task Legacy_staff_cannot_access_operational_or_administration_endpoints()
     {
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
             await Login("staff", "Staff123"));
 
-        Assert.Equal(HttpStatusCode.OK, (await _client.GetAsync("/api/orders")).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await _client.GetAsync("/api/inventory/product/1")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await _client.GetAsync("/api/orders")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await _client.GetAsync("/api/inventory/product/1")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await _client.GetAsync("/api/users")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await _client.GetAsync("/api/admin/dashboard")).StatusCode);
     }

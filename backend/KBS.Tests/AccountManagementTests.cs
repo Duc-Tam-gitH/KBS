@@ -28,11 +28,18 @@ public class AccountManagementTests
         }
         var admin = await Login(client, "admin", "Admin123");
         var roles = await client.GetFromJsonAsync<List<UserRoleDto>>("/api/users/roles");
+        Assert.Equal(new[] { "Admin", "Customer" }, roles!.Select(role => role.Name));
+        var retiredRoleUser = NewUser();
+        retiredRoleUser.RoleId = 3;
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await client.PostAsJsonAsync("/api/users", retiredRoleUser)).StatusCode);
         var dto = NewUser();
         dto.RoleId = roles!.Single(x => x.Name == "Customer").Id;
         var created = await client.PostAsJsonAsync("/api/users", dto);
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         var user = (await created.Content.ReadFromJsonAsync<UserResponseDto>())!;
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await client.PutAsJsonAsync($"/api/users/{user.Id}/role", new { roleId = 3 })).StatusCode);
         Assert.DoesNotContain("password", await created.Content.ReadAsStringAsync(), StringComparison.OrdinalIgnoreCase);
         Assert.Equal(HttpStatusCode.Conflict, (await client.PostAsJsonAsync("/api/users", dto)).StatusCode);
         dto.FullName = "Updated account";

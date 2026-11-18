@@ -2,6 +2,7 @@
 .local-tools/
 **/bin/
 **/obj/
+**/App_Data/products/
 .vs/
 *.user
 *.suo

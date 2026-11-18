@@ -8,6 +8,8 @@
 .staff-workspace .sf-conversation { display: grid; gap: 6px; text-align: left; }
 .staff-workspace .sf-conversation > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .staff-workspace .sf-chat-thread { display: flex; flex-direction: column; min-width: 0; }
+.sf-chat-pending { align-self: start; padding: 24px; }
+.sf-chat-pending button { margin-top: 12px; }
 .staff-workspace .sf-messages { height: 440px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 .staff-workspace .sf-message {
   max-width: 88%;

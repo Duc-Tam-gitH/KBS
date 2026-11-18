@@ -35,6 +35,20 @@ public class PaymentServiceTests
     }
 
     [Fact]
+    public async Task Old_gateway_order_cannot_be_reused_for_real_bank_transfer()
+    {
+        await using var db = NewDb();
+        var service = Service(db);
+        var order = new Order { UserId = 1, TotalPrice = 10000, PaymentMethod = "BANKING" };
+        db.Orders.Add(order);
+        await db.SaveChangesAsync();
+        db.GatewayPayments.Add(new GatewayPayment { OrderId = order.Id, Invoice = "old-sandbox", Amount = 10000 });
+        await db.SaveChangesAsync();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateAsync(1, order.Id, default));
+        Assert.Empty(await db.BankPayments.ToListAsync());
+    }
+
+    [Fact]
     public async Task Only_cod_and_banking_are_supported()
     {
         using var db = NewDb();
@@ -62,6 +76,7 @@ public class PaymentServiceTests
         await Assert.ThrowsAsync<KeyNotFoundException>(() => service.CreateAsync(2, order.Id, default));
         var payment = await service.CreateAsync(1, order.Id, default);
         Assert.Equal(125000, payment.Amount);
+        Assert.Null(payment.Checkout);
         Assert.Contains("amount=125000", payment.QrImageUrl);
         Assert.Contains($"addInfo=KBS{order.Id}", payment.QrImageUrl);
         Assert.Contains("970422-1234567890", payment.QrImageUrl);

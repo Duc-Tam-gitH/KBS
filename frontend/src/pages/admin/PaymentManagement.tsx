@@ -10,7 +10,7 @@ const empty: Bank = { bankName: '', bankBin: '', accountNumber: '', accountName:
 const fields = [
   ['bankName', 'Tên ngân hàng', 100], ['bankBin', 'BIN ngân hàng (6 chữ số)', 6],
   ['accountNumber', 'Số tài khoản', 19], ['accountName', 'Chủ tài khoản', 150],
-  ['sePayBankAccountId', 'ID tài khoản ngân hàng trong SePay (UUID, không bắt buộc)', 36],
+  ['sePayBankAccountId', 'ID tài khoản ngân hàng trong SePay (không bắt buộc)', 100],
 ] as const
 
 export default function PaymentManagement() {
@@ -51,7 +51,11 @@ export default function PaymentManagement() {
         <button type="button" disabled={busy} onClick={() => setRetry(value => value + 1)}>Làm mới</button></header>
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      {!data ? <p role="status">Đang tải cấu hình thanh toán…</p> : <>
+      {data && !data.gatewayEnabled && !data.tokenConfigured && <p className="sm-notice" role="alert">
+        Chưa có API token SePay Live: KBS chưa thể đọc giao dịch để xác nhận thanh toán.
+        Đơn chuyển khoản sẽ chờ đối soát trước khi AI được phép duyệt.
+      </p>}
+      {!data ? !error && <p role="status">Đang tải cấu hình thanh toán…</p> : <>
         <form className="sm-form" onSubmit={save}>
           <fieldset disabled={busy}><legend>Tài khoản nhận chuyển khoản</legend>
             {fields.map(([key, label, maxLength]) => <label key={key}>{label}
@@ -73,16 +77,17 @@ export default function PaymentManagement() {
           </li>)}</ul>}
       </>}
     </main>
-    <aside className="ad-details ad-panel"><h2>Đối soát tự động</h2>
-      {data?.gatewayEnabled ? <>
-        <p>SePay Payment Gateway Sandbox đang bật. Thanh toán mô phỏng, không chuyển tiền thật.</p>
-        <p>URL IPN:</p><code style={{ overflowWrap: 'anywhere' }}>{data.ipnUrl}</code>
-        <p>Ngân hàng nhận tiền trên trang thanh toán được quản lý tại SePay. Thông tin ngân hàng trong form dành cho QR trực tiếp.</p>
-      </> : <>
-      <p>{data?.tokenConfigured ? 'Backend đã có API token SePay.' : 'Backend chưa cấu hình API token SePay.'}</p>
-      <p>Liên kết ngân hàng với SePay, sau đó nhập đúng ID tài khoản tương ứng. Backend đọc giao dịch mỗi 30 giây khi đang chạy, kể cả trên localhost.</p>
-      <p>Đã cấu hình không đồng nghĩa đã kết nối thành công. Chỉ giao dịch được đối soát mới được ghi nhận đã thanh toán.</p>
-      </>}
+    <aside className="ad-details ad-panel"><h2>Tài khoản ngân hàng shop</h2>
+      {!data ? <p>{error ? 'Chưa tải được thông tin ngân hàng.' : 'Đang tải thông tin ngân hàng…'}</p>
+        : !data.bank?.accountNumber ? <p>Chưa lưu tài khoản ngân hàng nhận thanh toán.</p> : <>
+          <p>Thông tin đã lưu, dùng cho mã QR của đơn mới.</p>
+          <dl className="sm-bank-details">
+            {fields.map(([key, label]) => <div key={key}>
+              <dt>{key === 'sePayBankAccountId' ? 'ID tài khoản SePay' : label}</dt>
+              <dd>{data.bank?.[key] || 'Chưa cấu hình'}</dd>
+            </div>)}
+          </dl>
+        </>}
       <p>Đơn từ 10.000.000 ₫ trở lên luôn cần người duyệt, kể cả khi đã nhận đủ tiền.</p>
     </aside>
   </>

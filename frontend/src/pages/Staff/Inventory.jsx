@@ -52,7 +52,7 @@ function InventoryDetails({ item, reload }) {
     const data = new FormData(event.currentTarget)
     const quantity = Number(data.get('quantity'))
     const ok = await action.run(() => api.staff.adjustStock(item.productId, {
-      delta: quantity, expectedQuantity: item.stockQuantity,
+      delta: quantity, expectedQuantity: item.stockQuantity, reason: 'Nhập kho',
     }))
     if (ok) reload()
   }

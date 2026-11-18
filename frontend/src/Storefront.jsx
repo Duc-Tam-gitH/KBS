@@ -14,7 +14,7 @@ import Account from './pages/customer/Account'
 import SearchPage from './pages/customer/Search'
 import Detail from './pages/customer/productdetail'
 import Orders from './pages/customer/orderProduct'
-import StaffWorkspace from './pages/Staff/StaffWorkspace'
+import SupportBot from './pages/customer/SupportBot'
 import SupportChat from './pages/Staff/SupportChat'
 import Admin from './pages/admin/AdminWorkspace'
 
@@ -41,7 +41,7 @@ function App() {
   const pendingProduct = useRef(null)
   const [route, setRoute] = useSessionView('route', () => linkedProduct() ? 'detail' : 'home',
     value => !linkedProduct() && ['home', 'shop', 'search', 'auth', 'register', 'cart', 'checkout',
-      'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(value))
+      'orders', 'account', 'admin', 'likes', 'support'].includes(value))
   const [selected, setSelected] = useState(linkedProduct)
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -61,7 +61,7 @@ function App() {
       pendingRoute.current = 'detail'
       pendingProduct.current = selected
     }
-    if (!authStore.user && ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(next)) {
+    if (!authStore.user && ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'support'].includes(next)) {
       pendingRoute.current = next
       next = 'auth'
     }
@@ -150,7 +150,7 @@ function App() {
   }, [user, retry])
 
 
-  // Admin luôn dùng workspace riêng, kể cả khi URL đang trỏ tới sản phẩm hay trang nhân viên.
+  // Admin luôn dùng workspace riêng, kể cả khi URL đang trỏ tới sản phẩm hay trang hỗ trợ.
   if (user?.roleName === 'Admin') return <main className="min-h-screen bg-deep text-light font-body">
     <Admin key={user.id} user={user} onLogout={logout} />
   </main>
@@ -165,7 +165,7 @@ function App() {
     </section>
   </main>
 
-  const privateRoute = ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'staff', 'support'].includes(route)
+  const privateRoute = ['cart', 'checkout', 'orders', 'account', 'admin', 'likes', 'support'].includes(route)
   const visibleRoute = !user && privateRoute ? 'auth' : route
   const page =
     visibleRoute === 'auth' ? (
@@ -206,10 +206,8 @@ function App() {
       />
     ) : route === 'orders' ? (
       <Orders key={user.id} user={user} onNavigate={go} onAdd={addCart} busy={cartBusy} />
-    ) : route === 'staff' ? (
-      <StaffWorkspace key={user.id} user={user} onNavigate={go} onLogout={logout} />
     ) : route === 'support' ? (
-      <SupportChat key={user.id} user={user} />
+      <SupportBot key={user.id} user={user} onNavigate={go} />
     ) : route === 'admin' ? (
       <Empty title="Không có quyền truy cập" action="Về trang chủ" onAction={() => go('home')} />
     ) : route === 'account' ? (

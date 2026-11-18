@@ -14,9 +14,7 @@ public class ChatService(KbsDbContext db)
         CancellationToken ct)
     {
         var query = db.ChatConversations.AsNoTracking();
-        query = role == "Admin" ? query : role == "Staff"
-            ? query.Where(x => x.StaffId == userId || x.StaffId == null)
-            : query.Where(x => x.CustomerId == userId);
+        query = role == "Admin" ? query : query.Where(x => x.CustomerId == userId);
         return await query.OrderByDescending(x => x.Messages.Max(m => (long?)m.Id) ?? 0)
             .Select(x => new ChatConversationDto
             {
@@ -80,8 +78,7 @@ public class ChatService(KbsDbContext db)
     {
         var conversation = await db.ChatConversations.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct)
             ?? throw new KeyNotFoundException("Không tìm thấy hội thoại.");
-        if (role == "Admin" || (role == "Staff" && conversation.StaffId == userId)
-            || (role == "Customer" && conversation.CustomerId == userId)) return conversation;
+        if (role == "Admin" || (role == "Customer" && conversation.CustomerId == userId)) return conversation;
         throw new UnauthorizedAccessException("Không có quyền truy cập hội thoại này.");
     }
 
@@ -118,6 +115,8 @@ public class ChatService(KbsDbContext db)
         if (string.IsNullOrWhiteSpace(content) || content.Length > 4000)
             throw new ArgumentException("Tin nhắn phải có nội dung, tối đa 4000 ký tự.");
         var conversation = await AuthorizedAsync(id, userId, role, ct);
+        if (conversation.StaffId is null)
+            throw new InvalidOperationException("Yêu cầu chat đang chờ cửa hàng xác nhận.");
         if (!await db.Users.AnyAsync(x => x.Id == conversation.CustomerId && x.IsActive, ct))
             throw new InvalidOperationException("Tài khoản khách hàng đã bị khóa.");
         db.ChatMessages.Add(new ChatMessage { ConversationId = id, SenderId = userId, Content = content.Trim() });

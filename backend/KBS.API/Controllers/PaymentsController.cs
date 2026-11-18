@@ -26,7 +26,7 @@ public class PaymentsController(PaymentService service) : ControllerBase
     public Task<PaymentResponseDto> Create(long id, CancellationToken ct)
         => service.CreateAsync(UserId(), id, ct);
 
-    [Authorize(Roles = "Admin,Staff,Nhân viên")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("orders/{id:long}/bank-confirmation")]
     public Task<PaymentResponseDto> ConfirmBank(long id, CancellationToken ct)
         => service.ConfirmBankAsync(UserId(), id, ct);

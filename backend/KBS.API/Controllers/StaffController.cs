@@ -10,7 +10,7 @@ namespace KBS.API.Controllers;
 
 [ApiController]
 [Route("api/staff")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize(Roles = "Admin")]
 [TypeFilter(typeof(StaffOperationFilter))]
 public class StaffController(StaffService service, IOrderService orders) : ControllerBase
 {
@@ -29,8 +29,7 @@ public class StaffController(StaffService service, IOrderService orders) : Contr
         StockAdjustmentRequest dto,
         CancellationToken ct)
     {
-        var staffImportOnly = User.IsInRole("Staff") && !User.IsInRole("Admin");
-        await service.AdjustStockAsync(id, UserId(), dto, staffImportOnly, ct);
+        await service.AdjustStockAsync(id, UserId(), dto, staffImportOnly: false, ct);
         return NoContent();
     }
 

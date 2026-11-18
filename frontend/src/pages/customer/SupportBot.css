@@ -1,0 +1,47 @@
+.sf-support-bot { max-width: 1000px; }
+.sf-support-bot .sf-heading { margin-bottom: 20px; }
+.sf-bot-eyebrow {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+}
+.sf-bot-panel { display: grid; gap: 24px; padding: clamp(20px, 4vw, 36px); }
+.sf-bot-greeting { display: flex; align-items: flex-start; gap: 14px; }
+.sf-bot-avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 50%;
+  color: var(--color-accent);
+  background: var(--color-bg-deep);
+}
+.sf-bot-greeting strong { display: block; margin: 2px 0 6px; }
+.sf-bot-greeting p, .sf-bot-human p { color: var(--color-text-muted); }
+.sf-bot-suggestions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sf-support-bot .sf-bot-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  text-align: left;
+  background: var(--color-bg-deep);
+}
+.sf-bot-suggestion span { flex: 1; }
+.sf-bot-human {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.sf-bot-human h2 { margin: 0 0 4px; }
+.sf-support-bot .sf-chat-thread { min-width: 0; }
+@media (max-width: 640px) {
+  .sf-bot-suggestions { grid-template-columns: 1fr; }
+  .sf-bot-human { align-items: stretch; }
+}

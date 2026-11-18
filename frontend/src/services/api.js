@@ -37,6 +37,13 @@ export const authStore = {
   hasRole(role) { return currentUser?.roleName === role },
 }
 
+function productFormData(payload, files) {
+  const body = new FormData()
+  body.append('product', JSON.stringify(payload))
+  files.forEach(file => body.append('files', file))
+  return body
+}
+
 export class ApiError extends Error {
   constructor(message, status) { super(message); this.status = status }
 }
@@ -55,7 +62,7 @@ async function request(path, options = {}) {
     const payload = await response.json().catch(() => null)
     const validationMessage = Object.values(payload?.errors || {}).flat().join(' ')
     throw new ApiError(
-      validationMessage || payload?.message || 'Không thể kết nối đến máy chủ.',
+      validationMessage || payload?.message || payload?.title || `Yêu cầu không thành công (HTTP ${response.status}).`,
       response.status,
     )
   }
@@ -172,12 +179,16 @@ export const api = {
     dashboard: (signal) => request('/api/admin/dashboard', { signal }),
     orders: (signal) => request('/api/orders', { signal }),
     updateOrderStatus: (id, orderStatus) => request(`/api/orders/${id}/status`, { method: 'PUT', body: { orderStatus } }),
-    updateProduct: (id, payload) => request(`/api/products/${id}`, { method: 'PUT', body: payload }),
+    updateProduct: (id, payload, files = []) => request(`/api/products/${id}${files.length ? '/with-images' : ''}`, {
+      method: 'PUT', body: files.length ? productFormData(payload, files) : payload,
+    }),
     inventory: (productId) => request(`/api/inventory/product/${productId}`),
     updateInventory: (productId, stockQuantity, reason) => request(`/api/inventory/product/${productId}`, {
       method: 'PUT', body: { stockQuantity, reason },
     }),
-    createProduct: (payload) => request('/api/products', { method: 'POST', body: payload }),
+    createProduct: (payload, files = []) => request(`/api/products${files.length ? '/with-images' : ''}`, {
+      method: 'POST', body: files.length ? productFormData(payload, files) : payload,
+    }),
   },
 }
 

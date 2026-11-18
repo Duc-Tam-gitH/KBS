@@ -11,7 +11,6 @@ createdb -U postgres KBS_DB
 dotnet user-secrets set "ConnectionStrings:KBSConnection" "Host=localhost;Port=5432;Database=KBS_DB;Username=postgres;Password=10052005" --project .\backend\KBS.API
 dotnet ef database update --project .\backend\KBS.DAL --startup-project .\backend\KBS.API
 psql -U postgres -d KBS_DB -f .\database\seed_demo.sql
-psql -U postgres -d KBS_DB -f .\database\seed_staff.sql
 psql -U postgres -d KBS_DB -f .\database\reporting.sql
 dotnet run --project .\backend\KBS.API --launch-profile https
 
@@ -28,13 +27,9 @@ Frontend: `http://localhost:5173`. OpenAPI: `https://localhost:7013/openapi/v1.j
 | Vai trò | Tài khoản | Mật khẩu |
 |---|---|---|
 | Admin | `admin` | `Admin@123` |
-| Staff | `staff` (email: `staff@kbs.local`) | `Staff@123` |
 | Customer | `minh.demo`, `lan.demo` | `Demo@123` |
 
 Đổi AdminBootstrap/JWT bằng User Secrets hoặc biến môi trường trước khi deploy; tài khoản demo chỉ dùng local.
-
-Tài khoản Staff được tạo bằng `database/seed_staff.sql`, có role `Staff` và đang hoạt động.
-Script không ghi đè tài khoản đã có cùng username/email. Sau khi đăng nhập, chọn **Nhân viên** để vào khu vực Staff.
 
 ## API chính
 
@@ -54,30 +49,20 @@ Login trả access token; gửi `Authorization: Bearer <token>`. Ảnh nằm tro
 
 ## Kiểm tra và kịch bản demo
 
-### Khu vực Staff
+### Vận hành trong khu vực Admin
 
-Đăng nhập tài khoản có role `Staff` hoặc `Admin`, chọn **Nhân viên** trên thanh điều hướng.
-Năm trang dùng tên PascalCase: `StaffDashboard.jsx`, `OrderManager.jsx`, `Inventory.jsx`,
-`CustomerManager.jsx`, `SupportChat.jsx`; mỗi trang có CSS riêng và dùng chung `Staff.css`.
+Admin → **Quản lý đơn hàng** để xem tất cả đơn, tìm kiếm/lọc, cập nhật trạng thái,
+quản lý mã vận đơn, ghi chú nội bộ và in hóa đơn.
+Admin → **Chat khách hàng** để xem và trả lời các hội thoại; khách vẫn sử dụng mục **Hỗ trợ**.
+Chat tải lịch sử và tin mới bằng polling 5 giây, ngừng khi rời trang.
 
-- Dashboard: đếm đơn chờ xử lý, tin chưa đọc của hội thoại được giao và hội thoại chưa được tiếp nhận.
-- Đơn hàng: trạng thái theo luồng hiện có, mã vận đơn, ghi chú nội bộ và bản in đơn hàng.
-- Kho: ngưỡng tồn thấp lưu DB, nhập/xuất có lý do và kiểm tra tồn cũ; log cùng transaction với thay đổi tồn.
-- Khách hàng: thông tin, chi tiêu từ đơn hoàn tất, lịch sử đơn/đánh giá, khóa/mở khóa và mở chat.
-- Chat: khách mở mục **Hỗ trợ**; Staff tiếp nhận hội thoại, gửi/đọc tin, tải lịch sử.
-  Polling 5 giây với cursor, ngừng khi rời trang; không hiển thị trạng thái online giả.
-
-Áp dụng migration `AddStaffOperations` trước khi chạy phiên bản này:
-
-```powershell
-dotnet ef database update --project .\backend\KBS.DAL --startup-project .\backend\KBS.API
-```
-
-Migration thêm 5 bảng đã duyệt và hai cột `Orders.TrackingNumber`, `Inventories.LowStockThreshold`.
-Không tạo tin nhắn, log hoặc ca trực mẫu; log chỉ ghi các thao tác phát sinh từ phiên bản này.
-API cũ `PUT /api/inventory/product/{id}` nay yêu cầu thêm `reason` để mọi điều chỉnh đều có nhật ký.
-Nếu đã cài view/function bằng `database/reporting.sql`, chạy lại script đó sau migration để cập nhật ngưỡng và log.
-Xem [ánh xạ UI, API contracts và tiêu chí kiểm thử](database/staff-mapping.md).
+Role Staff đã bị loại khỏi quyền vận hành và danh sách cấp role.
+Áp dụng migration `20261118040000_RetireStaffRole` bằng lệnh cập nhật DB ở trên:
+tài khoản Staff/Nhân viên cũ chuyển thành Customer, token cũ mất hiệu lực,
+hội thoại được trả về hàng chờ Admin và lịch sử tin nhắn/ghi chú được giữ nguyên.
+Migration không tự nâng tài khoản thành Admin; muốn khôi phục phân công cũ cần bản backup.
+Các tên kỹ thuật `StaffId`, `api/staff` được giữ để tương thích dữ liệu/API, nhưng API vận hành chỉ cho Admin.
+Xem [ánh xạ dữ liệu và kiểm thử](database/admin-operations.md).
 
 Trang chi tiết hỗ trợ liên kết `/#product=ID`, dùng ảnh/thông số/giá/tồn kho từ API,
 yêu thích, giỏ hàng và sản phẩm cùng danh mục. `stockQuantity` được bổ sung vào phản hồi sản phẩm.

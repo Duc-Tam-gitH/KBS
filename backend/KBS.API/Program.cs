@@ -203,6 +203,7 @@ app.Use(async (context, next) =>
 });
 app.UseAuthorization();
 app.MapControllers();
+app.MapProductImages();
 app.MapBankPayments();
 app.MapSePayGateway();
 

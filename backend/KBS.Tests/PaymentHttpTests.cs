@@ -11,6 +11,32 @@ namespace KBS.Tests;
 
 public class PaymentHttpTests(TestApiFactory factory) : IClassFixture<TestApiFactory>
 {
+    [Theory]
+    [InlineData("ba_TestAccount123", HttpStatusCode.NoContent)]
+    [InlineData("f9e8d7c6-b5a4-3210-fedc-ba0987654321", HttpStatusCode.NoContent)]
+    [InlineData(null, HttpStatusCode.NoContent)]
+    [InlineData("invalid id!", HttpStatusCode.BadRequest)]
+    public async Task Admin_can_save_bank_identifier_with_clear_validation(string? bankId, HttpStatusCode expected)
+    {
+        using var client = factory.CreateClient();
+        var bank = new { bankName = "MB Bank", bankBin = "970422", accountNumber = "123456789",
+            accountName = "TEST SHOP", sePayBankAccountId = bankId };
+        await Login(client, "customer", "Customer1");
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.PutAsJsonAsync("/api/admin/payments/bank", bank)).StatusCode);
+        await Login(client, "admin", "Admin123");
+        var response = await client.PutAsJsonAsync("/api/admin/payments/bank", bank);
+        Assert.Equal(expected, response.StatusCode);
+        if (expected == HttpStatusCode.BadRequest)
+        {
+            Assert.Contains("errors", await response.Content.ReadAsStringAsync());
+            return;
+        }
+        var saved = await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/admin/payments");
+        Assert.Equal(bankId, saved.GetProperty("bank").GetProperty("sePayBankAccountId").GetString());
+        Assert.Equal("123456789", saved.GetProperty("bank").GetProperty("accountNumber").GetString());
+    }
+
     [Fact]
     public async Task Payment_routes_enforce_owner_and_staff_roles_and_do_not_expose_secrets()
     {
@@ -37,6 +63,9 @@ public class PaymentHttpTests(TestApiFactory factory) : IClassFixture<TestApiFac
         Assert.Equal(HttpStatusCode.Forbidden,
             (await client.PutAsync($"/api/payments/orders/{owned.Id}/bank-confirmation", null)).StatusCode);
         await Login(client, "staff", "Staff123");
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.PutAsync($"/api/payments/orders/{owned.Id}/bank-confirmation", null)).StatusCode);
+        await Login(client, "admin", "Admin123");
         Assert.Equal(HttpStatusCode.OK,
             (await client.PutAsync($"/api/payments/orders/{owned.Id}/bank-confirmation", null)).StatusCode);
         db.ChangeTracker.Clear();

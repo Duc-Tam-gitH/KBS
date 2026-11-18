@@ -15,7 +15,7 @@ export function StockForm({ items, mode, busy, onConfirm, onClose }) {
     const form = new FormData(event.currentTarget)
     try {
       const changes = items.map(item => ({ item, payload: stockAdjustment(item, mode,
-        Number(form.get(String(item.productId))), String(form.get('reason'))) }))
+      Number(form.get(String(item.productId))), String(form.get('reason') ?? '')) }))
       setError(''); onConfirm(changes)
     } catch (err) { setError(err.message) }
   }}>
@@ -26,7 +26,7 @@ export function StockForm({ items, mode, busy, onConfirm, onClose }) {
       <input name={String(item.productId)} type="number" required step="1"
         min={mode === 'adjust' ? 0 : 1} max={mode === 'out' ? item.stockQuantity : 2147483647} />
     </label>)}
-      <label>Lý do<textarea name="reason" required maxLength={500} rows={3} /></label>
+      {mode !== 'in' && <label>Lý do<textarea name="reason" required maxLength={500} rows={3} /></label>}
     </fieldset>
     {error && <p role="alert">{error}</p>}
     <div className="iv-actions"><button type="submit" className="iv-primary" disabled={busy}>Tiếp tục</button>

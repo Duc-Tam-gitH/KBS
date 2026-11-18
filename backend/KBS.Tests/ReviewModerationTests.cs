@@ -72,7 +72,7 @@ public class ReviewModerationTests
         var moderationPath = $"/api/admin/reviews/{review.Id}/moderation";
         Assert.Equal(HttpStatusCode.Forbidden,
             (await client.PutAsJsonAsync(moderationPath, new { status = "HIDDEN" })).StatusCode);
-        await Login(client, "staff", "Staff123");
+        await Login(client, "admin", "Admin123");
         (await client.GetAsync("/api/admin/reviews?status=FLAGGED")).EnsureSuccessStatusCode();
         (await client.PutAsJsonAsync(moderationPath, new { status = "HIDDEN" })).EnsureSuccessStatusCode();
         var visible = await client.GetFromJsonAsync<ProductReviewsResponseDto>(publicPath);

@@ -100,6 +100,22 @@ FROM seed_demo_products v
 JOIN "Products" p ON p."Name" = v.name
 ON CONFLICT ("ProductId") DO NOTHING;
 
+INSERT INTO "ProductImages" ("ProductId","ImageUrl","AltText","SortOrder")
+SELECT p."Id", v.image_url, p."Name", 0
+FROM (VALUES
+    ('Keychron K8 Pro', '/Ban_Phim_1.webp'),
+    ('Keychron Q1 Max', '/Ban_Phim_2.jpg'),
+    ('Akko 5075B Plus', '/Ban_Phim_3.jpg'),
+    ('Akko MOD 007B HE', '/Ban_Phim_4.jpg'),
+    ('NuPhy Air75 V2', '/Ban_Phim_5.jpg'),
+    ('NuPhy Halo75 V2', '/Ban_Phim_6.jpg')
+) AS v(product_name, image_url)
+JOIN "Products" p ON p."Name" = v.product_name
+WHERE NOT EXISTS (
+    SELECT 1 FROM "ProductImages" image
+    WHERE image."ProductId" = p."Id" AND image."ImageUrl" = v.image_url
+);
+
 -- Tồn kho phía trên là số dư demo hiện tại; đơn lịch sử không trừ tồn lần nữa.
 -- Chỉ thêm dòng hàng cho đơn vừa tạo; chạy lại không thay đổi đơn đã có.
 WITH demo(email, address, product_name, payment_method, payment_status, order_status, age) AS (
@@ -138,6 +154,22 @@ BEGIN
         JOIN "Products" p ON p."Name" = v.name
         JOIN "Inventories" i ON i."ProductId" = p."Id") <> 56 THEN
         RAISE EXCEPTION 'Seed requires inventory for all 56 demo products';
+    END IF;
+    IF (
+        SELECT count(*)
+        FROM (VALUES
+            ('Keychron K8 Pro', '/Ban_Phim_1.webp'),
+            ('Keychron Q1 Max', '/Ban_Phim_2.jpg'),
+            ('Akko 5075B Plus', '/Ban_Phim_3.jpg'),
+            ('Akko MOD 007B HE', '/Ban_Phim_4.jpg'),
+            ('NuPhy Air75 V2', '/Ban_Phim_5.jpg'),
+            ('NuPhy Halo75 V2', '/Ban_Phim_6.jpg')
+        ) AS expected(product_name, image_url)
+        JOIN "Products" p ON p."Name" = expected.product_name
+        JOIN "ProductImages" image ON image."ProductId" = p."Id"
+            AND image."ImageUrl" = expected.image_url
+    ) <> 6 THEN
+        RAISE EXCEPTION 'Expected the six sample product images in ProductImages';
     END IF;
     IF (SELECT count(*) FROM "Users" WHERE "Email" IN ('minh.demo@kbs.local', 'lan.demo@kbs.local')) <> 2 THEN
         RAISE EXCEPTION 'Demo accounts missing or conflict with an existing username/phone';

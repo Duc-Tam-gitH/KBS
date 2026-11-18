@@ -25,7 +25,7 @@ public class ReviewWorkerController(ReviewModerationService service) : Controlle
 
 [ApiController]
 [Route("api/admin/reviews")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize(Roles = "Admin")]
 [TypeFilter(typeof(StaffOperationFilter))]
 public class ReviewModerationController(ReviewModerationService service) : ControllerBase
 {

@@ -1,0 +1,8 @@
+Terminal 1 — Backend
+dotnet run --project .\backend\KBS.API --launch-profile https
+Terminal 2 — Frontend
+npm run dev --prefix .\frontend
+Mở web: localhost:5173.
+
+Nếu cần chạy thêm AI, mở terminal 3:
+.\start-ai.cmd

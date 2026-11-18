@@ -47,7 +47,7 @@ public static class BankPaymentEndpoints
             bank.BankBin = dto.BankBin;
             bank.AccountNumber = dto.AccountNumber;
             bank.AccountName = dto.AccountName.Trim();
-            bank.SePayBankAccountId = dto.SePayBankAccountId?.ToString();
+            bank.SePayBankAccountId = string.IsNullOrEmpty(dto.SePayBankAccountId) ? null : dto.SePayBankAccountId;
             bank.UpdatedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync(ct);
             return Results.NoContent();

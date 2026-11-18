@@ -1,8 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 
 export default function ProductForm({ product, categories, brands, busy, onSave, onClose }) {
   const [error, setError] = useState('')
+  const [images, setImages] = useState(() => [...(product?.images || [])]
+    .sort((a, b) => a.sortOrder - b.sortOrder).map(image => ({ ...image, preview: image.imageUrl })))
+  const previews = useRef(new Set())
+  useEffect(() => {
+    const urls = previews.current
+    return () => { urls.forEach(url => URL.revokeObjectURL(url)); urls.clear() }
+  }, [])
+  const chooseImages = event => {
+    const files = [...event.target.files]
+    event.target.value = ''
+    if (!files.length) return
+    if (images.length + files.length > 10) { setError('Tối đa 10 ảnh cho một sản phẩm.'); return }
+    if (files.some(file => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+      || file.size === 0 || file.size > 5 * 1024 * 1024)) {
+      setError('Chọn ảnh JPG, PNG hoặc WebP, mỗi ảnh không vượt quá 5 MB.'); return
+    }
+    setImages(current => [...current, ...files.map(file => {
+      const preview = URL.createObjectURL(file)
+      previews.current.add(preview)
+      return { file, preview }
+    })])
+    setError('')
+  }
+  const removeImage = index => {
+    const image = images[index]
+    if (image.file) { URL.revokeObjectURL(image.preview); previews.current.delete(image.preview) }
+    setImages(current => current.filter((_, position) => position !== index))
+  }
   const submit = async event => {
     event.preventDefault()
     if (busy) return
@@ -20,13 +48,15 @@ export default function ProductForm({ product, categories, brands, busy, onSave,
       isActive: product ? values.get('isActive') === 'on' : true,
       isHotSwap: values.get('isHotSwap') === 'on',
       isRGB: values.get('isRGB') === 'on',
-      images: product?.images || [],
+      images: images.filter(image => !image.file).map((image, sortOrder) => ({
+        imageUrl: image.imageUrl, altText: image.altText || name, sortOrder,
+      })),
     }
     for (const key of ['switchType', 'sound', 'layout', 'connectionType', 'keycap', 'color']) {
       payload[key] = values.get(key).trim() || null
     }
     setError('')
-    try { await onSave(payload) }
+    try { await onSave(payload, images.filter(image => image.file).map(image => image.file)) }
     catch (err) { setError(err.message || 'Không thể lưu sản phẩm.') }
   }
   return <>
@@ -39,6 +69,19 @@ export default function ProductForm({ product, categories, brands, busy, onSave,
       <fieldset disabled={busy} className="pm-form-body">
         <label>Tên sản phẩm<input name="name" required minLength={2} maxLength={200}
           defaultValue={product?.name || ''} autoFocus /></label>
+        <section className="pm-images" aria-label="Ảnh sản phẩm">
+          <label>Thêm ảnh sản phẩm<input type="file" accept="image/jpeg,image/png,image/webp" multiple
+            disabled={images.length >= 10} onChange={chooseImages} aria-describedby="pm-image-help" /></label>
+          <p id="pm-image-help" className="pm-help">JPG, PNG, WebP · tối đa 5 MB/ảnh, 10 ảnh.
+            Ảnh đầu tiên là ảnh đại diện.</p>
+          {!images.length ? <p className="pm-help">Chưa chọn ảnh.</p>
+            : <ol className="pm-image-list">{images.map((image, index) => <li key={image.preview}>
+              <img src={image.preview} alt={image.altText || `Ảnh sản phẩm ${index + 1}`} />
+              <span>{index === 0 ? 'Ảnh đại diện' : `Ảnh ${index + 1}`}</span>
+              <button type="button" onClick={() => removeImage(index)} aria-label={`Bỏ ảnh ${index + 1}`}>
+                <X size={16} aria-hidden="true" />Bỏ ảnh</button>
+            </li>)}</ol>}
+        </section>
         <div className="pm-form-grid">
           <label>Danh mục<select name="categoryId" required defaultValue={product?.categoryId || ''}>
             <option value="" disabled>Chọn danh mục</option>

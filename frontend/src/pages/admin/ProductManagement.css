@@ -88,6 +88,15 @@
 .pm-form .pm-checks label, .pm-form .pm-active-check { flex-direction: row; align-items: center; }
 .pm-form input[type='checkbox'] { width: 18px; height: 18px; min-height: 18px; accent-color: var(--color-accent); }
 .pm-help { color: var(--color-text-muted); font-size: 12px; }
+.pm-images { display: grid; gap: 12px; }
+.pm-image-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+  padding: 0; list-style: none; }
+.pm-image-list li { display: grid; gap: 8px; padding: 10px; min-width: 0;
+  border: 1px solid var(--color-border); border-radius: 12px; }
+.pm-image-list img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--color-bg-deep);
+  border-radius: 8px; }
+.pm-image-list span { font-size: 12px; color: var(--color-text-light); }
+.pm-image-list button { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .pm-dialog [role='alert'] { color: var(--color-accent); font-size: 13px; }
 .pm-confirm { margin: auto; width: min(440px, calc(100% - 32px)); padding: 28px; }
 .pm-confirm-icon { color: var(--color-accent); margin-bottom: 20px; }

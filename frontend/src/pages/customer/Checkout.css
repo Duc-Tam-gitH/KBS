@@ -129,5 +129,9 @@
 .co-payment-panel :is(dt, dd) { font-size: 12px; }
 .co-payment-panel dd { overflow-wrap: anywhere; text-align: right; }
 .co-payment-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.co-payment-success { display: flex; align-items: flex-start; gap: 12px; padding: 16px;
+  border: 1px solid var(--color-accent); border-radius: 10px; }
+.co-payment-success > svg { flex-shrink: 0; color: var(--color-accent); }
+.co-payment-success h4 { color: var(--color-accent); margin: 0 0 8px; }
 .co-payment-option:has(input:disabled) { opacity: .6; }
 @media (max-width: 1000px) { .co-region-grid { grid-template-columns: minmax(0, 1fr); } }

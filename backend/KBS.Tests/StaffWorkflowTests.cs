@@ -14,6 +14,44 @@ namespace KBS.Tests;
 public class StaffWorkflowTests
 {
     [Fact]
+    public async Task Admin_manages_all_customers_orders_and_legacy_staff_is_denied()
+    {
+        using var app = new TestApiFactory();
+        using var admin = await Login(app, "admin", "Admin123");
+        using var customer = await Login(app, "customer", "Customer1");
+        using var legacyStaff = await Login(app, "staff", "Staff123");
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
+        var customerId = await db.Users.Where(x => x.Username == "customer").Select(x => x.Id).SingleAsync();
+        var otherId = await db.Users.Where(x => x.Username == "staff").Select(x => x.Id).SingleAsync();
+        var first = new Order { UserId = customerId };
+        var second = new Order { UserId = otherId };
+        db.Orders.AddRange(first, second);
+        await db.SaveChangesAsync();
+        var orders = await admin.GetFromJsonAsync<JsonElement>("/api/orders");
+        Assert.Equal(2, orders.GetArrayLength());
+        foreach (var order in new[] { first, second })
+        {
+            var path = $"/api/orders/{order.Id}/status";
+            Assert.Equal(HttpStatusCode.Forbidden,
+                (await legacyStaff.PutAsJsonAsync(path, new { orderStatus = "CONFIRMED" })).StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden,
+                (await customer.PutAsJsonAsync(path, new { orderStatus = "CONFIRMED" })).StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict,
+                (await admin.PutAsJsonAsync(path, new { orderStatus = "COMPLETED" })).StatusCode);
+            foreach (var status in new[] { "CONFIRMED", "SHIPPING", "COMPLETED" })
+            {
+                Assert.Equal(HttpStatusCode.OK,
+                    (await admin.PutAsJsonAsync(path, new { orderStatus = status })).StatusCode);
+            }
+        }
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await legacyStaff.GetAsync("/api/chat/conversations")).StatusCode);
+        db.ChangeTracker.Clear();
+        Assert.All(await db.Orders.ToListAsync(), order => Assert.Equal("COMPLETED", order.OrderStatus));
+    }
+
+    [Fact]
     public async Task Admin_inventory_reports_open_orders_and_uses_validated_stock_movements()
     {
         using var app = new TestApiFactory();
@@ -69,7 +107,7 @@ public class StaffWorkflowTests
     {
         using var app = new TestApiFactory();
         using var anonymous = app.CreateClient();
-        using var staff = await Login(app, "staff", "Staff123");
+        using var staff = await Login(app, "admin", "Admin123");
         using var customer = await Login(app, "customer", "Customer1");
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
@@ -102,12 +140,12 @@ public class StaffWorkflowTests
     public async Task Stock_adjustments_are_validated_and_logged_and_notes_are_private()
     {
         using var app = new TestApiFactory();
-        using var staff = await Login(app, "staff", "Staff123");
+        using var staff = await Login(app, "admin", "Admin123");
         using var customer = await Login(app, "customer", "Customer1");
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
         var customerId = await db.Users.Where(x => x.Username == "customer").Select(x => x.Id).SingleAsync();
-        var staffId = await db.Users.Where(x => x.Username == "staff").Select(x => x.Id).SingleAsync();
+        var staffId = await db.Users.Where(x => x.Username == "admin").Select(x => x.Id).SingleAsync();
         var product = new Product
         {
             Name = Guid.NewGuid().ToString(), CategoryId = 1,
@@ -125,7 +163,7 @@ public class StaffWorkflowTests
         Assert.Equal(HttpStatusCode.Conflict, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         dto = dto with { ExpectedQuantity = 5 };
         Assert.Equal(HttpStatusCode.Forbidden, (await customer.PostAsJsonAsync(path, dto)).StatusCode);
-        dto = dto with { Reason = null };
+        dto = dto with { Reason = "Nhập kho" };
         Assert.Equal(HttpStatusCode.NoContent, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await staff.PostAsJsonAsync(path, dto)).StatusCode);
         db.ChangeTracker.Clear();
@@ -158,12 +196,12 @@ public class StaffWorkflowTests
     public async Task Customer_lock_blocks_existing_token_but_cannot_target_staff()
     {
         using var app = new TestApiFactory();
-        using var staff = await Login(app, "staff", "Staff123");
+        using var staff = await Login(app, "admin", "Admin123");
         using var customer = await Login(app, "customer", "Customer1");
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
         var customerId = await db.Users.Where(x => x.Username == "customer").Select(x => x.Id).SingleAsync();
-        var staffId = await db.Users.Where(x => x.Username == "staff").Select(x => x.Id).SingleAsync();
+        var staffId = await db.Users.Where(x => x.Username == "admin").Select(x => x.Id).SingleAsync();
         Assert.Equal(HttpStatusCode.NotFound,
             (await staff.PutAsJsonAsync(
                 $"/api/staff/customers/{staffId}/status", new { isActive = false })).StatusCode);
@@ -178,7 +216,7 @@ public class StaffWorkflowTests
     public async Task Chat_enforces_participants_read_cursor_and_unread_counts_without_shifts()
     {
         using var app = new TestApiFactory();
-        using var staff = await Login(app, "staff", "Staff123");
+        using var staff = await Login(app, "admin", "Admin123");
         using var customer = await Login(app, "customer", "Customer1");
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KbsDbContext>();
@@ -190,9 +228,13 @@ public class StaffWorkflowTests
         opened.EnsureSuccessStatusCode();
         var id = (await opened.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetInt64();
         var prefix = $"/api/chat/conversations/{id}";
-        Assert.Equal(HttpStatusCode.Forbidden, (await staff.GetAsync(prefix + "/messages")).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict,
+            (await customer.PostAsJsonAsync(prefix + "/messages", new { content = "Before acceptance" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict,
+            (await staff.PostAsJsonAsync(prefix + "/messages", new { content = "Before acceptance" })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await staff.GetAsync(prefix + "/messages")).StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, (await staff.PutAsync(prefix + "/claim", null)).StatusCode);
-        var originalStaff = await db.Users.SingleAsync(x => x.Username == "staff");
+        var originalStaff = await db.Users.SingleAsync(x => x.Username == "admin");
         var secondStaff = new User
         {
             Username = Guid.NewGuid().ToString("N"), Email = Guid.NewGuid() + "@example.test",
@@ -200,8 +242,8 @@ public class StaffWorkflowTests
         };
         db.Users.Add(secondStaff);
         await db.SaveChangesAsync();
-        using var colleague = await Login(app, secondStaff.Username, "Staff123");
-        Assert.Equal(HttpStatusCode.Forbidden, (await colleague.GetAsync(prefix + "/messages")).StatusCode);
+        using var colleague = await Login(app, secondStaff.Username, "Admin123");
+        Assert.Equal(HttpStatusCode.OK, (await colleague.GetAsync(prefix + "/messages")).StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, (await colleague.PutAsync(prefix + "/claim", null)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await staff.PostAsync("/api/staff/shift/start", null)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await staff.PostAsync("/api/staff/shift/end", null)).StatusCode);

@@ -16,5 +16,7 @@ public record BankSettingsDto
     [Required]
     [StringLength(150)]
     public required string AccountName { get; init; }
-    public Guid? SePayBankAccountId { get; init; }
+    [StringLength(100)]
+    [RegularExpression("^[A-Za-z0-9_-]+$", ErrorMessage = "ID tài khoản SePay chỉ gồm chữ, số, dấu gạch ngang hoặc gạch dưới.")]
+    public string? SePayBankAccountId { get; init; }
 }

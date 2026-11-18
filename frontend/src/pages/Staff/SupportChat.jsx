@@ -13,7 +13,6 @@ export default function SupportChat({ user, initialConversationId = null }) {
   const [query, setQuery] = useState('')
   const [unreadOnly, setUnreadOnly] = useState(false)
   const action = useStaffAction()
-  const isCustomer = user?.roleName === 'Customer'
   useEffect(() => {
     let active = true
     let timer
@@ -33,21 +32,16 @@ export default function SupportChat({ user, initialConversationId = null }) {
     return () => { active = false; clearTimeout(timer) }
   }, [version])
 
-  const choose = (conversation) => action.run(async () => {
-    if (!isCustomer && !conversation.staffId) await api.chat.claim(conversation.id)
-    setSelectedId(conversation.id)
+  const choose = (conversation) => setSelectedId(conversation.id)
+  const accept = () => action.run(async () => {
+    await api.chat.claim(selected.id)
     setVersion((value) => value + 1)
-  }, '')
-  const start = () => action.run(async () => {
-    const conversation = await api.chat.open()
-    setSelectedId(conversation.id)
-    setVersion((value) => value + 1)
-  }, '')
+  }, 'Đã chấp nhận yêu cầu chat.')
   const selected = conversations?.find((conversation) => conversation.id === selectedId)
   const filtered = (conversations || []).filter((conversation) => (!unreadOnly || conversation.unread > 0)
     && conversation.customerName.toLocaleLowerCase('vi').includes(query.trim().toLocaleLowerCase('vi')))
-  return <div className={isCustomer ? 'staff-workspace sf-customer-chat' : 'sf-chat-page'}>
-    <header className="sf-heading"><h1>Hỗ trợ & Chat</h1>
+  return <div className="sf-chat-page">
+    <header className="sf-heading"><h1>Chat khách hàng</h1>
       <button type="button" disabled={action.busy} onClick={() => setVersion((value) => value + 1)}>Làm mới</button>
     </header>
     <StaffNotice notice={action.notice} />
@@ -55,31 +49,34 @@ export default function SupportChat({ user, initialConversationId = null }) {
     {!conversations && !error && <p role="status">Đang tải hội thoại…</p>}
     {conversations && <div className="sf-chat-layout">
       <aside className="sf-panel sf-conversation-list">
-        {!isCustomer && <input aria-label="Tìm hội thoại theo khách" placeholder="Tên khách hàng"
-          value={query} onChange={(event) => setQuery(event.target.value)} />}
+        <input aria-label="Tìm hội thoại theo khách" placeholder="Tên khách hàng"
+          value={query} onChange={(event) => setQuery(event.target.value)} />
         <label className="sf-checkbox"><input type="checkbox" checked={unreadOnly}
           onChange={(event) => setUnreadOnly(event.target.checked)} /> Chưa đọc</label>
         {!filtered.length && <p>Không có hội thoại phù hợp.</p>}
-        {isCustomer && !conversations.length && <button type="button" className="sf-primary"
-          disabled={action.busy} onClick={start}>Bắt đầu trò chuyện</button>}
         {filtered.map((conversation) => <button className="sf-conversation" type="button" key={conversation.id}
           disabled={action.busy} aria-pressed={selectedId === conversation.id} onClick={() => choose(conversation)}>
-          <strong>
-            {isCustomer ? conversation.staffName || 'Chờ nhân viên tiếp nhận' : conversation.customerName}
-          </strong>
+          <strong>{conversation.customerName}</strong>
           <span>{conversation.lastMessage || 'Chưa có tin nhắn.'}</span>
           <small>{dateTime(conversation.lastMessageAt)} · {conversation.unread} chưa đọc</small>
-          {!isCustomer && !conversation.staffId && <small>Tiếp nhận hội thoại</small>}
+          {!conversation.staffId && <small>Yêu cầu chờ xác nhận</small>}
         </button>)}
       </aside>
-      {selected ? <ChatThread key={selected.id} conversation={selected} user={user}
+      {selected && !selected.staffId ? <section className="sf-panel sf-chat-pending">
+        <h2>{selected.customerName}</h2>
+        <p>Khách hàng đang chờ cửa hàng xác nhận yêu cầu chat.</p>
+        <button type="button" className="sf-primary" disabled={action.busy} onClick={accept}>
+          {action.busy ? 'Đang xác nhận…' : 'Chấp nhận yêu cầu'}
+        </button>
+      </section> : selected ? <ChatThread key={selected.id} conversation={selected} user={user}
         onRead={() => setVersion((value) => value + 1)} />
-        : <div className="sf-panel sf-state">Chọn hội thoại để bắt đầu.</div>}
+        : null}
+      {!selected && <div className="sf-panel sf-state">Chọn hội thoại để bắt đầu.</div>}
     </div>}
   </div>
 }
 
-function ChatThread({ conversation, user, onRead }) {
+export function ChatThread({ conversation, user, onRead }) {
   const [messages, setMessages] = useState(null)
   const [error, setError] = useState('')
   const [draft, setDraft] = useState('')

@@ -41,14 +41,14 @@ export default function ProductManagement() {
   const reload = () => { setData(null); setError(''); setNotice(''); setRevision(value => value + 1) }
   const clearFilters = () => { setQuery(''); setCategory(''); setStatus(''); setPage(1) }
   const openEditor = product => { setNotice(''); setEditor({ product }) }
-  const save = async (product, payload) => {
+  const save = async (product, payload, files = []) => {
     if (lock.current) return
     lock.current = true
     setBusy(true)
     try {
       const saved = product
-        ? await api.admin.updateProduct(product.id, payload)
-        : await api.admin.createProduct(payload)
+        ? await api.admin.updateProduct(product.id, payload, files)
+        : await api.admin.createProduct(payload, files)
       if (!mounted.current) return
       setData(current => ({ ...current, products: product
         ? current.products.map(item => item.id === saved.id ? saved : item)
@@ -124,7 +124,7 @@ export default function ProductManagement() {
     {editor && <ProductDialog className="pm-drawer" titleId="pm-form-title" busy={busy}
       onClose={() => setEditor(null)}>
       <ProductForm product={editor.product} categories={data.categories} brands={data.brands} busy={busy}
-        onSave={payload => save(editor.product, payload)} onClose={() => setEditor(null)} />
+        onSave={(payload, files) => save(editor.product, payload, files)} onClose={() => setEditor(null)} />
     </ProductDialog>}
     {changing && <ProductDialog className="pm-confirm" titleId="pm-confirm-title" busy={busy}
       onClose={() => setChanging(null)}>

@@ -16,7 +16,8 @@ public class UserService(KbsDbContext context) : IUserService
         return users.Select(ToDto).ToList();
     }
 
-    public Task<List<UserRoleDto>> RolesAsync() => context.Roles.AsNoTracking().OrderBy(x => x.Id)
+    public Task<List<UserRoleDto>> RolesAsync() => context.Roles.AsNoTracking()
+        .Where(x => x.Name == "Admin" || x.Name == "Customer").OrderBy(x => x.Id)
         .Select(x => new UserRoleDto(x.Id, x.Name)).ToListAsync();
 
     public async Task<UserResponseDto> CreateAsync(CreateUserDto dto)
@@ -68,7 +69,8 @@ public class UserService(KbsDbContext context) : IUserService
         await using var tx = await context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         var user = await FindAsync(id);
         await ProtectAsync(user, actorId, user.IsActive, roleId);
-        user.Role = await context.Roles.SingleOrDefaultAsync(x => x.Id == roleId)
+        user.Role = await context.Roles.SingleOrDefaultAsync(
+            x => x.Id == roleId && (x.Name == "Admin" || x.Name == "Customer"))
             ?? throw new ArgumentException("Vai trò không tồn tại.");
         user.RoleId = roleId;
         await context.SaveChangesAsync();
@@ -103,7 +105,8 @@ public class UserService(KbsDbContext context) : IUserService
             && (x.Username.ToLower() == username.ToLower() || x.Email.ToLower() == email
                 || (phone != null && x.PhoneNumber == phone))))
             throw new InvalidOperationException("Tên đăng nhập, email hoặc số điện thoại đã được sử dụng.");
-        var role = await context.Roles.SingleOrDefaultAsync(x => x.Id == dto.RoleId)
+        var role = await context.Roles.SingleOrDefaultAsync(
+            x => x.Id == dto.RoleId && (x.Name == "Admin" || x.Name == "Customer"))
             ?? throw new ArgumentException("Vai trò không tồn tại.");
         user.Username = username;
         user.Email = email;
